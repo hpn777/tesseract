@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "test": "bash -c './d node ./tests/unit'"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "node-nats-streaming": "0.0.51"
+  },
+  "devDependencies": {
+    "flat": "^4.1.0",
+    "rxjs": "6.3.3",
+    "tape": "4.9.1"
+  }
+}
