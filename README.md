@@ -6,7 +6,3 @@ Run unit tests:
 npm test
 ```
 
-Run cluster tests (needs Docker)
-```bash
-npm run test-cluster
-```
