@@ -2,7 +2,7 @@ const { fromEvent } = require('rxjs')
 const { map } = require('rxjs/operators')
 const tape = require('tape')
 const flat = require('flat')
-const { tapeAssert } = require('./utils')
+const { tapeAssert, assertArraysMatch } = require('./utils')
 
 const Tesseract = require('../../lib/tesseract')
 const EventHorizon = require('../../lib/eventHorizon')
@@ -22,14 +22,7 @@ tape('EventHorizon / Resolver test', t => {
             name: 'status',
             columnType: 'number',
         }, {
-            name: 'user',
-            columnType: 'staticResolve',
-            resolve: {
-                underlyingName: 'user',
-                childrenTable: 'users',
-                valueField: 'id',
-                displayField: 'name'
-            }
+            name: 'user'
         }]
     }
 
@@ -57,7 +50,6 @@ tape('EventHorizon / Resolver test', t => {
             field: 'status',
             value: 1
         }],
-        //immediateUpdate: true,
         sort: [{
             property: 'id',
             direction: 'DESC'
@@ -67,6 +59,8 @@ tape('EventHorizon / Resolver test', t => {
         }],
         groupBy: []
     })
+
+
 
     let updated$ = fromEvent(session, 'dataUpdated')
       .pipe(map(([d]) => d))
@@ -114,5 +108,48 @@ tape('EventHorizon / Resolver test', t => {
         {id: 4, message: 'orange', user: 1, status: 2}
     ])
 
+    let dataResult = [ 
+        { id: 2, name: 'daniel', msgCount: 2 },
+        { id: 3, name: 'lauren' },
+        { id: 1, name: 'rafal' } 
+    ]
+
+    var usersSession = eventHorizon.createSession({
+        table: 'users',
+        columns: [{
+            name: 'id',
+            primaryKey: true,
+        }, {
+            name: 'name',
+        }, {
+            name: 'msgCount',
+            resolve: {
+                underlyingName: 'id',
+                session: {
+                    table: 'messages',
+                    columns:  [{
+                        name: 'user',
+                        primaryKey: true,
+                    }, {
+                        name: 'count',
+                        value: 1,
+                        aggregator: 'sum'
+                    }],
+                    filter: [{
+                        type: 'custom',
+                        value: 'user == 2',
+                    }],
+                    groupBy: [{ dataIndex: 'user' }]
+                },
+                valueField: 'user',
+                displayField: 'count'
+            }
+        }],
+        sort: [  { property: 'name', direction: 'asc' }]
+    })
+
+    let data = usersSession.getData().map(x=>x.object)
+
+    assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Relational live query'))
 })
 
