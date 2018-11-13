@@ -1,4 +1,10 @@
 {
+  "name": "tesseract",
+  "version": "1.0.4",
+  "author": {
+    "name": "Rafal Okninski",
+    "email": "hpn777@gmail.com"
+  },
   "scripts": {
     "test": "bash -c './d node ./tests/unit'"
   },
