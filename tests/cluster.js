@@ -25,7 +25,6 @@ node1.connect({clientName: 'client1'})
 
                 messages.update({id: 2, message: 'cipa2', status: 2})
                 messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 4, message: 'cipa3', status: 2}])
-                console.log('sent shit --------------')
             })
     })
 
@@ -82,7 +81,7 @@ let messageQueueDefinition = {
         columnType: 'number'
     }, {
         name: 'releaseTime',
-        value: (data) => { return new Date() },
+        value: () => new Date(),
         aggregator: 'max'
     }, {
         name: 'tessUserName',
@@ -110,8 +109,11 @@ var usersDefinition = {
 }
 
 
+setTimeout(()=>{
+    node2.get('messages').reset()
+}, 1000)
 
-// setTimeout(()=>{
-//     console.log('summary',node2.getSession('messages_querry').getData().map(x=>x.object))
-    
-// }, 2000)
+setTimeout(()=>{
+    console.log('summary',node2.getSession('messages_querry').getData().map(x=>x.object))
+
+}, 1000)

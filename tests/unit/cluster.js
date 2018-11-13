@@ -42,7 +42,7 @@ tape('Tesseract cluster test', t => {
                 node1.close()
                 node2.close()
                 t.end()
-            }, 200)
+            }, 500)
         }
     })
 
