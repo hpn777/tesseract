@@ -101,7 +101,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-// session.on('dataUpdated', (x)=>{console.log(x.toJSON())})
+// session.on('update', (x)=>{console.log(x.toJSON())})
 
 var ii = 1
 

@@ -44,9 +44,9 @@ tape('LiveQuery test', t => {
         groupBy: [{ dataIndex: 'status' }]
     })
 
-    //session.on('dataUpdated', v => console.log('h:', v.toJSON()))
+    //session.on('update', v => console.log('h:', v.toJSON()))
 
-    let updated$ = fromEvent(session, 'dataUpdated')
+    let updated$ = fromEvent(session, 'update')
       .pipe(map(([d]) => d))
 
     let result = [{

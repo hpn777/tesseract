@@ -61,8 +61,8 @@ node2.on('add', (tess)=>{
             sort: [{ property: 'id', direction: 'DESC' }]
         })
         
-        session.on('dataUpdated',(data)=>{
-            console.log('dataUpdated', data.toJSON())
+        session.on('update',(data)=>{
+            console.log('update', data.toJSON())
         })
     }
 })
