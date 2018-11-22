@@ -62,15 +62,19 @@ var usersSession = EVH.createSession({
                     value: 1,
                     aggregator: 'sum'
                 }],
-                filter: [{
-                    type: 'custom',
-                    value: 'user == 2',
-                }],
+                // filter: [{
+                //     type: 'custom',
+                //     value: 'user == 2',
+                // }],
                 groupBy: [{ dataIndex: 'user' }]
             },
             valueField: 'user',
             displayField: 'count'
         }
+    }],
+    filter: [{
+        type: 'custom',
+        value: 'msgCount > 3',
     }],
     sort: [  { property: 'name', direction: 'asc' }]
 })
@@ -101,7 +105,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-// session.on('update', (x)=>{console.log(x.toJSON())})
+// usersSession.on('dataUpdate', (x)=>{console.log(x.toJSON())})
 
 var ii = 1
 

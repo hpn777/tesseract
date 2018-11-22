@@ -94,6 +94,10 @@ tape('Tesseract cluster test', t => {
         },{
             name: 'message',
         },{
+            name: 'status',
+        },{
+            name: 'tessUserName',
+        },{
             name: 'userName',
             resolve: {
                 underlyingName: 'user',

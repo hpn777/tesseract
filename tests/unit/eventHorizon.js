@@ -62,7 +62,7 @@ tape('EventHorizon / Resolver test', t => {
 
 
 
-    let updated$ = fromEvent(session, 'update')
+    let updated$ = fromEvent(session, 'dataUpdate')
       .pipe(map(([d]) => d))
 
     let result = [{

@@ -101,7 +101,6 @@ tape('utils.groupSelectedData', t => {
     }]
 
     assertArraysMatch(grouped2, result2, e => t.fail(e), () => t.pass('groupSelectedData 1'))
-console.log()
     t.equals(grouped2[0].children.length, 1)
     t.equals(grouped2[1].children.length, 1)
     t.equals(grouped2[2].children.length, 1)

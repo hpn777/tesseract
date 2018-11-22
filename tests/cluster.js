@@ -45,6 +45,8 @@ node2.on('add', (tess)=>{
             },{
                 name: 'message',
             },{
+                name: 'status',
+            },{
                 name: 'userName',
                 resolve: {
                     underlyingName: 'user',
@@ -57,12 +59,12 @@ node2.on('add', (tess)=>{
                 type: 'custom',
                 value: 'status == 2',
             }],
-            sort: [{ property: 'id', direction: 'DESC' }]
+            sort: [{ property: 'id', direction: 'desc' }]
         })
-        
-        session.on('update',(data)=>{
-            console.log('update', data.toJSON())
-        })
+
+        setTimeout(()=>{
+            console.log('summary',session.getData().map(x=>x.object))
+        }, 1000)
     }
 })
 let messageQueueDefinition = {
@@ -113,7 +115,3 @@ setTimeout(()=>{
     node2.get('messages').reset()
 }, 1000)
 
-setTimeout(()=>{
-    console.log('summary',node2.getSession('messages_querry').getData().map(x=>x.object))
-
-}, 1000)

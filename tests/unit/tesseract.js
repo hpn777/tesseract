@@ -10,7 +10,6 @@ tape('LiveQuery test', t => {
 
     var messages = new Tesseract({
         id: 'messageQueue',
-        //clusterSync: true,
         columns: [{
             name: 'id',
             columnType: 'number',
@@ -37,16 +36,13 @@ tape('LiveQuery test', t => {
             comparison: 'eq',
             value: 1,
         }],
-        //immediateUpdate: true,
         sort: [{ property: 'id', direction: 'DESC' }],
         start: 0,
         limit: 2,
         groupBy: [{ dataIndex: 'status' }]
     })
 
-    //session.on('update', v => console.log('h:', v.toJSON()))
-
-    let updated$ = fromEvent(session, 'update')
+    let updated$ = fromEvent(session, 'dataUpdate')
       .pipe(map(([d]) => d))
 
     let result = [{
