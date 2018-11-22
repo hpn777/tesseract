@@ -62,10 +62,10 @@ var usersSession = EVH.createSession({
                     value: 1,
                     aggregator: 'sum'
                 }],
-                // filter: [{
-                //     type: 'custom',
-                //     value: 'user == 2',
-                // }],
+                filter: [{
+                    type: 'custom',
+                    value: 'user == 2',
+                }],
                 groupBy: [{ dataIndex: 'user' }]
             },
             valueField: 'user',
