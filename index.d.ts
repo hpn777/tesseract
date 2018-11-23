@@ -77,8 +77,8 @@ declare class EventHorizon {
   get(key: string): any
   getList(table: string): DataRow<any>[] | undefined
   createTesseract(name: string, options: TesseractOptions): Tesseract<any>
-  registerTessearct(tesseract: Tesseract<any>)
-  registerSession(session: Session)
+  registerTessearct(tesseract: Tesseract<any>): void
+  registerSession(session: Session): void
   createTesseractFromSession(name: string, session: Session): Tesseract<any>
   createSession(sessionOptions: SessionOptions): Session
   generateHash(): string

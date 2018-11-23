@@ -1,6 +1,6 @@
-let EventHorizon = import('./lib/eventHorizon')
-let Tesseract = import('./lib/tesseract')
-let Cluster = import('./lib/cluster')
+let EventHorizon = require('./lib/eventHorizon')
+let Tesseract = require('./lib/tesseract')
+let Cluster = require('./lib/cluster')
 
 
 module.exports = {Cluster, EventHorizon, Tesseract}
