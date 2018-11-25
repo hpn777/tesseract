@@ -12,34 +12,39 @@ tape('LiveQuery test', t => {
         id: 'messageQueue',
         columns: [{
             name: 'id',
+            primaryKey: true,
+            //value: (data) => { return data.id || self.guid() }
+        }, {
+            name: 'message',
+        }, {
+            name: 'status',
+        }, {
+            name: 'releaseTime',
+            value: (data) => (new Date())
+        }]
+    })
+
+    var session = messages.createSession({
+        columns: [{
+            name: 'id',
             columnType: 'number',
             primaryKey: true,
             //value: (data) => { return data.id || self.guid() }
         }, {
             name: 'message',
-            columnType: 'object',
         }, {
             name: 'status',
             columnType: 'number',//1-new;2-scheduled;3-send
-        }, {
-            name: 'releaseTime',
-            columnType: 'number',
-            value: (data) => (new Date()),
-            aggregator: 'max'
-        }]
-    })
-
-    var session = messages.createSession({
+        }],
         filter: [{
             field: 'status',
             type: 'number',
             comparison: 'eq',
-            value: 1,
+            value: 1
         }],
         sort: [{ property: 'id', direction: 'DESC' }],
         start: 0,
-        limit: 2,
-        groupBy: [{ dataIndex: 'status' }]
+        limit: 2
     })
 
     let updated$ = fromEvent(session, 'dataUpdate')
@@ -79,6 +84,7 @@ tape('LiveQuery test', t => {
 
             // since we disabled immediateUpdate there will be no data
             let data = session.getData().map(i => i.object)
+            console.log(data)
             assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
             t.end()
         },

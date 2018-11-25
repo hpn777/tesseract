@@ -19,14 +19,14 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'releaseTime',
         value: (data) => { return new Date() },
         aggregator: 'max'
-    }, {
-        name: 'tessUserName',
-        resolve: {
-            underlyingName: 'user',
-            childrenTable: 'users',
-            valueField: 'id',
-            displayField: 'name'
-        }
+    // }, {
+    //     name: 'tessUserName',
+    //     resolve: {
+    //         underlyingName: 'user',
+    //         childrenTable: 'users',
+    //         valueField: 'id',
+    //         displayField: 'name'
+    //     }
     }]
 })
 
@@ -64,7 +64,7 @@ var usersSession = EVH.createSession({
                 }],
                 filter: [{
                     type: 'custom',
-                    value: 'user == 2',
+                    value: 'user >1',
                 }],
                 groupBy: [{ dataIndex: 'user' }]
             },
@@ -148,6 +148,6 @@ while(ii++ < 2000000){
 // console.log(messageSession.groupData([{ dataIndex: 'userName' }]))
 
 setTimeout(() => {
-console.log(usersSession.getData().map(x=>x.object))
+    console.log(usersSession.getData().map(x=>x.object))
 }, 100)
 setTimeout(()=>{}, 1000000)
