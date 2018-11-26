@@ -6,9 +6,14 @@ type ProxyConfig = any
 
 type Session = any
 type SessionOptions = any
+type ColumnType = any
+
+// not sure what this is
+type NatsCluster = any
 
 interface ColumnResolve {
-  childTable: string
+  childrenTable: string
+  underlyingName: string
   valueField: string
   displayField: string
 }
@@ -56,6 +61,39 @@ declare class Tesseract<T> {
   createSession(config: SessionOptions): Session
   getData(): DataRow<T>[]
   getById(id: string): T
+}
 
-  
+interface EventHorizonOptions {
+  namespace: string
+}
+
+declare class EventHorizon {
+  constructor(option: EventHorizonOptions)
+  on(...args: any[]): any
+  off(...args: any[]): any
+  once(...args: any[]): any
+  trigger(...args: any[]): any
+  resolve(resolve: ColumnResolve, data: any): any
+  get(key: string): any
+  getList(table: string): DataRow<any>[] | undefined
+  createTesseract(name: string, options: TesseractOptions): Promise<Tesseract<any>> | Tesseract<any>
+  registerTessearct(tesseract: Tesseract<any>): void
+  registerSession(session: Session): void
+  createTesseractFromSession(name: string, session: Session): Tesseract<any>
+  createSession(sessionOptions: SessionOptions): Session
+  generateHash(): string
+  getSession(sessionName: string): Session
+}
+
+interface ClusterConnectOptions {
+  clientName: string
+}
+
+type InnerData = any
+
+declare class Cluster extends EventHorizon {
+
+  constructor()
+  connect(options: ClusterConnectOptions): Promise<NatsCluster>
+  createTesseract(name: string, options: TesseractOptions): Promise<Tesseract<InnerData>>
 }
