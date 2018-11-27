@@ -20,17 +20,16 @@ interface ColumnResolve {
 
 interface Column {
   name: string
-  type: ColumnType
   primaryKey?: boolean
   resolve?: ColumnResolve
   value?(data: any): any
-  aggregator: string
+  aggregator?: string
 }
 
 interface TesseractOptions {
-  id: string,
-  idProperty: string
-  resolve: Resolve
+  id: string
+  idProperty?: string
+  resolve?: Resolve
   columns: Column[]
   clusterSync: boolean
 }
@@ -57,6 +56,7 @@ declare class Tesseract<T> {
   refreshTesseract(): void
   collectGarbage(): void
 
+  add(t: T): void
   get(key: string): T
   createSession(config: SessionOptions): Session
   getData(): DataRow<T>[]
@@ -77,7 +77,7 @@ declare class EventHorizon {
   get(key: string): any
   getList(table: string): DataRow<any>[] | undefined
   createTesseract(name: string, options: TesseractOptions): Promise<Tesseract<any>> | Tesseract<any>
-  registerTessearct(tesseract: Tesseract<any>): void
+  registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
   createTesseractFromSession(name: string, session: Session): Tesseract<any>
   createSession(sessionOptions: SessionOptions): Session
