@@ -25,17 +25,6 @@ tape('LiveQuery test', t => {
     })
 
     var session = messages.createSession({
-        columns: [{
-            name: 'id',
-            columnType: 'number',
-            primaryKey: true,
-            //value: (data) => { return data.id || self.guid() }
-        }, {
-            name: 'message',
-        }, {
-            name: 'status',
-            columnType: 'number',//1-new;2-scheduled;3-send
-        }],
         filter: [{
             field: 'status',
             type: 'number',
@@ -84,7 +73,6 @@ tape('LiveQuery test', t => {
 
             // since we disabled immediateUpdate there will be no data
             let data = session.getData().map(i => i.object)
-            console.log(data)
             assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
             t.end()
         },

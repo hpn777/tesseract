@@ -33,9 +33,9 @@ node2.connect({clientName: 'client2'})
         console.log('node2 online')
     })
 
-node2.on('add', (tess)=>{
-    console.log(tess.get('id') + ' added on node 2')
-    if(tess.get('id') === 'messages'){
+node2.getTesseract('messages')
+    .then((tess)=>{
+        console.log(tess.get('id'))
         let session = node2.createSession({
             id: 'messages_querry',
             table: 'messages',
@@ -64,9 +64,9 @@ node2.on('add', (tess)=>{
 
         setTimeout(()=>{
             console.log('summary',session.getData().map(x=>x.object))
-        }, 1000)
-    }
-})
+        }, 300)
+    })
+    
 let messageQueueDefinition = {
     clusterSync: true,
     isDurableStream: true,
@@ -85,14 +85,6 @@ let messageQueueDefinition = {
         name: 'releaseTime',
         value: () => new Date(),
         aggregator: 'max'
-    }, {
-        name: 'tessUserName',
-        resolve: {
-            underlyingName: 'user',
-            childrenTable: 'users',
-            valueField: 'id',
-            displayField: 'name'
-        }
     }]
 }
 
