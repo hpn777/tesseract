@@ -9,7 +9,7 @@ tape('Tesseract cluster test', t => {
     var node1 = new TessCluster()
     let node2 = new TessCluster()
 
-    node1.connect({clientName: 'client1'})
+    node1.connect({clientName: 'client1', syncSchema: true})
         .then((nc) => {
             node1.createTesseract('users', usersDefinition)
                 .then((users) => {
@@ -30,7 +30,7 @@ tape('Tesseract cluster test', t => {
                 })
         })
 
-    node2.connect({clientName: 'client2'})
+    node2.connect({clientName: 'client2', syncSchema: true})
     
     node2.on('add', (tess)=>{
         if(tess.get('id') === 'messages'){
@@ -48,7 +48,6 @@ tape('Tesseract cluster test', t => {
 
     let messageQueueDefinition = {
         clusterSync: true,
-        isDurableStream: true,
         columns: [{
             name: 'id',
             primaryKey: true,
@@ -76,7 +75,6 @@ tape('Tesseract cluster test', t => {
     
     var usersDefinition = {
         clusterSync: true,
-        isDurableStream: true,
         columns: [{
             name: 'id',
             primaryKey: true,

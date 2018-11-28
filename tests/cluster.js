@@ -6,7 +6,7 @@ const TessCluster = require('../lib/cluster')
 var node1 = new TessCluster()
 let node2 = new TessCluster()
 
-node1.connect({clientName: 'client1'})
+node1.connect({clientName: 'client1', syncSchema: true})
     .then((nc) => {
         console.log('node1 online')
         node1.createTesseract('users', usersDefinition)
@@ -28,7 +28,7 @@ node1.connect({clientName: 'client1'})
             })
     })
 
-node2.connect({clientName: 'client2'})
+node2.connect({clientName: 'client2', syncSchema: true})
     .then((nc) => {
         console.log('node2 online')
     })
@@ -69,7 +69,6 @@ node2.getTesseract('messages')
     
 let messageQueueDefinition = {
     clusterSync: true,
-    isDurableStream: true,
     columns: [{
         name: 'id',
         primaryKey: true,
@@ -90,7 +89,6 @@ let messageQueueDefinition = {
 
 var usersDefinition = {
     clusterSync: true,
-    isDurableStream: true,
     columns: [{
         name: 'id',
         columnType: 'number',
