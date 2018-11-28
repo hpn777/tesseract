@@ -122,6 +122,10 @@ messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
 messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
+messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
+messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
+messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
+messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
 
 messages.remove([2])
 
@@ -150,4 +154,4 @@ while(ii++ < 2000000){
 setTimeout(() => {
     console.log(usersSession.getData().map(x=>x.object))
 }, 100)
-setTimeout(()=>{}, 1000000)
+// setTimeout(()=>{}, 1000000)
