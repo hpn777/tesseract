@@ -31,7 +31,7 @@ interface TesseractOptions {
   idProperty?: string
   resolve?: Resolve
   columns: Column[]
-  clusterSync: boolean
+  clusterSync?: boolean
 }
 
 declare class Tesseract<T> {
