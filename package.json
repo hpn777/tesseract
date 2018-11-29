@@ -1,10 +1,7 @@
 {
   "name": "tesseract",
-  "version": "1.0.4",
-  "author": {
-    "name": "Rafal Okninski",
-    "email": "hpn777@gmail.com"
-  },
+  "version": "2.0.0",
+  "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
     "test": "bash -c './d node ./tests/unit'"
   },
@@ -16,5 +13,19 @@
     "flat": "^4.1.0",
     "rxjs": "6.3.3",
     "tape": "4.9.1"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hpn777/tesseract.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hpn777/tesseract/issues"
+  },
+  "homepage": "https://github.com/hpn777/tesseract#readme"
 }

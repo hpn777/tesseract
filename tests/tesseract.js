@@ -74,7 +74,48 @@ var usersSession = EVH.createSession({
     }],
     filter: [{
         type: 'custom',
-        value: 'msgCount > 3',
+        value: 'msgCount > 1',
+    }],
+    sort: [  { property: 'name', direction: 'asc' }]
+})
+
+var usersSession2 = EVH.createSession({
+    table: 'users',
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingName: 'id',
+            session: {
+                table: 'messageQueue',
+                columns:  [{
+                    name: 'user',
+                    primaryKey: true,
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }],
+                filter: [{
+                    type: 'custom',
+                    value: 'user == 2',
+                }],
+                groupBy: [{ dataIndex: 'user' }]
+            },
+            valueField: 'user',
+            displayField: 'count'
+        }
+    },{
+        name: 'halfCount',
+        value: x => x.msgCount/2
+    }],
+    filter: [{
+        type: 'custom',
+        value: 'msgCount > 1',
     }],
     sort: [  { property: 'name', direction: 'asc' }]
 })
@@ -131,11 +172,11 @@ messages.remove([2])
 
 // console.log(messages.getById(1).userName)
 
-while(ii++ < 2000000){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
-}
+// while(ii++ < 2000000){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
+// }
 
 
 // setTimeout(()=>{
@@ -152,6 +193,12 @@ while(ii++ < 2000000){
 // console.log(messageSession.groupData([{ dataIndex: 'userName' }]))
 
 setTimeout(() => {
+    console.log(users.sessions.map(x=>x.get('id')))
     console.log(usersSession.getData().map(x=>x.object))
+    console.log(usersSession2.getData().map(x=>x.object))
+    usersSession2.destroy()
+    console.log(users.sessions.map(x=>x.get('id')))
+    users.destroy()
+    console.log(EVH.sessions.map(x=>x.get('id')))
 }, 100)
-// setTimeout(()=>{}, 1000000)
+setTimeout(()=>{}, 1000000)
