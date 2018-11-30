@@ -11,8 +11,10 @@ type ColumnType = any
 type NatsCluster = any
 
 interface CompareFilter {
+  type: string
   field: string
   comparison: 'lt' | 'eq' | 'gt'
+  value: any
 }
 
 interface CustomFilter {
@@ -20,7 +22,7 @@ interface CustomFilter {
   value: string
 }
 
-type Filter = CustomFilter
+type Filter = CustomFilter | CompareFilter
 
 interface Sort {
   property: string
