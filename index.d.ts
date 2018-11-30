@@ -5,25 +5,72 @@ type DataRow<T> = T
 type ProxyConfig = any
 
 type Session = any
-type SessionOptions = any
 type ColumnType = any
 
 // not sure what this is
 type NatsCluster = any
 
-interface ColumnResolve {
-  childrenTable: string
+interface CompareFilter {
+  field: string
+  comparison: 'lt' | 'eq' | 'gt'
+}
+
+interface CustomFilter {
+  type: 'custom'
+  value: string
+}
+
+type Filter = CustomFilter
+
+interface Sort {
+  property: string
+  direction: 'asc' | 'desc'
+}
+
+interface GroupBy {
+  dataIndex: string
+}
+
+interface Query {
+  id: string
+  table: string
+  columns: Column[]
+  filter: Filter[]
+  sort: Sort[]
+  groupBy: GroupBy[]
+}
+
+interface ColumnResolveBase {
   underlyingName: string
   valueField: string
   displayField: string
 }
+
+interface ColumnResolveSession extends ColumnResolveBase {
+  session?: Query
+}
+
+interface ColumnResolveTable extends ColumnResolveBase {
+  childrenTable?: string
+}
+
+type ColumnResolve = ColumnResolveSession
+                   | ColumnResolveTable
+
+type AggregatorFunction = (
+  data: any,
+  name: string,
+  groupedColumn: Column,
+  branchPath: string,
+  parent: string
+) => any
 
 interface Column {
   name: string
   primaryKey?: boolean
   resolve?: ColumnResolve
   value?(data: any): any
-  aggregator?: string
+  aggregator?: 'sum' | 'avg' | 'max' | 'min' | AggregatorFunction
 }
 
 interface TesseractOptions {
@@ -58,7 +105,7 @@ declare class Tesseract<T> {
 
   add(t: T): void
   get(key: string): T
-  createSession(config: SessionOptions): Session
+  createSession(query: Query): Session
   getData(): DataRow<T>[]
   getById(id: string): T
 }
@@ -80,7 +127,7 @@ declare class EventHorizon {
   registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
   createTesseractFromSession(name: string, session: Session): Tesseract<any>
-  createSession(sessionOptions: SessionOptions): Session
+  createSession(query: Query): Session
   generateHash(): string
   getSession(sessionName: string): Session
 }
