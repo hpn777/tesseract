@@ -31,7 +31,7 @@ tape('LiveQuery test', t => {
             comparison: 'eq',
             value: 1
         }],
-        sort: [{ property: 'id', direction: 'DESC' }],
+        sort: [{ field: 'id', direction: 'DESC' }],
         start: 0,
         limit: 2
     })

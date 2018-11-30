@@ -76,7 +76,7 @@ var usersSession = EVH.createSession({
         type: 'custom',
         value: 'msgCount > 1',
     }],
-    sort: [  { property: 'name', direction: 'asc' }]
+    sort: [  { field: 'name', direction: 'asc' }]
 })
 
 var usersSession2 = EVH.createSession({
@@ -117,7 +117,7 @@ var usersSession2 = EVH.createSession({
         type: 'custom',
         value: 'msgCount > 1',
     }],
-    sort: [  { property: 'name', direction: 'asc' }]
+    sort: [  { field: 'name', direction: 'asc' }]
 })
 
 var messageSession = EVH.createSession({
@@ -142,7 +142,7 @@ var messageSession = EVH.createSession({
     //    // comparison: 'eq',
     //     value: 'status == 2',
     // }],
-    sort: [  { property: 'status', direction: 'desc' }],
+    sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
 })
 
@@ -172,11 +172,11 @@ messages.remove([2])
 
 // console.log(messages.getById(1).userName)
 
-// while(ii++ < 2000000){
-//     if(ii%100000 === 0) 
-//         console.log(ii)
-//         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
-// }
+while(ii++ < 2000000){
+    if(ii%100000 === 0) 
+        console.log(ii)
+        messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
+}
 
 
 // setTimeout(()=>{

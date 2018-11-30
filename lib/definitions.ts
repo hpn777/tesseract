@@ -11,7 +11,7 @@ interface Filter {
 }
 
 interface Sort {
-    property: string;
+    field: string;
     direction: 'asc' | 'desc';
 }
 

@@ -51,10 +51,10 @@ tape('EventHorizon / Resolver test', t => {
             value: 1
         }],
         sort: [{
-            property: 'id',
+            field: 'id',
             direction: 'DESC'
         }, {
-            property: 'name',
+            field: 'name',
             direction: 'ASC'
         }],
         groupBy: []
@@ -145,7 +145,7 @@ tape('EventHorizon / Resolver test', t => {
                 displayField: 'count'
             }
         }],
-        sort: [  { property: 'name', direction: 'asc' }]
+        sort: [  { field: 'name', direction: 'asc' }]
     })
 
     let data = usersSession.getData().map(x=>x.object)
