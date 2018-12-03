@@ -40,7 +40,7 @@ interface CustomFilter {
 type Filter = CustomFilter | CompareFilter
 
 interface Sort {
-  property: string
+  field: string
   direction: 'asc' | 'desc'
 }
 
