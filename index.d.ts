@@ -1,14 +1,29 @@
 declare module 'tesseract'
 
-type Resolve = any
+type UnionToIntersection<U> = 
+  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
+
+// TODO it's something like:
+// (table: string) => Tesseract<T>
+type ResolveFunction = any
 type DataRow<T> = T
 type ProxyConfig = any
 
-type Session = any
-type ColumnType = any
-
 // not sure what this is
 type NatsCluster = any
+
+interface DataUpdate<T> {
+  updatedIds: (keyof T)[]
+  updatjdData: T[]
+  removedIds: (keyof T)[]
+  removedData: T[]
+  toJSON(): T
+}
+
+interface Session<T = any> {
+  on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
+  getData(): T
+}
 
 interface CompareFilter {
   type: string
@@ -33,59 +48,74 @@ interface GroupBy {
   dataIndex: string
 }
 
-interface Query {
-  id: string
-  table: string
-  columns: Column[]
-  filter: Filter[]
-  sort: Sort[]
-  groupBy: GroupBy[]
-}
-
-interface ColumnResolveBase {
-  underlyingName: string
-  valueField: string
-  displayField: string
-}
-
-interface ColumnResolveSession extends ColumnResolveBase {
-  session?: Query
-}
-
-interface ColumnResolveTable extends ColumnResolveBase {
-  childrenTable?: string
-}
-
-type ColumnResolve = ColumnResolveSession
-                   | ColumnResolveTable
-
+// TODO: needs type params
 type AggregatorFunction = (
   data: any,
   name: string,
-  groupedColumn: Column,
+  //groupedColumn: RegularColumn<T>,
+  groupedColumn: string,
   branchPath: string,
   parent: string
 ) => any
 
-interface Column {
-  name: string
+interface ColumnRegular<T> {
+  name: keyof T
   primaryKey?: boolean
-  resolve?: ColumnResolve
   value?(data: any): any
   aggregator?: 'sum' | 'avg' | 'max' | 'min' | AggregatorFunction
 }
 
-interface TesseractOptions {
+interface ResolveSession<T, S, D extends keyof S> {
+  underlyingName: keyof T
+  session: Query<any, any, D>
+  valueField: keyof UnionToIntersection<S>
+  displayField: keyof UnionToIntersection<S>
+}
+
+interface ResolveTable<T, S, D extends keyof S> {
+  underlyingName: keyof T
+  childrenTable: S[D] 
+  valueField: keyof UnionToIntersection<S>
+  displayField: keyof UnionToIntersection<S>
+}
+
+type Resolve<T, S, D extends keyof S> =
+  ResolveTable<T, S, D> | ResolveSession<T, S, D>
+
+interface ColumnResolved<T, S, D extends keyof S> {
+  name: string
+  resolve: Resolve<T, S, D>
+}
+
+type Column<T, S, D extends keyof S> =
+  ColumnRegular<T> | ColumnResolved<T, S, D>
+
+interface Query<T, S, D extends keyof (T | S)> {
   id: string
-  idProperty?: string
-  resolve?: Resolve
-  columns: Column[]
+  table: T[D]
+  columns: Column<T, S, D>[]
+  filter?: Filter[]
+  sort?: Sort[]
+  groupBy?: GroupBy[]
+}
+
+interface TesseractColumn<T> {
+  name: keyof T
+  primaryKey?: boolean
+  value?(data: any): any
+}
+
+interface TesseractOptions<T> {
+  id: string
+  idProperty?: keyof T
+  resolve?: ResolveFunction
+  columns: TesseractColumn<T>[]
   clusterSync?: boolean
 }
 
 declare class Tesseract<T> {
 
-  constructor(options: TesseractOptions)
+  constructor(options: TesseractOptions<T>)
 
   // Properties
   dataMap: { [key: string]: DataRow<T> }
@@ -93,10 +123,9 @@ declare class Tesseract<T> {
   sessions: Session[]
   id: string
   idProperty: string
-  idIndex: number
-  columns: Column[]
-  idColumn: Column
-  resolve: Resolve
+  private idIndex: number
+  columns: TesseractColumn<T>[]
+  resolve: ResolveFunction
   clusterSync: boolean
   defaultObjDef: ProxyConfig
 
@@ -107,7 +136,7 @@ declare class Tesseract<T> {
 
   add(t: T): void
   get(key: string): T
-  createSession(query: Query): Session
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getData(): DataRow<T>[]
   getById(id: string): T
 }
@@ -122,14 +151,14 @@ declare class EventHorizon {
   off(...args: any[]): any
   once(...args: any[]): any
   trigger(...args: any[]): any
-  resolve(resolve: ColumnResolve, data: any): any
+  resolve(resolve: any, data: any): any
   get(key: string): any
   getList(table: string): DataRow<any>[] | undefined
-  createTesseract(name: string, options: TesseractOptions): Promise<Tesseract<any>> | Tesseract<any>
+  createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
-  createTesseractFromSession(name: string, session: Session): Tesseract<any>
-  createSession(query: Query): Session
+  createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   generateHash(): string
   getSession(sessionName: string): Session
 }
@@ -138,11 +167,9 @@ interface ClusterConnectOptions {
   clientName: string
 }
 
-type InnerData = any
-
 declare class Cluster extends EventHorizon {
 
   constructor()
   connect(options: ClusterConnectOptions): Promise<NatsCluster>
-  createTesseract(name: string, options: TesseractOptions): Promise<Tesseract<InnerData>>
+  createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>>
 }
