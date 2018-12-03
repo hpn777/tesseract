@@ -28,7 +28,8 @@ interface Session<T = any> {
 interface CompareFilter {
   type: string
   field: string
-  comparison: 'lt' | 'eq' | 'gt'
+  // TODO: Pull from /lib/expressionEngine.js
+  comparison: 'lt' | 'eq' | 'gt' | string
   value: any
 }
 
