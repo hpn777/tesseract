@@ -108,7 +108,7 @@ tape('Tesseract cluster test', t => {
             type: 'custom',
             value: 'status == 2',
         }],
-        sort: [{ property: 'userName', direction: 'DESC' }]
+        sort: [{ field: 'userName', direction: 'DESC' }]
     }
 
     let dataResult = [

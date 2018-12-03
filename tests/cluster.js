@@ -59,7 +59,7 @@ node2.getTesseract('messages')
                 type: 'custom',
                 value: 'status == 2',
             }],
-            sort: [{ property: 'id', direction: 'desc' }]
+            sort: [{ field: 'id', direction: 'desc' }]
         })
 
         setTimeout(()=>{
