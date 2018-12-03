@@ -171,12 +171,13 @@ messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa
 messages.remove([2])
 
 // console.log(messages.getById(1).userName)
-
+console.time('perf')
 while(ii++ < 2000000){
     if(ii%100000 === 0) 
         console.log(ii)
         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
 }
+console.timeEnd('perf')
 
 
 // setTimeout(()=>{
