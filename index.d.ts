@@ -14,7 +14,7 @@ type NatsCluster = any
 
 interface DataUpdate<T> {
   updatedIds: (keyof T)[]
-  updatjdData: T[]
+  updatedData: T[]
   removedIds: (keyof T)[]
   removedData: T[]
   toJSON(): T
