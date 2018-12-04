@@ -69,6 +69,7 @@ node2.getTesseract('messages')
     
 let messageQueueDefinition = {
     clusterSync: true,
+    persistent: true,
     columns: [{
         name: 'id',
         primaryKey: true,
@@ -89,6 +90,7 @@ let messageQueueDefinition = {
 
 var usersDefinition = {
     clusterSync: true,
+    persistent: true,
     columns: [{
         name: 'id',
         columnType: 'number',
