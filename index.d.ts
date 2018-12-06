@@ -154,7 +154,7 @@ declare class EventHorizon {
   trigger(...args: any[]): any
   resolve(resolve: any, data: any): any
   get(key: string): any
-  getList(table: string): DataRow<any>[] | undefined
+  getTesseract(table: string): DataRow<any>[] | undefined
   createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
@@ -168,9 +168,19 @@ interface ClusterConnectOptions {
   clientName: string
 }
 
-declare class Cluster extends EventHorizon {
+declare class Cluster {
 
-  constructor()
+  constructor(option: EventHorizonOptions, evH?: EventHorizon)
   connect(options: ClusterConnectOptions): Promise<NatsCluster>
-  createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>>
+  createTesseract<T>(name: string, options: TesseractOptions<T>): Tesseract<T>
+  on(...args: any[]): any
+  off(...args: any[]): any
+  once(...args: any[]): any
+  trigger(...args: any[]): any
+  resolve(resolve: any, data: any): any
+  get(key: string): any
+  getTesseract(table: string): DataRow<any>[] | undefined
+  createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
+  getSession(sessionName: string): Session
 }
