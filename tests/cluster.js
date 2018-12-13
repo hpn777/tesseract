@@ -25,6 +25,7 @@ node1.connect({clientName: 'client1', syncSchema: true})
 
                 messages.update({id: 2, message: 'cipa2', status: 2})
                 messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 4, message: 'cipa3', status: 2}])
+                messages.remove([1, 2])
             })
     })
 
@@ -55,10 +56,10 @@ node2.getTesseract('messages')
                     displayField: 'name'
                 }
             }],
-            filter: [{
-                type: 'custom',
-                value: 'status == 2',
-            }],
+            // filter: [{
+            //     type: 'custom',
+            //     value: 'status == 2',
+            // }],
             sort: [{ field: 'id', direction: 'desc' }]
         })
 
