@@ -3,12 +3,12 @@ const { map } = require('rxjs/operators')
 const tape = require('tape')
 const flat = require('flat')
 const { tapeAssert, assertArraysMatch } = require('./utils')
-const TessCluster = require('../../lib/cluster')
+const TessCluster = require('../../lib/clusterRedis')
 
-tape('Tesseract NATS cluster test', t => {
+tape('Tesseract Redis cluster test', t => {
     var node1 = new TessCluster()
     let node2 = new TessCluster()
-
+    
     node1.connect({clientName: 'client1', syncSchema: true})
         .then((nc) => {
             node1.createTesseract('users', usersDefinition)
@@ -42,7 +42,7 @@ tape('Tesseract NATS cluster test', t => {
                 node1.close()
                 node2.close()
                 t.end()
-            }, 500)
+            }, 100)
         }
     })
 
