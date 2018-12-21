@@ -3,11 +3,17 @@
   "version": "2.0.0",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
-    "test": "bash -c './d node ./tests/unit'"
+    "test": "docker-compose up redis nats tests",
+    "redis": "docker-compose up redis",
+    "nats": "docker-compose up nats",
+    "all": "docker-compose up redis nats",
+    "down": "docker-compose down"
   },
   "dependencies": {
+    "ioredis": "^4.3.0",
     "lodash": "^4.17.11",
-    "node-nats-streaming": "0.0.51"
+    "node-nats-streaming": "0.0.51",
+    "rxjs": "6.3.3"
   },
   "devDependencies": {
     "flat": "^4.1.0",

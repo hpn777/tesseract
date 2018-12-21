@@ -56,10 +56,10 @@ node2.getTesseract('messages')
                     displayField: 'name'
                 }
             }],
-            // filter: [{
-            //     type: 'custom',
-            //     value: 'status == 2',
-            // }],
+            filter: [{
+                type: 'custom',
+                value: 'status == 2',
+            }],
             sort: [{ field: 'id', direction: 'desc' }]
         })
 
@@ -105,6 +105,6 @@ var usersDefinition = {
 
 
 setTimeout(()=>{
-    node2.get('messages').reset()
+    //node2.get('messages').reset()
 }, 1000)
 

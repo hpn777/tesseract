@@ -1,12 +1,14 @@
 var {mergeColumns} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
-var EVH = new (require('../lib/cluster'))()
+var EVH = new (require('../lib/clusterRedis'))()
+var EVH2 = new (require('../lib/clusterRedis'))()
 
 EVH.connect({clientName: 'client1'})
 .then(()=>{
+    //EVH.clear()
     EVH.createTesseract('messageQueue', {
         clusterSync: true,
-        // persistent: true,
+        persistent: true,
         columns: [{
             name: 'id',
             primaryKey: true,
@@ -49,17 +51,21 @@ EVH.connect({clientName: 'client1'})
         
         messages.remove([2])
         
+        let cc = 0
+        messages.on('dataUpdate', ()=>{
+            if(cc++%10000 === 0)
+                console.log('dataUpdate',cc)
+        })
+
         // console.log(messages.getById(1).userName)
         console.time('perf')
         let dupa = ()=>{
-            if(ii%1000 === 0)
-                console.log(ii)
             messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
             if(ii++ <2000000){
-                //if(ii%10 === 0)
+                if(ii%10 === 0)
                     setImmediate(()=>{dupa()})
-                // else
-                //    dupa()
+                else
+                   dupa()
             }
             else
             console.timeEnd('perf')
@@ -70,7 +76,7 @@ EVH.connect({clientName: 'client1'})
     
     EVH.createTesseract('users', {
         clusterSync: true,
-        // persistent: true,
+        persistent: true,
         columns: [{
             name: 'id',
             primaryKey: true,
@@ -87,11 +93,15 @@ EVH.connect({clientName: 'client1'})
 
 })
 
-var EVH2 = new (require('../lib/cluster'))()
+
 EVH2.connect({clientName: 'client2', syncSchema: true})
 .then(()=>{
     EVH2.on('add', (x)=>{console.log(x.get('id'))})
 })
+
+setInterval(()=>{
+    EVH2.get('messageQueue').reset()
+}, 2000)
 
 setTimeout(()=>{
     var usersSession = EVH.createSession({
@@ -132,7 +142,7 @@ setTimeout(()=>{
         sort: [  { field: 'name', direction: 'asc' }]
     })
     
-    var usersSession2 = EVH.createSession({
+    var usersSession2 = EVH2.createSession({
         table: 'users',
         columns: [{
             name: 'id',
@@ -173,7 +183,7 @@ setTimeout(()=>{
         sort: [  { field: 'name', direction: 'asc' }]
     })
     
-    var messageSession = EVH.createSession({
+    var messageSession = EVH2.createSession({
         table: 'messageQueue',
         columns:  [{
             name: 'tessUserName',
