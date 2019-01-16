@@ -1,6 +1,6 @@
 declare module 'tesseract'
 
-type UnionToIntersection<U> = 
+type UnionToIntersection<U> =
   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
 // TODO it's something like:
@@ -23,6 +23,7 @@ interface DataUpdate<T> {
 interface Session<T = any> {
   on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
   getData(): T
+  destroy(): void
 }
 
 interface CompareFilter {
@@ -75,7 +76,7 @@ interface ResolveSession<T, S, D extends keyof S> {
 
 interface ResolveTable<T, S, D extends keyof S> {
   underlyingName: keyof T
-  childrenTable: S[D] 
+  childrenTable: S[D]
   valueField: keyof UnionToIntersection<S>
   displayField: keyof UnionToIntersection<S>
 }
@@ -92,12 +93,14 @@ type Column<T, S, D extends keyof S> =
   ColumnRegular<T> | ColumnResolved<T, S, D>
 
 interface Query<T, S, D extends keyof (T | S)> {
-  id: string
+  id?: string
   table: T[D]
-  columns: Column<T, S, D>[]
+  columns?: Column<T, S, D>[]
   filter?: Filter[]
   sort?: Sort[]
   groupBy?: GroupBy[]
+  start?: number;
+  limit?: number;
 }
 
 interface TesseractColumn<T> {
@@ -120,7 +123,7 @@ declare class Tesseract<T> {
 
   // Properties
   dataMap: { [key: string]: DataRow<T> }
-  dataCache: DataRow<T>[] 
+  dataCache: DataRow<T>[]
   sessions: Session[]
   id: string
   idProperty: string
