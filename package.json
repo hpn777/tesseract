@@ -10,6 +10,7 @@
     "down": "docker-compose down"
   },
   "dependencies": {
+    "benchmark": "^2.1.4",
     "ioredis": "^4.3.0",
     "lodash": "^4.17.11",
     "node-nats-streaming": "0.0.51",

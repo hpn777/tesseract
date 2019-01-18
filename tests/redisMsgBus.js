@@ -15,3 +15,6 @@ setTimeout(() => {
 	console.log('sending message .....')
 	myMQ.send('news', {dupa: 'dupa'})
 }, 1000)
+
+
+
