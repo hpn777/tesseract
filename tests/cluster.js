@@ -65,6 +65,11 @@ node2.getTesseract('messages')
 
         setTimeout(()=>{
             console.log('summary',session.getData().map(x=>x.object))
+           // node1.get('messages').clear()
+            setTimeout(()=>{
+                console.log('summary',session.getData().map(x=>x.object))
+                
+            }, 300)
         }, 300)
     })
     

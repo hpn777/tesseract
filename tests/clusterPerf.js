@@ -101,7 +101,7 @@ EVH2.connect({clientName: 'client2', syncSchema: true})
 
 setInterval(()=>{
     EVH2.get('messageQueue').reset()
-}, 2000)
+}, 10000)
 
 setTimeout(()=>{
     var usersSession = EVH.createSession({
