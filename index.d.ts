@@ -138,11 +138,15 @@ declare class Tesseract<T> {
   refreshTesseract(): void
   collectGarbage(): void
 
-  add(t: T): void
+  add(data: T, disableClusterUpdate?: boolean): void
+  update(data: T, disableClusterUpdate?: boolean): DataRow<T>[]
+  remove(data: T, disableClusterUpdate?: boolean): void
   get(key: string): T
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getData(): DataRow<T>[]
   getById(id: string): T
+  clear(disableClusterUpdate?: boolean): void
+  reset(data: T, disableClusterUpdate?: boolean): DataRow<T>[]
 }
 
 interface EventHorizonOptions {
