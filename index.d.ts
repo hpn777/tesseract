@@ -27,7 +27,7 @@ interface Session<T = any> {
 }
 
 interface CompareFilter {
-  type: string
+  type?: string
   field: string
   // TODO: Pull from /lib/expressionEngine.js
   comparison: 'lt' | 'eq' | 'gt' | string
@@ -173,6 +173,7 @@ declare class EventHorizon {
 
 interface ClusterConnectOptions {
   clientName: string
+  syncSchema?: boolean
 }
 
 declare class Cluster {
@@ -186,7 +187,7 @@ declare class Cluster {
   trigger(...args: any[]): any
   resolve(resolve: any, data: any): any
   get(key: string): any
-  getTesseract(table: string): DataRow<any>[] | undefined
+  getTesseract(table: string): DataRow<any> | undefined
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getSession(sessionName: string): Session
