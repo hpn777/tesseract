@@ -66,16 +66,16 @@ tape('EventHorizon / Resolver test', t => {
       .pipe(map(([d]) => d))
 
     let result = [{
-        'updatedIds': [1],
+        'addedIds': [1],
         'removedIds': []
     }, {
-        'updatedIds': [2],
+        'addedIds': [2],
         'removedIds': []
     }, {
-        'updatedIds': [3],
+        'addedIds': [3],
         'removedIds': []
     }, {
-        'updatedIds': [4],
+        'addedIds': [4],
         'removedIds': []
     }, {
         'updatedIds': [],

@@ -16,6 +16,8 @@ var messages = EVH.createTesseract('messageQueue', {
     }, {
         name: 'user',
     }, {
+        name: 'deleted'
+    }, {
         name: 'releaseTime',
         value: (data) => { return new Date() },
         aggregator: 'max'
@@ -123,26 +125,19 @@ var usersSession2 = EVH.createSession({
 var messageSession = EVH.createSession({
     table: 'messageQueue',
     columns:  [{
-        name: 'tessUserName',
-    }, {
-        name: 'status',
-        aggregator: 'avg'
+        name: 'id',
     },{
-        name: 'userName',
-        resolve: {
-            underlyingName: 'user',
-            childrenTable: 'users',
-            valueField: 'id',
-            displayField: 'name'
-        }
+        name: 'deleted'
+    }, {
+        name: 'message',
     }],
-    // filter: [{
-    //     //field: 'status',
-    //     type: 'custom',
-    //    // comparison: 'eq',
-    //     value: 'status == 2',
-    // }],
-    sort: [  { field: 'status', direction: 'desc' }],
+    filter: [{
+        field: 'deleted',
+        type: 'boolean',
+       // comparison: 'eq',
+        value: true
+    }],
+    // sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
 })
 
@@ -162,22 +157,18 @@ messages.add({id: ii++, message: 'bla2', user: 2, status: 2})
 messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
-messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
-messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
-messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
-messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
-messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
+messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
 
 messages.remove([2])
 
 // console.log(messages.getById(1).userName)
-console.time('perf')
-while(ii++ < 2000000){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
-}
-console.timeEnd('perf')
+// console.time('perf')
+// while(ii++ < 2000000){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
+// }
+// console.timeEnd('perf')
 
 
 // setTimeout(()=>{
@@ -197,6 +188,7 @@ setTimeout(() => {
     console.log(users.sessions.map(x=>x.get('id')))
     console.log(usersSession.getData().map(x=>x.object))
     console.log(usersSession2.getData().map(x=>x.object))
+    console.log('messageSession',messageSession.getData().map(x=>x.object))
     usersSession2.destroy()
     console.log(users.sessions.map(x=>x.get('id')))
     users.destroy()
