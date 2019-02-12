@@ -68,14 +68,14 @@ interface ColumnRegular<T> {
 }
 
 interface ResolveSession<T, S, D extends keyof S> {
-  underlyingName: keyof T
+  underlyingField: keyof T
   session: Query<any, any, D>
   valueField: keyof UnionToIntersection<S>
   displayField: keyof UnionToIntersection<S>
 }
 
 interface ResolveTable<T, S, D extends keyof S> {
-  underlyingName: keyof T
+  underlyingField: keyof T
   childrenTable: S[D]
   valueField: keyof UnionToIntersection<S>
   displayField: keyof UnionToIntersection<S>

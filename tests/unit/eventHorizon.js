@@ -124,7 +124,7 @@ tape('EventHorizon / Resolver test', t => {
         }, {
             name: 'msgCount',
             resolve: {
-                underlyingName: 'id',
+                underlyingField: 'id',
                 session: {
                     table: 'messages',
                     columns:  [{

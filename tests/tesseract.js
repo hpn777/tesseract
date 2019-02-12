@@ -24,7 +24,7 @@ var messages = EVH.createTesseract('messageQueue', {
     // }, {
     //     name: 'tessUserName',
     //     resolve: {
-    //         underlyingName: 'user',
+    //         underlyingField: 'user',
     //         childrenTable: 'users',
     //         valueField: 'id',
     //         displayField: 'name'
@@ -53,7 +53,7 @@ var usersSession = EVH.createSession({
     }, {
         name: 'msgCount',
         resolve: {
-            underlyingName: 'id',
+            underlyingField: 'id',
             session: {
                 table: 'messageQueue',
                 columns:  [{
@@ -91,7 +91,7 @@ var usersSession2 = EVH.createSession({
     }, {
         name: 'msgCount',
         resolve: {
-            underlyingName: 'id',
+            underlyingField: 'id',
             session: {
                 table: 'messageQueue',
                 columns:  [{

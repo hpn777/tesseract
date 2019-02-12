@@ -43,7 +43,7 @@ let query: Query<Message, User, 'kind'> = {
   },{
     name: 'userName',
     resolve: {
-      underlyingName: 'user',
+      underlyingField: 'user',
       childrenTable: 'user',
       valueField: 'id',
       displayField: 'name'

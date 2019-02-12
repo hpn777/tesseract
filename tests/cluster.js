@@ -50,7 +50,7 @@ node2.getTesseract('messages')
             },{
                 name: 'userName',
                 resolve: {
-                    underlyingName: 'user',
+                    underlyingField: 'user',
                     childrenTable: 'users',
                     valueField: 'id',
                     displayField: 'name'

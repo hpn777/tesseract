@@ -27,7 +27,7 @@ EVH.connect({clientName: 'client1'})
         // }, {
         //     name: 'tessUserName',
         //     resolve: {
-        //         underlyingName: 'user',
+        //         underlyingField: 'user',
         //         childrenTable: 'users',
         //         valueField: 'id',
         //         displayField: 'name'
@@ -114,7 +114,7 @@ setTimeout(()=>{
         }, {
             name: 'msgCount',
             resolve: {
-                underlyingName: 'id',
+                underlyingField: 'id',
                 session: {
                     table: 'messageQueue',
                     columns:  [{
@@ -152,7 +152,7 @@ setTimeout(()=>{
         }, {
             name: 'msgCount',
             resolve: {
-                underlyingName: 'id',
+                underlyingField: 'id',
                 session: {
                     table: 'messageQueue',
                     columns:  [{
@@ -193,7 +193,7 @@ setTimeout(()=>{
         },{
             name: 'userName',
             resolve: {
-                underlyingName: 'user',
+                underlyingField: 'user',
                 childrenTable: 'users',
                 valueField: 'id',
                 displayField: 'name'

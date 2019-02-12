@@ -65,7 +65,7 @@ tape('Tesseract NATS cluster test', t => {
         }, {
             name: 'tessUserName',
             resolve: {
-                underlyingName: 'user',
+                underlyingField: 'user',
                 childrenTable: 'users',
                 valueField: 'id',
                 displayField: 'name'
@@ -98,7 +98,7 @@ tape('Tesseract NATS cluster test', t => {
         },{
             name: 'userName',
             resolve: {
-                underlyingName: 'user',
+                underlyingField: 'user',
                 childrenTable: 'users',
                 valueField: 'id',
                 displayField: 'name'
