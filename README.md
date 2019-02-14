@@ -56,10 +56,11 @@ let query: Query<Message, User, 'kind'> = {
 }
 
 let complexQuery: Query<Message, User, 'kind'> = {
+    id: 'aggregated_subquery',
     table: 'users',
     subSessions: {
         msgPerUser: {
-            table: 'messageQueue',
+            table: 'message',
             columns:  [{
                 name: 'user',
                 primaryKey: true,
@@ -81,7 +82,6 @@ let complexQuery: Query<Message, User, 'kind'> = {
         resolve: {
             underlyingField: 'id',
             session: 'msgPerUser',
-            valueField: 'user',
             displayField: 'count'
         }
     },{
