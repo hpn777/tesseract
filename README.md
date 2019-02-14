@@ -45,7 +45,6 @@ let query: Query<Message, User, 'kind'> = {
     resolve: {
       underlyingField: 'user',
       childrenTable: 'user',
-      valueField: 'id',
       displayField: 'name'
     }
   }],
@@ -54,5 +53,45 @@ let query: Query<Message, User, 'kind'> = {
       value: 'status == 2',
   }],
   sort: [{ field: 'id', direction: 'desc' }]
+}
+
+let complexQuery: Query<Message, User, 'kind'> = {
+    table: 'users',
+    subSessions: {
+        msgPerUser: {
+            table: 'messageQueue',
+            columns:  [{
+                name: 'user',
+                primaryKey: true,
+            }, {
+                name: 'count',
+                value: 1,
+                aggregator: 'sum'
+            }],
+            groupBy: [{ dataIndex: 'user' }]
+        }
+    },
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingField: 'id',
+            session: 'msgPerUser',
+            valueField: 'user',
+            displayField: 'count'
+        }
+    },{
+        name: 'halfCount',
+        value: x => x.msgCount/2
+    }],
+    filter: [{
+        type: 'custom',
+        value: 'msgCount > 1',
+    }],
+    sort: [  { field: 'name', direction: 'asc' }]
 }
 ```

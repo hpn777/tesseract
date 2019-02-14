@@ -63,11 +63,15 @@ var usersSession = EVH.createSession({
                     name: 'count',
                     value: 1,
                     aggregator: 'sum'
+                }, {
+                    name: 'min',
+                    value: 1,
+                    aggregator: 'min'
                 }],
-                filter: [{
-                    type: 'custom',
-                    value: 'user >1',
-                }],
+                // filter: [{
+                //     type: 'custom',
+                //     value: 'user == 2',
+                // }],
                 groupBy: [{ dataIndex: 'user' }]
             },
             valueField: 'user',
@@ -83,6 +87,28 @@ var usersSession = EVH.createSession({
 
 var usersSession2 = EVH.createSession({
     table: 'users',
+    subSessions: {
+        a: {
+            table: 'messageQueue',
+            columns:  [{
+                name: 'user',
+                primaryKey: true,
+            }, {
+                name: 'count',
+                value: 1,
+                aggregator: 'sum'
+            }, {
+                name: 'min',
+                value: 1,
+                aggregator: 'min'
+            }],
+            // filter: [{
+            //     type: 'custom',
+            //     value: 'user == 2',
+            // }],
+            groupBy: [{ dataIndex: 'user' }]
+        }
+    },
     columns: [{
         name: 'id',
         primaryKey: true,
@@ -92,24 +118,17 @@ var usersSession2 = EVH.createSession({
         name: 'msgCount',
         resolve: {
             underlyingField: 'id',
-            session: {
-                table: 'messageQueue',
-                columns:  [{
-                    name: 'user',
-                    primaryKey: true,
-                }, {
-                    name: 'count',
-                    value: 1,
-                    aggregator: 'sum'
-                }],
-                filter: [{
-                    type: 'custom',
-                    value: 'user == 2',
-                }],
-                groupBy: [{ dataIndex: 'user' }]
-            },
+            session: 'a',
             valueField: 'user',
             displayField: 'count'
+        }
+    }, {
+        name: 'msgmin',
+        resolve: {
+            underlyingField: 'id',
+            session: 'a',
+            valueField: 'user',
+            displayField: 'min'
         }
     },{
         name: 'halfCount',
@@ -141,7 +160,12 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-// usersSession.on('dataUpdate', (x)=>{console.log(x.toJSON())})
+let cipa = {}
+usersSession2.on('dataUpdate', (x)=>{  })
+usersSession2.on('dataUpdate', (x)=>{  })
+usersSession2.on('dataUpdate', (x)=>{  })
+usersSession2.on('dataUpdate', (x)=>{  }, cipa)
+usersSession2.off(null, null, cipa)
 
 var ii = 1
 
@@ -185,13 +209,11 @@ messages.remove([2])
 // console.log(messageSession.groupData([{ dataIndex: 'userName' }]))
 
 setTimeout(() => {
-    console.log(users.sessions.map(x=>x.get('id')))
-    console.log(usersSession.getData().map(x=>x.object))
+    // console.log(usersSession.getData().map(x=>x.object))
     console.log(usersSession2.getData().map(x=>x.object))
     console.log('messageSession',messageSession.getData().map(x=>x.object))
+    console.log(EVH.sessions.map(x=>x.get('id')))
     usersSession2.destroy()
-    console.log(users.sessions.map(x=>x.get('id')))
-    users.destroy()
     console.log(EVH.sessions.map(x=>x.get('id')))
 }, 100)
 setTimeout(()=>{}, 1000000)
