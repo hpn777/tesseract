@@ -116,6 +116,7 @@ interface TesseractOptions<T> {
   resolve?: ResolveFunction
   columns: TesseractColumn<T>[]
   clusterSync?: boolean
+  persistent?: boolean
 }
 
 declare class Tesseract<T> {
