@@ -133,6 +133,9 @@ var usersSession2 = EVH.createSession({
     },{
         name: 'halfCount',
         value: x => x.msgCount/2
+    },{
+        name: 'fullName',
+        value: x => `${x.name}-${x.id}`
     }],
     filter: [{
         type: 'custom',
@@ -150,12 +153,12 @@ var messageSession = EVH.createSession({
     }, {
         name: 'message',
     }],
-    filter: [{
-        field: 'deleted',
-        type: 'boolean',
-       // comparison: 'eq',
-        value: true
-    }],
+    // filter: [{
+    //     field: 'deleted',
+    //     type: 'boolean',
+    //    // comparison: 'eq',
+    //     value: true
+    // }],
     // sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
 })
@@ -183,7 +186,9 @@ messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
 messages.update({id: 2, message: 'cipa2', status: 2})
 messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
 
+console.log('before remove', messageSession.getCount())
 messages.remove([2])
+console.log('after remove', messageSession.getCount())
 
 // console.log(messages.getById(1).userName)
 // console.time('perf')

@@ -1,6 +1,6 @@
 {
   "name": "tessio",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
     "test": "docker-compose up redis nats tests",

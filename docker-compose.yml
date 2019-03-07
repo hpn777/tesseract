@@ -16,6 +16,8 @@ services:
     hostname: redis
     networks:
       - hpndev
+    ports:
+      - 6379:6379
 
   exec:
     build: ./docker/dev/
