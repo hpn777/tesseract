@@ -135,7 +135,7 @@ var usersSession2 = EVH.createSession({
         value: x => x.msgCount/2
     },{
         name: 'fullName',
-        value: x => `${x.name}-${x.id}`
+        value: '${name}-${id}'
     }],
     filter: [{
         type: 'custom',

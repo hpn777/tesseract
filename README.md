@@ -87,6 +87,9 @@ let complexQuery: Query<Message, User, 'kind'> = {
     },{
         name: 'halfCount',
         value: x => x.msgCount/2
+    }, {
+        name: 'templatedName',
+        value: '${name} - ${msgCount}'
     }],
     filter: [{
         type: 'custom',
