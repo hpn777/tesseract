@@ -16,9 +16,9 @@ var messages = EVH.createTesseract('messageQueue', {
     }, {
         name: 'user',
     }, {
-        name: 'deleted'
+        name: 'deleted',
     }, {
-        name: 'releaseTime',
+        name: 'update',
         value: (data) => { return new Date() },
         aggregator: 'max'
     // }, {
@@ -43,47 +43,47 @@ var users = EVH.createTesseract('users', {
     }]
 })
 
-var usersSession = EVH.createSession({
-    table: 'users',
-    columns: [{
-        name: 'id',
-        primaryKey: true,
-    }, {
-        name: 'name',
-    }, {
-        name: 'msgCount',
-        resolve: {
-            underlyingField: 'id',
-            session: {
-                table: 'messageQueue',
-                columns:  [{
-                    name: 'user',
-                    primaryKey: true,
-                }, {
-                    name: 'count',
-                    value: 1,
-                    aggregator: 'sum'
-                }, {
-                    name: 'min',
-                    value: 1,
-                    aggregator: 'min'
-                }],
-                // filter: [{
-                //     type: 'custom',
-                //     value: 'user == 2',
-                // }],
-                groupBy: [{ dataIndex: 'user' }]
-            },
-            valueField: 'user',
-            displayField: 'count'
-        }
-    }],
-    filter: [{
-        type: 'custom',
-        value: 'msgCount > 1',
-    }],
-    sort: [  { field: 'name', direction: 'asc' }]
-})
+// var usersSession = EVH.createSession({
+//     table: 'users',
+//     columns: [{
+//         name: 'id',
+//         primaryKey: true,
+//     }, {
+//         name: 'name',
+//     }, {
+//         name: 'msgCount',
+//         resolve: {
+//             underlyingField: 'id',
+//             session: {
+//                 table: 'messageQueue',
+//                 columns:  [{
+//                     name: 'user',
+//                     primaryKey: true,
+//                 }, {
+//                     name: 'count',
+//                     value: 1,
+//                     aggregator: 'sum'
+//                 }, {
+//                     name: 'min',
+//                     value: 1,
+//                     aggregator: 'min'
+//                 }],
+//                 // filter: [{
+//                 //     type: 'custom',
+//                 //     value: 'user == 2',
+//                 // }],
+//                 groupBy: [{ dataIndex: 'user' }]
+//             },
+//             valueField: 'user',
+//             displayField: 'count'
+//         }
+//     }],
+//     filter: [{
+//         type: 'custom',
+//         value: 'msgCount > 1',
+//     }],
+//     sort: [  { field: 'name', direction: 'asc' }]
+// })
 
 var usersSession2 = EVH.createSession({
     table: 'users',
@@ -94,6 +94,8 @@ var usersSession2 = EVH.createSession({
                 name: 'user',
                 primaryKey: true,
             }, {
+                name: 'deleted'
+            }, {
                 name: 'count',
                 value: 1,
                 aggregator: 'sum'
@@ -102,10 +104,11 @@ var usersSession2 = EVH.createSession({
                 value: 1,
                 aggregator: 'min'
             }],
-            // filter: [{
-            //     type: 'custom',
-            //     value: 'user == 2',
-            // }],
+            filter: [{
+                field: 'deleted',
+                comparison: '!=',
+                value: true,
+            }],
             groupBy: [{ dataIndex: 'user' }]
         }
     },
@@ -139,7 +142,7 @@ var usersSession2 = EVH.createSession({
     }],
     filter: [{
         type: 'custom',
-        value: 'msgCount > 1',
+        value: 'msgCount > 0',
     }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
@@ -148,27 +151,27 @@ var messageSession = EVH.createSession({
     table: 'messageQueue',
     columns:  [{
         name: 'id',
+    }, {
+        name: 'user',
     },{
-        name: 'deleted'
+        name: 'deleted',
+        value: (x, propertyName, propertyIndex)=> x.raw[propertyIndex]?true:false
     }, {
         name: 'message',
     }],
-    // filter: [{
-    //     field: 'deleted',
-    //     type: 'boolean',
-    //    // comparison: 'eq',
-    //     value: true
-    // }],
-    // sort: [  { field: 'status', direction: 'desc' }],
+    filter: [{
+        field: 'deleted',
+        //type: 'boolean',
+        comparison: 'neq',
+        value: true
+    }],
+    sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
 })
 
-let cipa = {}
-usersSession2.on('dataUpdate', (x)=>{  })
-usersSession2.on('dataUpdate', (x)=>{  })
-usersSession2.on('dataUpdate', (x)=>{  })
-usersSession2.on('dataUpdate', (x)=>{  }, cipa)
-usersSession2.off(null, null, cipa)
+usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
+// messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
+
 
 var ii = 1
 
@@ -184,11 +187,11 @@ messages.add({id: ii++, message: 'bla2', user: 2, status: 2})
 messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
-messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
 
-console.log('before remove', messageSession.getCount())
-messages.remove([2])
-console.log('after remove', messageSession.getCount())
+setTimeout(()=>{
+    messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
+}, 3000)
+
 
 // console.log(messages.getById(1).userName)
 // console.time('perf')
@@ -200,25 +203,10 @@ console.log('after remove', messageSession.getCount())
 // console.timeEnd('perf')
 
 
-// setTimeout(()=>{
-    // console.log(
-    //     messageSession.getData().map(x => x.object)
-    //        // .map(x => x.toObject())
-    // )
-    // console.log('end',
-    //     JSON.stringify(messageSession.getData()//groupData()
-    //       .map(x => x.object), '',4)
-    //     // ,messageSession.getData()
-    // )
-// }, 100)
-// console.log(messageSession.groupData([{ dataIndex: 'userName' }]))
-
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    console.log(usersSession2.getData().map(x=>x.object))
-    console.log('messageSession',messageSession.getData().map(x=>x.object))
-    console.log(EVH.sessions.map(x=>x.get('id')))
-    usersSession2.destroy()
-    console.log(EVH.sessions.map(x=>x.get('id')))
-}, 100)
+    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
+    //console.log('messageSession',messageSession.getData().map(x=>x.object))
+    console.log('way after remove', usersSession2.getCount())
+}, 300)
 setTimeout(()=>{}, 1000000)
