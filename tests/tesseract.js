@@ -107,7 +107,7 @@ var usersSession2 = EVH.createSession({
             filter: [{
                 field: 'deleted',
                 comparison: '!=',
-                value: false,
+                value: true,
             }],
             groupBy: [{ dataIndex: 'user' }]
         }
@@ -140,10 +140,11 @@ var usersSession2 = EVH.createSession({
         name: 'fullName',
         value: '${name}-${id}'
     }],
-    filter: [{
-        type: 'custom',
-        value: 'msgCount > 0',
-    }],
+    // filter: [{
+    //     field: 'name',
+    //     comparison: 'regex',
+    //     value: /^d.*/g,
+    // }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
 
@@ -169,7 +170,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates')})
+usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
@@ -191,21 +192,23 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 setTimeout(()=>{
     messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
 }, 3000)
-
+setTimeout(()=>{
+    messages.update({id: 4, deleted: true})
+}, 4000)
 
 // console.log(messages.getById(1).userName)
-console.time('perf')
-while(ii++ < 2000000){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
-}
-console.timeEnd('perf')
+// console.time('perf')
+// while(ii++ < 2000000){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
+// }
+// console.timeEnd('perf')
 
 
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
+    console.log('usersSession2', usersSession2.getData().map(x=>x.object))
     //console.log('messageSession',messageSession.getData().map(x=>x.object))
     console.log('way after remove', usersSession2.getCount())
 }, 300)
