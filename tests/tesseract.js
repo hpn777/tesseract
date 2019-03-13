@@ -140,11 +140,11 @@ var usersSession2 = EVH.createSession({
         name: 'fullName',
         value: '${name}-${id}'
     }],
-    // filter: [{
-    //     field: 'name',
-    //     comparison: 'regex',
-    //     value: /^d.*/g,
-    // }],
+    filter: [{
+        field: 'name',
+        comparison: 'regex',
+        value: /^d.*/g,
+    }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
 
