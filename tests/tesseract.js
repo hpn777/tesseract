@@ -2,7 +2,7 @@ var {mergeColumns} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
 var EVH = new (require('../lib/eventHorizon'))({
     commandPort: {
-        host: '0.0.0.0', 
+        host: 'exec', 
         port: 6789
     }
 })
@@ -26,20 +26,11 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'update',
         value: (data) => { return new Date() },
         aggregator: 'max'
-    // }, {
-    //     name: 'tessUserName',
-    //     resolve: {
-    //         underlyingField: 'user',
-    //         childrenTable: 'users',
-    //         valueField: 'id',
-    //         displayField: 'name'
-    //     }
     }]
 })
 
 
 var users = EVH.createTesseract('users', {
-    //clusterSync: true,
     columns: [{
         name: 'id',
         primaryKey: true,
