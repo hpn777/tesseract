@@ -32,6 +32,15 @@ services:
     networks:
       - hpndev
 
+  shell:
+    build: ./docker/dev/
+    volumes:
+      - './:/home'
+    command: ["bash", "-c", "${FILE}"]
+    ipc: host
+    networks:
+      - hpndev
+
   tests:
     build: ./docker/dev/
     volumes:

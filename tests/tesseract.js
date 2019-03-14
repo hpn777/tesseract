@@ -1,6 +1,11 @@
 var {mergeColumns} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
-var EVH = new (require('../lib/eventHorizon'))()
+var EVH = new (require('../lib/eventHorizon'))({
+    commandPort: {
+        host: '0.0.0.0', 
+        port: 6789
+    }
+})
 
 var messages = EVH.createTesseract('messageQueue', {
     //clusterSync: true,
@@ -43,47 +48,47 @@ var users = EVH.createTesseract('users', {
     }]
 })
 
-// var usersSession = EVH.createSession({
-//     table: 'users',
-//     columns: [{
-//         name: 'id',
-//         primaryKey: true,
-//     }, {
-//         name: 'name',
-//     }, {
-//         name: 'msgCount',
-//         resolve: {
-//             underlyingField: 'id',
-//             session: {
-//                 table: 'messageQueue',
-//                 columns:  [{
-//                     name: 'user',
-//                     primaryKey: true,
-//                 }, {
-//                     name: 'count',
-//                     value: 1,
-//                     aggregator: 'sum'
-//                 }, {
-//                     name: 'min',
-//                     value: 1,
-//                     aggregator: 'min'
-//                 }],
-//                 // filter: [{
-//                 //     type: 'custom',
-//                 //     value: 'user == 2',
-//                 // }],
-//                 groupBy: [{ dataIndex: 'user' }]
-//             },
-//             valueField: 'user',
-//             displayField: 'count'
-//         }
-//     }],
-//     filter: [{
-//         type: 'custom',
-//         value: 'msgCount > 1',
-//     }],
-//     sort: [  { field: 'name', direction: 'asc' }]
-// })
+var usersSession = EVH.createSession({
+    table: 'users',
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingField: 'id',
+            session: {
+                table: 'messageQueue',
+                columns:  [{
+                    name: 'user',
+                    primaryKey: true,
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }, {
+                    name: 'min',
+                    value: 1,
+                    aggregator: 'min'
+                }],
+                // filter: [{
+                //     type: 'custom',
+                //     value: 'user == 2',
+                // }],
+                groupBy: [{ dataIndex: 'user' }]
+            },
+            valueField: 'user',
+            displayField: 'count'
+        }
+    }],
+    filter: [{
+        type: 'custom',
+        value: 'msgCount > 1',
+    }],
+    sort: [  { field: 'name', direction: 'asc' }]
+})
 
 var usersSession2 = EVH.createSession({
     table: 'users',
@@ -106,8 +111,8 @@ var usersSession2 = EVH.createSession({
             }],
             filter: [{
                 field: 'deleted',
-                comparison: '!=',
-                value: true,
+                comparison: 'eq',
+                value: false,
             }],
             groupBy: [{ dataIndex: 'user' }]
         }
@@ -122,15 +127,13 @@ var usersSession2 = EVH.createSession({
         resolve: {
             underlyingField: 'id',
             session: 'a',
-            valueField: 'user',
             displayField: 'count'
         }
     }, {
-        name: 'msgmin',
+        name: 'msgMin',
         resolve: {
             underlyingField: 'id',
             session: 'a',
-            valueField: 'user',
             displayField: 'min'
         }
     },{
@@ -140,11 +143,11 @@ var usersSession2 = EVH.createSession({
         name: 'fullName',
         value: '${name}-${id}'
     }],
-    filter: [{
-        field: 'name',
-        comparison: 'regex',
-        value: /^d.*/g,
-    }],
+    // filter: [{
+    //     field: 'name',
+    //     comparison: 'regex',
+    //     value: /^d.*/g,
+    // }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
 
@@ -170,7 +173,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
+// usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
@@ -181,11 +184,11 @@ users.add({id: 2, name: 'daniel'})
 users.add({id: 3, name: 'lauren'})
 
 
-messages.add({id: ii++, message: 'dupa', user: 3, status: 1})
-messages.add({id: ii++, message: 'cipa', user: 1, status: 1})
-messages.add({id: ii++, message: 'bla', user: 3, status: 2})
-messages.add({id: ii++, message: 'bla2', user: 2, status: 2})
-messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
+messages.add({id: ii++, message: 'dupa', user: 3, status: 1, deleted: false})
+messages.add({id: ii++, message: 'cipa', user: 1, status: 1, deleted: false})
+messages.add({id: ii++, message: 'bla', user: 3, status: 2, deleted: false})
+messages.add({id: ii++, message: 'bla2', user: 2, status: 2, deleted: false})
+messages.add({id: ii++, message: 'bla3', user: 2, status: 2, deleted: false})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
 
@@ -201,7 +204,7 @@ setTimeout(()=>{
 // while(ii++ < 2000000){
 //     if(ii%100000 === 0) 
 //         console.log(ii)
-//         messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
+//         messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
 // }
 // console.timeEnd('perf')
 
@@ -211,5 +214,5 @@ setTimeout(() => {
     console.log('usersSession2', usersSession2.getData().map(x=>x.object))
     //console.log('messageSession',messageSession.getData().map(x=>x.object))
     console.log('way after remove', usersSession2.getCount())
-}, 300)
+}, 6000)
 setTimeout(()=>{}, 1000000)
