@@ -1,10 +1,10 @@
 var {mergeColumns} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
 var EVH = new (require('../lib/eventHorizon'))({
-    commandPort: {
-        host: 'exec', 
-        port: 6789
-    }
+    // commandPort: {
+    //     host: 'exec', 
+    //     port: 6789
+    // }
 })
 
 var messages = EVH.createTesseract('messageQueue', {
@@ -81,7 +81,8 @@ var usersSession = EVH.createSession({
     sort: [  { field: 'name', direction: 'asc' }]
 })
 
-var usersSession2 = EVH.createSession({
+EVH.createSession({
+    id:'liveQuery',
     table: 'users',
     subSessions: {
         a: {
@@ -141,6 +142,9 @@ var usersSession2 = EVH.createSession({
     // }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
+var usersSession2 = EVH.createSession({
+    id: 'liveQuery'
+})
 
 var messageSession = EVH.createSession({
     table: 'messageQueue',
@@ -150,21 +154,21 @@ var messageSession = EVH.createSession({
         name: 'user',
     },{
         name: 'deleted',
-        value: (x, propertyName, propertyIndex)=> x.raw[propertyIndex]?true:false
+        defaultValue: false
     }, {
         name: 'message',
     }],
     filter: [{
         field: 'deleted',
         //type: 'boolean',
-        comparison: 'neq',
-        value: true
+        comparison: '==',
+        value: false
     }],
     sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
 })
 
-// usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
+usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
@@ -185,10 +189,12 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 
 setTimeout(()=>{
     messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
-}, 3000)
+    usersSession2.columns[5].value = '${id}-${name}'
+    usersSession2.updateColumns(usersSession2.columns)
+}, 1000)
 setTimeout(()=>{
     messages.update({id: 4, deleted: true})
-}, 4000)
+}, 2000)
 
 // console.log(messages.getById(1).userName)
 // console.time('perf')
@@ -203,7 +209,7 @@ setTimeout(()=>{
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     console.log('usersSession2', usersSession2.getData().map(x=>x.object))
-    //console.log('messageSession',messageSession.getData().map(x=>x.object))
+    console.log('messageSession',messageSession.getData().map(x=>x.object))
     console.log('way after remove', usersSession2.getCount())
-}, 6000)
+}, 3000)
 setTimeout(()=>{}, 1000000)
