@@ -20,9 +20,17 @@ interface DataUpdate<T> {
   toJSON(): T
 }
 
+interface GetSessionDataRequest {
+  filter?: Filter[]
+  sort?: Sort[]
+  start?: number;
+  limit?: number;
+}
+
 interface Session<T = any> {
   on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
-  getData(): T
+  getData(request?: GetSessionDataRequest): T
+  updateColumns(columns: TesseractColumn<T>[]): void
   destroy(): void
 }
 
@@ -182,7 +190,7 @@ declare class Cluster {
 
   constructor(option: EventHorizonOptions, evH?: EventHorizon)
   connect(options: ClusterConnectOptions): Promise<NatsCluster>
-  createTesseract<T>(name: string, options: TesseractOptions<T>): Tesseract<T>
+  createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   on(...args: any[]): any
   off(...args: any[]): any
   once(...args: any[]): any
