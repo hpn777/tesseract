@@ -35,51 +35,53 @@ var users = EVH.createTesseract('users', {
         name: 'id',
         primaryKey: true,
     }, {
+        name: 'parentId',
+    }, {
         name: 'name',
     }]
 })
 
-var usersSession = EVH.createSession({
-    table: 'users',
-    columns: [{
-        name: 'id',
-        primaryKey: true,
-    }, {
-        name: 'name',
-    }, {
-        name: 'msgCount',
-        resolve: {
-            underlyingField: 'id',
-            session: {
-                table: 'messageQueue',
-                columns:  [{
-                    name: 'user',
-                    primaryKey: true,
-                }, {
-                    name: 'count',
-                    value: 1,
-                    aggregator: 'sum'
-                }, {
-                    name: 'min',
-                    value: 1,
-                    aggregator: 'min'
-                }],
-                // filter: [{
-                //     type: 'custom',
-                //     value: 'user == 2',
-                // }],
-                groupBy: [{ dataIndex: 'user' }]
-            },
-            valueField: 'user',
-            displayField: 'count'
-        }
-    }],
-    filter: [{
-        type: 'custom',
-        value: 'msgCount > 1',
-    }],
-    sort: [  { field: 'name', direction: 'asc' }]
-})
+// var usersSession = EVH.createSession({
+//     table: 'users',
+//     columns: [{
+//         name: 'id',
+//         primaryKey: true,
+//     }, {
+//         name: 'name',
+//     }, {
+//         name: 'msgCount',
+//         resolve: {
+//             underlyingField: 'id',
+//             session: {
+//                 table: 'messageQueue',
+//                 columns:  [{
+//                     name: 'user',
+//                     primaryKey: true,
+//                 }, {
+//                     name: 'count',
+//                     value: 1,
+//                     aggregator: 'sum'
+//                 }, {
+//                     name: 'min',
+//                     value: 1,
+//                     aggregator: 'min'
+//                 }],
+//                 // filter: [{
+//                 //     type: 'custom',
+//                 //     value: 'user == 2',
+//                 // }],
+//                 groupBy: [{ dataIndex: 'user' }]
+//             },
+//             valueField: 'user',
+//             displayField: 'count'
+//         }
+//     }],
+//     filter: [{
+//         type: 'custom',
+//         value: 'msgCount > 1',
+//     }],
+//     sort: [  { field: 'name', direction: 'asc' }]
+// })
 
 EVH.createSession({
     id:'liveQuery',
@@ -146,6 +148,10 @@ var usersSession2 = EVH.createSession({
     id: 'liveQuery'
 })
 
+var usersSession = EVH.createSession({
+    table: 'users'
+})
+
 var messageSession = EVH.createSession({
     table: 'messageQueue',
     columns:  [{
@@ -168,15 +174,15 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
+usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates')})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
 var ii = 1
 
-users.add({id: 1, name: 'rafal'})
-users.add({id: 2, name: 'daniel'})
-users.add({id: 3, name: 'lauren'})
+users.add({id: 1, parentId: 1, name: 'rafal'})
+users.add({id: 2, parentId: 1, name: 'daniel'})
+users.add({id: 3, parentId: 1, name: 'lauren'})
 
 
 messages.add({id: ii++, message: 'dupa', user: 3, status: 1, deleted: false})
@@ -187,14 +193,14 @@ messages.add({id: ii++, message: 'bla3', user: 2, status: 2, deleted: false})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
 
-setTimeout(()=>{
-    messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
-    usersSession2.columns[5].value = '${id}-${name}'
-    usersSession2.updateColumns(usersSession2.columns)
-}, 1000)
-setTimeout(()=>{
-    messages.update({id: 4, deleted: true})
-}, 2000)
+// setTimeout(()=>{
+//     messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
+//     usersSession2.columns[5].value = '${id}-${name}'
+//     usersSession2.updateColumns(usersSession2.columns)
+// }, 1000)
+// setTimeout(()=>{
+//     messages.update({id: 4, deleted: true})
+// }, 2000)
 
 // console.log(messages.getById(1).userName)
 // console.time('perf')
@@ -208,8 +214,37 @@ setTimeout(()=>{
 
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    console.log('usersSession2', usersSession2.getData().map(x=>x.object))
-    console.log('messageSession',messageSession.getData().map(x=>x.object))
+    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
+    // console.log('messageSession',messageSession.getData().map(x=>x.object))
+    console.log('users', usersSession.returnTree(1, 'parentId'))
     console.log('way after remove', usersSession2.getCount())
 }, 3000)
 setTimeout(()=>{}, 1000000)
+
+
+let usersDef = {
+    id: 'users',
+    columns: [{
+      name: 'id',
+      columnType: 'number',
+      primaryKey: true,
+    }, {
+      name: 'name',
+      columnType: 'text',
+    }]
+  }
+ let eventHorizon = new (require('../lib/eventHorizon'))({
+    // commandPort: {
+    //     host: 'exec', 
+    //     port: 6789
+    // }
+})
+let users2 = eventHorizon.createTesseract('users2', usersDef)
+users2.add({id: 1, name: 'rafal'})
+users2.add({id: 2, name: 'daniel'})
+users2.add({id: 3, name: 'lauren'})
+users2.remove([1,2,3])
+var session = eventHorizon.createSession({
+  table: 'users2'
+})
+console.log(session.getData())
