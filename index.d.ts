@@ -8,6 +8,8 @@ type UnionToIntersection<U> =
 type ResolveFunction = any
 type DataRow<T> = T
 type ProxyConfig = any
+type Bulkable<T> = T | T[]
+type Id = number | string
 
 // not sure what this is
 type NatsCluster = any
@@ -20,9 +22,17 @@ interface DataUpdate<T> {
   toJSON(): T
 }
 
+interface GetSessionDataRequest {
+  filter?: Filter[]
+  sort?: Sort[]
+  start?: number;
+  limit?: number;
+}
+
 interface Session<T = any> {
   on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
-  getData(): T
+  getData(request?: GetSessionDataRequest): T
+  updateColumns(columns: TesseractColumn<T>[]): void
   destroy(): void
 }
 
@@ -140,15 +150,15 @@ declare class Tesseract<T> {
   refreshTesseract(): void
   collectGarbage(): void
 
-  add(data: T, disableClusterUpdate?: boolean): void
-  update(data: T, disableClusterUpdate?: boolean): DataRow<T>[]
-  remove(data: T, disableClusterUpdate?: boolean): void
+  add(data: Bulkable<T>, disableClusterUpdate?: boolean): void
+  update(data: Bulkable<Partial<T>>, disableClusterUpdate?: boolean): DataRow<T>[]
+  remove(data: Id[], disableClusterUpdate?: boolean): void
   get(key: string): T
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getData(): DataRow<T>[]
-  getById(id: string): T
+  getById(id: Id): T
   clear(disableClusterUpdate?: boolean): void
-  reset(data: T, disableClusterUpdate?: boolean): DataRow<T>[]
+  reset(data: T[], disableClusterUpdate?: boolean): DataRow<T>[]
 }
 
 interface EventHorizonOptions {
@@ -182,7 +192,7 @@ declare class Cluster {
 
   constructor(option: EventHorizonOptions, evH?: EventHorizon)
   connect(options: ClusterConnectOptions): Promise<NatsCluster>
-  createTesseract<T>(name: string, options: TesseractOptions<T>): Tesseract<T>
+  createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   on(...args: any[]): any
   off(...args: any[]): any
   once(...args: any[]): any
