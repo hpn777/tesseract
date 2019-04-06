@@ -8,11 +8,9 @@ var EVH = new (require('../lib/eventHorizon'))({
 })
 
 var messages = EVH.createTesseract('messageQueue', {
-    //clusterSync: true,
     columns: [{
         name: 'id',
         primaryKey: true,
-        //value: (data) => { return data.id || self.guid() }
     }, {
         name: 'message',
     }, {
@@ -38,6 +36,72 @@ var users = EVH.createTesseract('users', {
         name: 'parentId',
     }, {
         name: 'name',
+    }]
+})
+
+var union = EVH.createUnion('pierdzielec', {
+    subSessions:{
+        a: {
+            table: 'messageQueue',
+            columns: [{
+                name: 'id',
+                primaryKey: true,
+            }, {
+                name: 'type',
+                value: 'message'
+            }, {
+                name: 'message',
+            }, {
+                name: 'user',
+            }, {
+                name: 'parentId',
+                value: x => `${x.user}/undefined`
+            }, {
+                name: 'userName',
+                resolve: {
+                    childrenTable: 'users',
+                    underlyingField: 'user',
+                    displayField: 'name'
+                }
+            }]
+        },
+        b: {
+            table: 'users',
+            columns: [{
+                name: 'id',
+                primaryKey: true,
+            }, {
+                name: 'type',
+                value: 'user'
+            }, {
+                name: 'user',
+                value: x=>x.id
+            }, {
+                name: 'name',
+            }, {
+                name: 'parentId',
+                value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
+            }, {
+                name: 'userName',
+                value: x => x.name
+            }]
+        },
+        
+    },
+    columns: [{
+        name: 'userName',
+    }, {
+        name: 'message',
+    }, {
+        name: 'user',
+    }, {
+        name: 'type',
+    }, {
+        name: 'id',
+        value: x => `${x.user}/${x.message}`,
+        primaryKey: true,
+    }, {
+        name: 'parentId',
     }]
 })
 
@@ -212,39 +276,11 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // console.timeEnd('perf')
 
 
-setTimeout(() => {
+// setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
     // console.log('messageSession',messageSession.getData().map(x=>x.object))
     console.log('users', usersSession.returnTree(1, 'parentId'))
-    console.log('way after remove', usersSession2.getCount())
-}, 3000)
+    console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
+// }, 3000)
 setTimeout(()=>{}, 1000000)
-
-
-let usersDef = {
-    id: 'users',
-    columns: [{
-      name: 'id',
-      columnType: 'number',
-      primaryKey: true,
-    }, {
-      name: 'name',
-      columnType: 'text',
-    }]
-  }
- let eventHorizon = new (require('../lib/eventHorizon'))({
-    // commandPort: {
-    //     host: 'exec', 
-    //     port: 6789
-    // }
-})
-let users2 = eventHorizon.createTesseract('users2', usersDef)
-users2.add({id: 1, name: 'rafal'})
-users2.add({id: 2, name: 'daniel'})
-users2.add({id: 3, name: 'lauren'})
-users2.remove([1,2,3])
-var session = eventHorizon.createSession({
-  table: 'users2'
-})
-console.log(session.getData())
