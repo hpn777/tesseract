@@ -1,12 +1,12 @@
 var EVH1 = new (require('../lib/eventHorizon'))();
 var EVH2 = new (require('../lib/eventHorizon'))();
-const TessCluster = require('../lib/cluster')
+const TessCluster = require('../lib/clusterRedis')
 
 
 var node1 = new TessCluster()
 let node2 = new TessCluster()
 
-node1.connect({clientName: 'client1', syncSchema: true})
+node1.connect({clientName: 'client1', syncSchema: false})
     .then((nc) => {
         console.log('node1 online')
         node1.createTesseract('users', usersDefinition)
@@ -29,10 +29,14 @@ node1.connect({clientName: 'client1', syncSchema: true})
             })
     })
 
-node2.connect({clientName: 'client2', syncSchema: true})
+node2.connect({clientName: 'client2', syncSchema: false})
     .then((nc) => {
         console.log('node2 online')
     })
+
+
+node2.pullTesseract('messages')
+node2.pullTesseract('users')
 
 node2.getTesseract('messages')
     .then((tess)=>{

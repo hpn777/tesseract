@@ -22,7 +22,7 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'deleted',
     }, {
         name: 'update',
-        value: (data) => { return new Date() },
+        value: data =>  new Date(),
         aggregator: 'max'
     }]
 })
@@ -85,8 +85,7 @@ var union = EVH.createUnion('pierdzielec', {
                 name: 'userName',
                 value: x => x.name
             }]
-        },
-        
+        }
     },
     columns: [{
         name: 'userName',
@@ -238,7 +237,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates')})
+usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
@@ -267,13 +266,13 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 2000)
 
 // console.log(messages.getById(1).userName)
-// console.time('perf')
-// while(ii++ < 2000000){
-//     if(ii%100000 === 0) 
-//         console.log(ii)
-//         messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
-// }
-// console.timeEnd('perf')
+console.time('perf')
+while(ii++ < 2000000){
+    if(ii%100000 === 0) 
+        console.log(ii)
+        messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
+}
+console.timeEnd('perf')
 
 
 // setTimeout(() => {
@@ -281,6 +280,6 @@ messages.update({id: 2, message: 'cipa2', status: 2})
     // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
     // console.log('messageSession',messageSession.getData().map(x=>x.object))
     console.log('users', usersSession.returnTree(1, 'parentId'))
-    console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
+    // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
 // }, 3000)
 setTimeout(()=>{}, 1000000)
