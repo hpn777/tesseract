@@ -112,6 +112,16 @@ interface Query<T, S, D extends keyof (T | S)> {
   groupBy?: GroupBy[]
   start?: number;
   limit?: number;
+  subSessions?: SubSessions<T, S, D>
+}
+
+interface SubSessions<T, S, D extends keyof (T | S)> {
+  [key: string]: Query<T, S, D>
+}
+
+interface UnionQuery<T, S, D extends keyof (T | S)> {
+  subSessions: SubSessions<T, S, D>
+  columns: Column<T, S, D>[]
 }
 
 interface TesseractColumn<T> {
@@ -202,5 +212,6 @@ declare class Cluster {
   getTesseract(table: string): DataRow<any> | undefined
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
+  createUnion<T, S, D extends keyof (T | S)>(name: string, query: UnionQuery<T, S, D>): Tesseract<T>
   getSession(sessionName: string): Session
 }
