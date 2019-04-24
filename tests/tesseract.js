@@ -27,7 +27,6 @@ var messages = EVH.createTesseract('messageQueue', {
     }]
 })
 
-
 var users = EVH.createTesseract('users', {
     columns: [{
         name: 'id',
@@ -266,13 +265,13 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 2000)
 
 // console.log(messages.getById(1).userName)
-console.time('perf')
-while(ii++ < 2000000){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
-}
-console.timeEnd('perf')
+// console.time('perf')
+// while(ii++ < 2000000){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
+// }
+// console.timeEnd('perf')
 
 
 // setTimeout(() => {
