@@ -32,7 +32,6 @@ var usersDefinition = {
         name: 'id',
         columnType: 'number',
         primaryKey: true,
-        //value: (data) => { return data.id || self.guid() }
     }, {
         name: 'name',
         columnType: 'text',
@@ -50,7 +49,6 @@ node1.connect({clientName: 'client1', syncSchema: false})
 node2.connect({clientName: 'client2', syncSchema: false})
     .then((nc) => {
         console.log('node2 online')
-        
     })
 
 
@@ -58,6 +56,7 @@ Promise.all([
     node2.pullTesseract('messages'),
     node2.pullTesseract('users')   
 ]).then(()=>{
+// setTimeout(()=>{
     let users = node2.get('users')
     let messages = node2.get('messages')
 
@@ -78,8 +77,6 @@ Promise.all([
     messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 4, message: 'cipa3', status: 2}])
     messages.remove([1, 2])
 
-    
-    
     let session = node2.createSession({
         id: 'messages_querry',
         table: 'messages',
@@ -107,18 +104,21 @@ Promise.all([
     })
 
     setTimeout(()=>{
-        console.log('users very after',users.getCount(), users.getData().map(x=>x.object))
-        console.log('messages very after',users.getCount(),messages.dataCache.length)
-        console.log('summary',session.getData().map(x=>x.object))
-        users.reset()
-        messages.reset()
+        console.log('users after',node2.get('users').getCount(), users.getData().map(x=>x.object))
+        console.log('messages after',node2.get('messages').getCount(),messages.getData().map(x=>x.object))
+        console.log('users after',node1.get('users').getCount(), users.getData().map(x=>x.object))
+        console.log('messages after',node1.get('messages').getCount(),messages.getData().map(x=>x.object))
+        users.clear()
+        messages.clear()
         // node1.get('messages').clear()
-        // setTimeout(()=>{
-        //     console.log('summary',session.getData().map(x=>x.object))
-            
-        // }, 300)
-    }, 300)
-})
+        setTimeout(()=>{
+            console.log('users very after',node2.get('users').getCount(), users.getData().map(x=>x.object))
+            console.log('messages very after',node2.get('messages').getCount(),messages.getData().map(x=>x.object))
+            console.log('users very after',node1.get('users').getCount(), users.getData().map(x=>x.object))
+            console.log('messages very after',node1.get('messages').getCount(),messages.getData().map(x=>x.object))
+        }, 300)
+    }, 10)
+}, 300)
 
     
 
