@@ -160,17 +160,17 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
     sort: [{ field: "id", direction: "desc" }]
   });
 
-//   await wait(1000)
+
   console.log("summary", session.getData().map(x => x.object));
 
   await node3.connect({ syncSchema: true });
   console.log("node3 online");
 
   const tessio = await node3.getTesseract('messages')
-//   await wait(1000)
+
   tessio.clear()
 
-  await wait(1000)
+  await wait(100)
   console.log("summary", session.getData().map(x => x.object));
 
     console.log('messages very after',node1.get('messages').getCount())

@@ -16,7 +16,7 @@ RUN pip install docker-compose
 
 RUN yum -y install git
 
-RUN curl --silent --location https://rpm.nodesource.com/setup_11.x | bash - \
+RUN curl --silent --location https://rpm.nodesource.com/setup_12.x | bash - \
  && yum -y install nodejs
 
 RUN yum -y install nc
