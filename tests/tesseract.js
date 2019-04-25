@@ -12,7 +12,7 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'id',
         primaryKey: true,
     }, {
-        name: 'message',
+        name: 'message', 
     }, {
         name: 'status',
         aggregator: 'avg'
@@ -103,47 +103,47 @@ var union = EVH.createUnion('pierdzielec', {
     }]
 })
 
-// var usersSession = EVH.createSession({
-//     table: 'users',
-//     columns: [{
-//         name: 'id',
-//         primaryKey: true,
-//     }, {
-//         name: 'name',
-//     }, {
-//         name: 'msgCount',
-//         resolve: {
-//             underlyingField: 'id',
-//             session: {
-//                 table: 'messageQueue',
-//                 columns:  [{
-//                     name: 'user',
-//                     primaryKey: true,
-//                 }, {
-//                     name: 'count',
-//                     value: 1,
-//                     aggregator: 'sum'
-//                 }, {
-//                     name: 'min',
-//                     value: 1,
-//                     aggregator: 'min'
-//                 }],
-//                 // filter: [{
-//                 //     type: 'custom',
-//                 //     value: 'user == 2',
-//                 // }],
-//                 groupBy: [{ dataIndex: 'user' }]
-//             },
-//             valueField: 'user',
-//             displayField: 'count'
-//         }
-//     }],
-//     filter: [{
-//         type: 'custom',
-//         value: 'msgCount > 1',
-//     }],
-//     sort: [  { field: 'name', direction: 'asc' }]
-// })
+var usersSession = EVH.createSession({
+    table: 'users',
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingField: 'id',
+            session: {
+                table: 'messageQueue',
+                columns:  [{
+                    name: 'user',
+                    primaryKey: true,
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }, {
+                    name: 'min',
+                    value: 1,
+                    aggregator: 'min'
+                }],
+                // filter: [{
+                //     type: 'custom',
+                //     value: 'user == 2',
+                // }],
+                groupBy: [{ dataIndex: 'user' }]
+            },
+            valueField: 'user',
+            displayField: 'count'
+        }
+    }],
+    filter: [{
+        type: 'custom',
+        value: 'msgCount > 1',
+    }],
+    sort: [  { field: 'name', direction: 'asc' }]
+})
 
 EVH.createSession({
     id:'liveQuery',

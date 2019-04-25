@@ -3,8 +3,8 @@ var EVH2 = new (require('../lib/eventHorizon'))();
 const TessCluster = require('../lib/clusterRedis')
 
 
-var node1 = new TessCluster()
-let node2 = new TessCluster()
+var node1 = new TessCluster({nodeId: 'node1'})
+let node2 = new TessCluster({nodeId: 'node2'})
 let messageQueueDefinition = {
     clusterSync: true,
     persistent: true,
@@ -63,12 +63,9 @@ Promise.all([
 
     console.log('users before',users.getData().map(x=>x.object))
     console.log('messages before',messages.getData().map(x=>x.object))
-    users.clear()
-    messages.clear()
-    console.log('users after',users.getData().map(x=>x.object))
-    console.log('messages after',messages.getData().map(x=>x.object))
     
     users.add([{id: 1, name: 'rafal'},{id: 2, name: 'daniel'},{id: 3, name: 'lauren'}])
+    users.update([{id: 1, name: 'rafal'},{id: 2, name: 'daniel'},{id: 3, name: 'lauren'}])
 
     let ii = 1
     messages.add({id: ii++, message: 'dupa', user: 3, status: 1})
@@ -113,12 +110,14 @@ Promise.all([
         console.log('users very after',users.getCount(), users.getData().map(x=>x.object))
         console.log('messages very after',users.getCount(),messages.dataCache.length)
         console.log('summary',session.getData().map(x=>x.object))
+        users.reset()
+        messages.reset()
         // node1.get('messages').clear()
         // setTimeout(()=>{
         //     console.log('summary',session.getData().map(x=>x.object))
             
         // }, 300)
-    }, 200)
+    }, 300)
 })
 
     
