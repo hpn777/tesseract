@@ -1,15 +1,5 @@
 version: "3.3"
 services:
-
-  nats:
-    image: nats-streaming:latest
-    hostname: nats
-    volumes:
-      - './datastore:/datastore'
-      - './docker/dev/nats.config:/nats.config'
-    command: ["-sc", "./nats.config"]
-    networks:
-      - hpndev
       
   redis:
     image: redis
@@ -27,7 +17,6 @@ services:
     ipc: host
     shm_size: 4GB
     depends_on:
-      - nats
       - redis
     networks:
       - hpndev
@@ -47,7 +36,6 @@ services:
       - './:/home'
     command: ["node", "./tests/unit"]
     depends_on:
-      - nats
       - redis
     networks:
       - hpndev

@@ -199,11 +199,11 @@ EVH.createSession({
         name: 'fullName',
         value: '${name}-${id}'
     }],
-    // filter: [{
-    //     field: 'name',
-    //     comparison: 'regex',
-    //     value: /^d.*/g,
-    // }],
+    filter: [{
+        field: 'msgCount',
+        comparison: 'eq',
+        value: 1,
+    }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
 var usersSession2 = EVH.createSession({
@@ -274,11 +274,11 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // console.timeEnd('perf')
 
 
-// setTimeout(() => {
+setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
+    console.log('usersSession2', usersSession2.getData().map(x=>x.object))
     // console.log('messageSession',messageSession.getData().map(x=>x.object))
-    console.log('users', usersSession.returnTree(1, 'parentId'))
+    // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
-// }, 3000)
+}, 300)
 setTimeout(()=>{}, 1000000)
