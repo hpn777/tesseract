@@ -10,4 +10,10 @@ redisInstance.keys('tess.*').then(x => {
     x.forEach(item => redisInstance.del(item))
 })
 redisInstance.del('EvH.def')
-console.log('done')
+
+setTimeout(() => {
+    console.log('done')
+    process.exit(0)
+}, 10)
+
+
