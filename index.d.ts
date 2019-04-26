@@ -11,9 +11,6 @@ type ProxyConfig = any
 type Bulkable<T> = T | T[]
 type Id = number | string
 
-// not sure what this is
-type NatsCluster = any
-
 interface DataUpdate<T> {
   updatedIds: (keyof T)[]
   updatedData: T[]
@@ -167,7 +164,7 @@ declare class Tesseract<T> {
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getData(): DataRow<T>[]
   getById(id: Id): T
-  clear(disableClusterUpdate?: boolean): void
+  clear(disableClusterUpdate?: boolean): Promise
   reset(data: T[], disableClusterUpdate?: boolean): DataRow<T>[]
 }
 
@@ -209,9 +206,12 @@ declare class Cluster {
   trigger(...args: any[]): any
   resolve(resolve: any, data: any): any
   get(key: string): any
+  clear(): Promise<any>
   getTesseract(table: string): DataRow<any> | undefined
+  pullTesseract(table: string): Promise<DataRow<any>>
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
+  createSessionAsync<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Promise<Session>
   createUnion<T, S, D extends keyof (T | S)>(name: string, query: UnionQuery<T, S, D>): Tesseract<T>
   getSession(sessionName: string): Session
 }

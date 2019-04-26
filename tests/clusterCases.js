@@ -120,14 +120,14 @@ const main = async () => {
     messages.add({ id: 5, message: "daniel", user: 2, status: 2 });
   }
 
-  await node2.connect({ syncSchema: true });
+  await node2.connect({ syncSchema: false });
   console.log("node2 online");
 
 //   await Promise.all([
 //     ...config.pullTesseractsInOtherCluster.map(t => node2.pullTesseract(t))
 //   ]);
 console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
-  const session = node2.createSession({
+  const session = await node2.createSessionAsync({
     id: "messages_query",
     table: "messages",
     columns: [
@@ -168,14 +168,12 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
 
   const tessio = await node3.getTesseract('messages')
 
-  node3.clear()
-    .then(async () => {
-        await wait(10)
-        console.log("summary", session.getData().map(x => x.object));
-        console.log('messages very after',node1.get('messages').getCount())
-        console.log('messages very after',node2.get('messages').getCount())
-        console.log('messages very after',node3.get('messages').getCount())
-    })
-};
+    await node3.clear()
+    await wait(10)
+    console.log("summary", session.getData().map(x => x.object));
+    console.log('messages very after',node1.get('messages').getCount())
+    console.log('messages very after',node2.get('messages').getCount())
+    console.log('messages very after',node3.get('messages').getCount())
+    };
 
 main();
