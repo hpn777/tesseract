@@ -120,12 +120,12 @@ const main = async () => {
     messages.add({ id: 5, message: "daniel", user: 2, status: 2 });
   }
 
-  await node2.connect({ syncSchema: config.syncSchemaConsumer });
+  await node2.connect({ syncSchema: true });
   console.log("node2 online");
 
-  await Promise.all([
-    ...config.pullTesseractsInOtherCluster.map(t => node2.pullTesseract(t))
-  ]);
+//   await Promise.all([
+//     ...config.pullTesseractsInOtherCluster.map(t => node2.pullTesseract(t))
+//   ]);
 console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
   const session = node2.createSession({
     id: "messages_query",
