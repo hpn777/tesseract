@@ -164,7 +164,7 @@ declare class Tesseract<T> {
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   getData(): DataRow<T>[]
   getById(id: Id): T
-  clear(disableClusterUpdate?: boolean): Promise
+  clear(disableClusterUpdate?: boolean):  Promise<any>
   reset(data: T[], disableClusterUpdate?: boolean): DataRow<T>[]
 }
 
@@ -198,7 +198,7 @@ interface ClusterConnectOptions {
 declare class Cluster {
 
   constructor(option: EventHorizonOptions, evH?: EventHorizon)
-  connect(options: ClusterConnectOptions): Promise<NatsCluster>
+  connect(options: ClusterConnectOptions): Promise<any>
   createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   on(...args: any[]): any
   off(...args: any[]): any
