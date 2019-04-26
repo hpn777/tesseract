@@ -168,14 +168,14 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
 
   const tessio = await node3.getTesseract('messages')
 
-  tessio.clear()
-
-  await wait(100)
-  console.log("summary", session.getData().map(x => x.object));
-
-    console.log('messages very after',node1.get('messages').getCount())
-    console.log('messages very after',node2.get('messages').getCount())
-    console.log('messages very after',node3.get('messages').getCount())
+  node3.clear()
+    .then(async () => {
+        await wait(10)
+        console.log("summary", session.getData().map(x => x.object));
+        console.log('messages very after',node1.get('messages').getCount())
+        console.log('messages very after',node2.get('messages').getCount())
+        console.log('messages very after',node3.get('messages').getCount())
+    })
 };
 
 main();

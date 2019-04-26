@@ -31,9 +31,7 @@ tape('Tesseract Redis cluster test', t => {
         })
 
     node2.connect({clientName: 'client2', syncSchema: true})
-    
-    node2.on('add', (tess)=>{
-        if(tess.get('id') === 'messages'){
+        .then(()=>{
             let session = node2.createSession(messagesSession)
             
             setTimeout(()=>{
@@ -43,8 +41,8 @@ tape('Tesseract Redis cluster test', t => {
                 node2.close()
                 t.end()
             }, 100)
-        }
-    })
+        })
+    
 
     let messageQueueDefinition = {
         clusterSync: true,
