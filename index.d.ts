@@ -208,7 +208,7 @@ declare class Cluster {
   get(key: string): any
   clear(): Promise<any>
   getTesseract(table: string): DataRow<any> | undefined
-  pullTesseract(table: string): Promise<DataRow<any>>
+  pullTesseract(name: string, retryNr, timeout): Promise<DataRow<any>>
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
   createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
   createSessionAsync<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Promise<Session>

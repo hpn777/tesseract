@@ -127,39 +127,93 @@ const main = async () => {
 //     ...config.pullTesseractsInOtherCluster.map(t => node2.pullTesseract(t))
 //   ]);
 console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
-  const session = await node2.createSessionAsync({
-    id: "messages_query",
-    table: "messages",
-    columns: [
-      {
-        name: "id",
-        primaryKey: true
-      },
-      {
-        name: "message"
-      },
-      {
-        name: "status"
-      },
-      {
-        name: "userName",
-        resolve: {
-          underlyingField: "user",
-          childrenTable: "users",
-          valueField: "id",
-          displayField: "name"
-        }
-      }
-    ],
-    filter: [
-      {
-        type: "custom",
-        value: "status == 2"
-      }
-    ],
-    sort: [{ field: "id", direction: "desc" }]
-  });
+//   const session = await node2.createSessionAsync({
+//     id: "messages_query",
+//     table: "messages",
+//     columns: [
+//       {
+//         name: "id",
+//         primaryKey: true
+//       },
+//       {
+//         name: "message"
+//       },
+//       {
+//         name: "status"
+//       },
+//       {
+//         name: "userName",
+//         resolve: {
+//           underlyingField: "user",
+//           childrenTable: "users",
+//           valueField: "id",
+//           displayField: "name"
+//         }
+//       }
+//     ],
+//     filter: [
+//       {
+//         type: "custom",
+//         value: "status == 2"
+//       }
+//     ],
+//     sort: [{ field: "id", direction: "desc" }]
+//   });
 
+  const session = await node2.createSessionAsync({
+    id:'liveQuery',
+    table: 'users',
+    subSessions: {
+        a: {
+            table: 'messages',
+            columns:  [{
+                name: 'user',
+                primaryKey: true,
+            }, {
+                name: 'count',
+                value: 1,
+                aggregator: 'sum'
+            }, {
+                name: 'min',
+                value: 1,
+                aggregator: 'min'
+            }],
+            groupBy: [{ dataIndex: 'user' }]
+        }
+    },
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingField: 'id',
+            session: 'a',
+            displayField: 'count'
+        }
+    }, {
+        name: 'msgMin',
+        resolve: {
+            underlyingField: 'id',
+            session: 'a',
+            displayField: 'min'
+        }
+    },{
+        name: 'halfCount',
+        value: x => x.msgCount/2
+    },{
+        name: 'fullName',
+        value: '${name}-${id}'
+    }],
+    filter: [{
+        field: 'msgMin',
+        comparison: 'eq',
+        value: 1,
+    }],
+    sort: [  { field: 'name', direction: 'asc' }]
+})
 
   console.log("summary", session.getData().map(x => x.object));
 
