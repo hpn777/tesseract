@@ -34,6 +34,9 @@ var users = EVH.createTesseract('users', {
     }, {
         name: 'parentId',
     }, {
+        name: 'expTest',
+        expression: 'id/2'
+    }, {
         name: 'name',
     }]
 })
@@ -179,6 +182,8 @@ EVH.createSession({
     }, {
         name: 'name',
     }, {
+        name: 'expTest',
+    }, {
         name: 'msgCount',
         resolve: {
             underlyingField: 'id',
@@ -194,16 +199,16 @@ EVH.createSession({
         }
     },{
         name: 'halfCount',
-        value: x => x.msgCount/2
+        expression: 'msgCount/3'
     },{
         name: 'fullName',
         value: '${name}-${id}'
     }],
-    filter: [{
-        field: 'msgCount',
-        comparison: 'eq',
-        value: 1,
-    }],
+    // filter: [{
+    //     field: 'msgCount',
+    //     comparison: 'eq',
+    //     value: 1,
+    // }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
 var usersSession2 = EVH.createSession({
@@ -236,7 +241,7 @@ var messageSession = EVH.createSession({
     // immediateUpdate: true
 })
 
-usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
+// usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 

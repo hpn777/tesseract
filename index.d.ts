@@ -71,6 +71,8 @@ interface ColumnRegular<T> {
   name: keyof T
   primaryKey?: boolean
   value?(data: any): any
+  defaultValue?(data: any): any
+  expression?: string
   aggregator?: 'sum' | 'avg' | 'max' | 'min' | AggregatorFunction
 }
 
