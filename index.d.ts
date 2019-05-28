@@ -14,6 +14,7 @@ type Id = number | string
 interface DataUpdate<T> {
   updatedIds: (keyof T)[]
   updatedData: T[]
+  updateReason?: UpdateReason,
   removedIds: (keyof T)[]
   removedData: T[]
   toJSON(): T
@@ -216,4 +217,9 @@ declare class Cluster {
   createSessionAsync<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Promise<Session>
   createUnion<T, S, D extends keyof (T | S)>(name: string, query: UnionQuery<T, S, D>): Tesseract<T>
   getSession(sessionName: string): Session
+}
+
+declare enum UpdateReason {
+  UPDATE_REASON_DATA = 'dataUpdate',
+  UPDATE_REASON_COLUMNS_CHANGED = 'columnsChanged',
 }
