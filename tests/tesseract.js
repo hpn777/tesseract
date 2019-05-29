@@ -1,4 +1,4 @@
-var {mergeColumns} = require('../lib/utils')
+var {mergeColumns, guid} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
 var EVH = new (require('../lib/eventHorizon'))({
     // commandPort: {
@@ -41,112 +41,112 @@ var users = EVH.createTesseract('users', {
     }]
 })
 
-var union = EVH.createUnion('pierdzielec', {
-    subSessions:{
-        a: {
-            table: 'messageQueue',
-            columns: [{
-                name: 'id',
-                primaryKey: true,
-            }, {
-                name: 'type',
-                value: 'message'
-            }, {
-                name: 'message',
-            }, {
-                name: 'user',
-            }, {
-                name: 'parentId',
-                value: x => `${x.user}/undefined`
-            }, {
-                name: 'userName',
-                resolve: {
-                    childrenTable: 'users',
-                    underlyingField: 'user',
-                    displayField: 'name'
-                }
-            }]
-        },
-        b: {
-            table: 'users',
-            columns: [{
-                name: 'id',
-                primaryKey: true,
-            }, {
-                name: 'type',
-                value: 'user'
-            }, {
-                name: 'user',
-                value: x=>x.id
-            }, {
-                name: 'name',
-            }, {
-                name: 'parentId',
-                value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
-            }, {
-                name: 'userName',
-                value: x => x.name
-            }]
-        }
-    },
-    columns: [{
-        name: 'userName',
-    }, {
-        name: 'message',
-    }, {
-        name: 'user',
-    }, {
-        name: 'type',
-    }, {
-        name: 'id',
-        value: x => `${x.user}/${x.message}`,
-        primaryKey: true,
-    }, {
-        name: 'parentId',
-    }]
-})
+// var union = EVH.createUnion('pierdzielec', {
+//     subSessions:{
+//         a: {
+//             table: 'messageQueue',
+//             columns: [{
+//                 name: 'id',
+//                 primaryKey: true,
+//             }, {
+//                 name: 'type',
+//                 value: 'message'
+//             }, {
+//                 name: 'message',
+//             }, {
+//                 name: 'user',
+//             }, {
+//                 name: 'parentId',
+//                 value: x => `${x.user}/undefined`
+//             }, {
+//                 name: 'userName',
+//                 resolve: {
+//                     childrenTable: 'users',
+//                     underlyingField: 'user',
+//                     displayField: 'name'
+//                 }
+//             }]
+//         },
+//         b: {
+//             table: 'users',
+//             columns: [{
+//                 name: 'id',
+//                 primaryKey: true,
+//             }, {
+//                 name: 'type',
+//                 value: 'user'
+//             }, {
+//                 name: 'user',
+//                 value: x=>x.id
+//             }, {
+//                 name: 'name',
+//             }, {
+//                 name: 'parentId',
+//                 value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
+//             }, {
+//                 name: 'userName',
+//                 value: x => x.name
+//             }]
+//         }
+//     },
+//     columns: [{
+//         name: 'userName',
+//     }, {
+//         name: 'message',
+//     }, {
+//         name: 'user',
+//     }, {
+//         name: 'type',
+//     }, {
+//         name: 'id',
+//         value: x => `${x.user}/${x.message}`,
+//         primaryKey: true,
+//     }, {
+//         name: 'parentId',
+//     }]
+// })
 
-var usersSession = EVH.createSession({
-    table: 'users',
-    columns: [{
-        name: 'id',
-        primaryKey: true,
-    }, {
-        name: 'name',
-    }, {
-        name: 'msgCount',
-        resolve: {
-            underlyingField: 'id',
-            session: {
-                table: 'messageQueue',
-                columns:  [{
-                    name: 'user',
-                    primaryKey: true,
-                }, {
-                    name: 'count',
-                    value: 1,
-                    aggregator: 'sum'
-                }, {
-                    name: 'min',
-                    value: 1,
-                    aggregator: 'min'
-                }],
-                // filter: [{
-                //     type: 'custom',
-                //     value: 'user == 2',
-                // }],
-                groupBy: [{ dataIndex: 'user' }]
-            },
-            valueField: 'user',
-            displayField: 'count'
-        }
-    }],
-    filter: [{
-        type: 'custom',
-        value: 'msgCount > 1',
-    }],
-    sort: [  { field: 'name', direction: 'asc' }]
-})
+// var usersSession = EVH.createSession({
+//     table: 'users',
+//     columns: [{
+//         name: 'id',
+//         primaryKey: true,
+//     }, {
+//         name: 'name',
+//     }, {
+//         name: 'msgCount',
+//         resolve: {
+//             underlyingField: 'id',
+//             session: {
+//                 table: 'messageQueue',
+//                 columns:  [{
+//                     name: 'user',
+//                     primaryKey: true,
+//                 }, {
+//                     name: 'count',
+//                     value: 1,
+//                     aggregator: 'sum'
+//                 }, {
+//                     name: 'min',
+//                     value: 1,
+//                     aggregator: 'min'
+//                 }],
+//                 // filter: [{
+//                 //     type: 'custom',
+//                 //     value: 'user == 2',
+//                 // }],
+//                 groupBy: [{ dataIndex: 'user' }]
+//             },
+//             valueField: 'user',
+//             displayField: 'count'
+//         }
+//     }],
+//     filter: [{
+//         type: 'custom',
+//         value: 'msgCount > 1',
+//     }],
+//     sort: [  { field: 'name', direction: 'asc' }]
+// })
 
 EVH.createSession({
     id:'liveQuery',
@@ -211,15 +211,15 @@ EVH.createSession({
     // }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
-var usersSession2 = EVH.createSession({
-    id: 'liveQuery'
-})
+// var usersSession2 = EVH.createSession({
+//     id: 'liveQuery'
+// })
 
-var usersSession = EVH.createSession({
-    table: 'users'
-})
+// var usersSession = EVH.createSession({
+//     table: 'users'
+// })
 
-var messageSession = EVH.createSession({
+var sessionDef = {
     table: 'messageQueue',
     columns:  [{
         name: 'id',
@@ -239,7 +239,9 @@ var messageSession = EVH.createSession({
     }],
     sort: [  { field: 'status', direction: 'desc' }],
     // immediateUpdate: true
-})
+}
+console.log(sessionDef)
+var messageSession = EVH.createSession(sessionDef)
 
 // usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
 // messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
@@ -270,20 +272,27 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 2000)
 
 // console.log(messages.getById(1).userName)
-// console.time('perf')
-// while(ii++ < 2000000){
-//     if(ii%100000 === 0) 
-//         console.log(ii)
-//         messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
-// }
-// console.timeEnd('perf')
+console.time('perf')
+while(ii++ < 1000000){
+    if(ii%100000 === 0) 
+        console.log(ii)
+        messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
+}
+console.timeEnd('perf')
 
-
+let sessionIterations = 1
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    console.log('usersSession2', usersSession2.getData().map(x=>x.object))
-    // console.log('messageSession',messageSession.getData().map(x=>x.object))
+    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
+    console.log('messageSession',messageSession.getCount())
+    setInterval(()=>{
+        sessionDef.id = guid()
+        let tempSession = EVH.createSession(sessionDef)
+        console.log('session iterations', sessionIterations++)
+        setTimeout(()=>{tempSession.destroy()}, 20000)
+    }, 1000)
     // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
+
 }, 300)
 setTimeout(()=>{}, 1000000)
