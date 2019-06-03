@@ -310,8 +310,8 @@ console.timeEnd('perf')
 let sessionIterations = 1
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    console.log('usersSession2', usersSession2.getData().select(x=>x.object).toArray())
-    // console.log('messageSession',messageSession.getData().select(x=>x.object).toArray())
+    // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
+    // console.log('messageSession',messageSession.getLinq().select(x=>x.object).toArray())
     // setInterval(()=>{
     //     sessionDef.id = guid()
     //     let tempSession = EVH.createSession(sessionDef)
