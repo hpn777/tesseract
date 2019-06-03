@@ -11,12 +11,13 @@
     "shell": "docker-compose run --rm shell sh"
   },
   "dependencies": {
-    "benchmark": "^2.1.4",
     "ioredis": "^4.3.0",
+    "linq": "^3.2.0",
     "lodash": "^4.17.11",
     "rxjs": "6.3.3"
   },
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "flat": "^4.1.0",
     "rxjs": "6.3.3",
     "tape": "4.9.1"
