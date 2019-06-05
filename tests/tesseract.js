@@ -294,7 +294,7 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 4000000
+const nrOfItems = 1000000
 console.time('perf')
 while(ii++ < nrOfItems){
     if(ii%100000 === 0) 
@@ -312,14 +312,13 @@ let sessionIterations = 1
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
-    
     // console.log('messageSession',messageSession.getLinq().select(x=>x.object).toArray())
-    // setInterval(()=>{
-    //     sessionDef.id = guid()
-    //     let tempSession = EVH.createSession(sessionDef)
-    //     console.log('session iterations', sessionIterations++, tempSession.getCount(), nrOfUpdates)
-    //     setTimeout(()=>{tempSession.destroy()}, 50000)
-    // }, 500)
+    setInterval(()=>{
+        sessionDef.id = guid()
+        let tempSession = EVH.createSession(sessionDef)
+        console.log('session iterations', sessionIterations++, tempSession.getCount(), nrOfUpdates)
+        setTimeout(()=>{tempSession.destroy()}, 50000)
+    }, 500)
     // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
 
