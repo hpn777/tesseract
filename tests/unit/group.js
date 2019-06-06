@@ -8,12 +8,12 @@ const {
 } = require('../../lib/utils')
 
 const objects = [
-    [ 1, 'Daniel',1000, 'on',  'red'],
-    [ 2, 'Rafal',900, 'on',  'blue'],
-    [ 3, 'Kurt',500, 'away',  'red'],
-    [ 4, 'Rick',4000, 'off',  'yellow'],
-    [ 5, 'Morty',50, 'on',  'yellow'],
-    [ 6, 'Bender',20, 'off',  'blue'],
+    { id:1, name: 'Daniel',points: 1000, status: 'on',  color:'red'},
+    { id:2, name: 'Rafal',points: 900, status: 'on',  color:'blue'},
+    { id:3, name: 'Kurt',points: 500, status: 'away',  color:'red'},
+    { id:4, name: 'Rick',points: 4000, status: 'off',  color:'yellow'},
+    { id:5, name: 'Morty',points: 50, status: 'on',  color:'yellow'},
+    { id:6, name: 'Bender',points: 20, status: 'off',  color:'blue'}
 ]
 
 const data = objects.map(i => {
