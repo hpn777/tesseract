@@ -90,7 +90,7 @@ tape('utils.groupSelectedData', t => {
 
     let grouped2 = groupSelectedData(
         columns, data, dataWrapper, groupBy, selectedRowsIds,
-        true, '', undefined, undefined, 'id', 0, { applyFilters: () => true }
+        true, '', undefined, undefined, 'id', { applyFilters: () => true }
     )
     
     let result2 = [{
