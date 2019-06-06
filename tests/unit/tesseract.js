@@ -76,7 +76,7 @@ tape('LiveQuery test', t => {
         .subscribe(r => {
 
             // since we disabled immediateUpdate there will be no data
-            let data = session.getData().map(i => i.object)
+            let data = session.getLinq().select(x => x.object).toArray()
             assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
             t.end()
         },

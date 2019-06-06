@@ -116,6 +116,24 @@ tape('EventHorizon / Resolver test', t => {
 
     var usersSession = eventHorizon.createSession({
         table: 'users',
+        subSessions: {
+            a: {
+                table: 'messages',
+                columns:  [{
+                    name: 'user',
+                    primaryKey: true,
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }],
+                filter: [{
+                    type: 'custom',
+                    value: 'user == 2',
+                }],
+                groupBy: [{ dataIndex: 'user' }]
+            }
+        },
         columns: [{
             name: 'id',
             primaryKey: true,
@@ -125,22 +143,7 @@ tape('EventHorizon / Resolver test', t => {
             name: 'msgCount',
             resolve: {
                 underlyingField: 'id',
-                session: {
-                    table: 'messages',
-                    columns:  [{
-                        name: 'user',
-                        primaryKey: true,
-                    }, {
-                        name: 'count',
-                        value: 1,
-                        aggregator: 'sum'
-                    }],
-                    filter: [{
-                        type: 'custom',
-                        value: 'user == 2',
-                    }],
-                    groupBy: [{ dataIndex: 'user' }]
-                },
+                session: 'a',
                 valueField: 'user',
                 displayField: 'count'
             }
@@ -148,7 +151,7 @@ tape('EventHorizon / Resolver test', t => {
         sort: [  { field: 'name', direction: 'asc' }]
     })
 
-    let data = usersSession.getData().map(x=>x.object)
+    let data = usersSession.getLinq().select(x => x.object).toArray()
 
     assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Relational live query'))
 })

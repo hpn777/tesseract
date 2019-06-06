@@ -6,6 +6,9 @@ var EVH = new (require('../lib/eventHorizon'))({
     //     port: 6789
     // }
 })
+var _ = require('lodash')
+var linq = require('linq')
+
 
 var messages = EVH.createTesseract('messageQueue', {
     columns: [{
@@ -18,6 +21,7 @@ var messages = EVH.createTesseract('messageQueue', {
         aggregator: 'avg'
     }, {
         name: 'user',
+        vlue: (data) => {data.id}
     }, {
         name: 'deleted',
     }, {
@@ -148,76 +152,76 @@ var users = EVH.createTesseract('users', {
 //     sort: [  { field: 'name', direction: 'asc' }]
 // })
 
-EVH.createSession({
-    id:'liveQuery',
-    table: 'users',
-    subSessions: {
-        a: {
-            table: 'messageQueue',
-            columns:  [{
-                name: 'user',
-                primaryKey: true,
-            }, {
-                name: 'deleted'
-            }, {
-                name: 'count',
-                value: 1,
-                aggregator: 'sum'
-            }, {
-                name: 'min',
-                value: 1,
-                aggregator: 'min'
-            }],
-            filter: [{
-                field: 'deleted',
-                comparison: 'eq',
-                value: false,
-            }],
-            groupBy: [{ dataIndex: 'user' }]
-        }
-    },
-    columns: [{
-        name: 'id',
-        primaryKey: true,
-    }, {
-        name: 'name',
-    }, {
-        name: 'expTest',
-    }, {
-        name: 'msgCount',
-        resolve: {
-            underlyingField: 'id',
-            session: 'a',
-            displayField: 'count'
-        }
-    }, {
-        name: 'msgMin',
-        resolve: {
-            underlyingField: 'id',
-            session: 'a',
-            displayField: 'min'
-        }
-    },{
-        name: 'halfCount',
-        expression: 'msgCount/3'
-    },{
-        name: 'fullName',
-        value: '${name}-${id}'
-    }],
-    // filter: [{
-    //     field: 'msgCount',
-    //     comparison: 'eq',
-    //     value: 1,
-    // }],
-    sort: [  { field: 'name', direction: 'asc' }]
-})
+// EVH.createSession({
+//     id:'liveQuery',
+//     table: 'users',
+//     subSessions: {
+//         a: {
+//             table: 'messageQueue',
+//             columns:  [{
+//                 name: 'user',
+//                 primaryKey: true,
+//             }, {
+//                 name: 'deleted'
+//             }, {
+//                 name: 'count',
+//                 value: 1,
+//                 aggregator: 'sum'
+//             }, {
+//                 name: 'min',
+//                 value: 1,
+//                 aggregator: 'min'
+//             }],
+//             filter: [{
+//                 field: 'deleted',
+//                 comparison: 'eq',
+//                 value: false,
+//             }],
+//             groupBy: [{ dataIndex: 'user' }]
+//         }
+//     },
+//     columns: [{
+//         name: 'id',
+//         primaryKey: true,
+//     }, {
+//         name: 'name',
+//     }, {
+//         name: 'expTest',
+//     }, {
+//         name: 'msgCount',
+//         resolve: {
+//             underlyingField: 'id',
+//             session: 'a',
+//             displayField: 'count'
+//         }
+//     }, {
+//         name: 'msgMin',
+//         resolve: {
+//             underlyingField: 'id',
+//             session: 'a',
+//             displayField: 'min'
+//         }
+//     },{
+//         name: 'halfCount',
+//         expression: 'msgCount/3'
+//     },{
+//         name: 'fullName',
+//         value: '${name}-${id}'
+//     }],
+//     // filter: [{
+//     //     field: 'msgCount',
+//     //     comparison: 'eq',
+//     //     value: 1,
+//     // }],
+//     sort: [  { field: 'name', direction: 'asc' }]
+// })
 // var usersSession2 = EVH.createSession({
 //     id: 'liveQuery'
 // })
 
-// var usersSession = EVH.createSession({
-//     table: 'users'
-// })
+var usersSession = EVH.createSession({
+    table: 'users'
+})
 
 var sessionDef = {
     table: 'messageQueue',
@@ -225,22 +229,34 @@ var sessionDef = {
         name: 'id',
     }, {
         name: 'user',
+        resolve: {
+            childrenTable: 'users',
+            underlyingField: 'user',
+            displayField: 'name'
+        }
     },{
         name: 'deleted',
         defaultValue: false
     }, {
         name: 'message',
+    }, {
+        name: 'status'
+    }, {
+        name: 'count',
+        value: 1,
+        aggregator: 'sum'
     }],
-    filter: [{
-        field: 'deleted',
-        //type: 'boolean',
-        comparison: '==',
-        value: false
-    }],
+    
+    // filter: [{
+    //     field: 'status',
+    //     comparison: '==',
+    //     value: 3
+    // }],
     sort: [  { field: 'status', direction: 'desc' }],
+    groupBy: [{ dataIndex: 'user' }]
     // immediateUpdate: true
 }
-console.log(sessionDef)
+// console.log(sessionDef)
 var messageSession = EVH.createSession(sessionDef)
 
 // usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
@@ -272,26 +288,39 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 2000)
 
 // console.log(messages.getById(1).userName)
-console.time('perf')
-while(ii++ < 1000000){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([[ii, 'jdoijs oifcj nds;of', 2, Math.ceil(Math.random()*3), false]])
-}
-console.timeEnd('perf')
 
+// for(var i = 0;i<10;i++){
+//     sessionDef.id = guid()
+//     EVH.createSession(sessionDef)
+// }
+// let nrOfUpdates = 0
+// const nrOfItems = 4000000
+// console.time('perf')
+// while(ii++ < nrOfItems){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
+// }
+// console.timeEnd('perf')
+
+// setInterval(()=>{ 
+//     ++nrOfUpdates
+//     messages.update([[Math.ceil(Math.random()*nrOfItems), `Dupa jasiu pierdzi stasiu: ${nrOfItems}`, Math.ceil(Math.random()*3), Math.ceil(Math.random()*3), false]])
+// }, 10)
+debugger
 let sessionIterations = 1
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
-    // console.log('usersSession2', usersSession2.getData().map(x=>x.object))
-    console.log('messageSession',messageSession.getCount())
-    setInterval(()=>{
-        sessionDef.id = guid()
-        let tempSession = EVH.createSession(sessionDef)
-        console.log('session iterations', sessionIterations++)
-        setTimeout(()=>{tempSession.destroy()}, 20000)
-    }, 1000)
-    // console.log('users', usersSession.returnTree(1, 'parentId'))
+    // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
+    
+    // console.log('messageSession',messageSession.groupData())
+    // setInterval(()=>{
+    //     sessionDef.id = guid()
+    //     let tempSession = EVH.createSession(sessionDef)
+    //     console.log('session iterations', sessionIterations++, tempSession.getCount(), nrOfUpdates)
+    //     setTimeout(()=>{tempSession.destroy()}, 50000)
+    // }, 500)
+    console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
 
 }, 300)

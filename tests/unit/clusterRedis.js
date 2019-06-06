@@ -33,9 +33,8 @@ tape('Tesseract Redis cluster test', t => {
     node2.connect({clientName: 'client2', syncSchema: true})
         .then(()=>{
             let session = node2.createSession(messagesSession)
-            
             setTimeout(()=>{
-                let data = session.getData().map(i => i.object)
+                let data = session.getLinq().select(x => x.object).toArray()
                 assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
                 node1.close()
                 node2.close()
@@ -65,7 +64,6 @@ tape('Tesseract Redis cluster test', t => {
             resolve: {
                 underlyingField: 'user',
                 childrenTable: 'users',
-                valueField: 'id',
                 displayField: 'name'
             }
         }]
@@ -98,7 +96,6 @@ tape('Tesseract Redis cluster test', t => {
             resolve: {
                 underlyingField: 'user',
                 childrenTable: 'users',
-                valueField: 'id',
                 displayField: 'name'
             }
         }],

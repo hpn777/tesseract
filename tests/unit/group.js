@@ -3,16 +3,17 @@ const { assertArraysMatch } = require('./utils')
 const {
     generateSummaryRow,
     groupData,
-    groupSelectedData
+    groupSelectedData,
+    createSessionProxyConfig
 } = require('../../lib/utils')
 
 const objects = [
-    { id: 1, name: 'Daniel', points: 1000, status: 'on',  color: 'red'},
-    { id: 2, name: 'Rafal',  points: 900,  status: 'on',  color: 'blue'},
-    { id: 3, name: 'Kurt',   points: 500,  status: 'away',color: 'red'},
-    { id: 4, name: 'Rick',   points: 4000, status: 'off', color: 'yellow'},
-    { id: 5, name: 'Morty',  points: 50,   status: 'on',  color: 'yellow'},
-    { id: 6, name: 'Bender', points: 20,   status: 'off', color: 'blue'},
+    { id:1, name: 'Daniel',points: 1000, status: 'on',  color:'red'},
+    { id:2, name: 'Rafal',points: 900, status: 'on',  color:'blue'},
+    { id:3, name: 'Kurt',points: 500, status: 'away',  color:'red'},
+    { id:4, name: 'Rick',points: 4000, status: 'off',  color:'yellow'},
+    { id:5, name: 'Morty',points: 50, status: 'on',  color:'yellow'},
+    { id:6, name: 'Bender',points: 20, status: 'off',  color:'blue'}
 ]
 
 const data = objects.map(i => {
@@ -46,16 +47,19 @@ const groupBy = [{
     dataIndex: 'status'
 }]
 
+let defaultObjDef = createSessionProxyConfig(()=>{}, columns )
+let dataWrapper = new defaultObjDef()
+
 tape('utils.generateSummaryRow', t => {
 
-    const summary = generateSummaryRow(data, columns)
+    const summary = generateSummaryRow(data, dataWrapper, columns)
     t.deepEqual(summary, {points: 6470})
     t.end()
 })
 
 tape('utils.groupData', t => {
 
-    let grouped1 = groupData(columns, data, groupBy, true)
+    let grouped1 = groupData(columns, data, dataWrapper, groupBy, true)
 
     let result1 = [{
         points: 1950,
@@ -85,10 +89,10 @@ tape('utils.groupSelectedData', t => {
     }
 
     let grouped2 = groupSelectedData(
-        columns, data, groupBy, selectedRowsIds,
-        true, '', undefined, undefined, 'id', 0, { applyFilters: () => true }
+        columns, data, dataWrapper, groupBy, selectedRowsIds,
+        true, '', undefined, undefined, 'id', { applyFilters: () => true }
     )
-
+    
     let result2 = [{
         points: 1950,
         status: 'on'
