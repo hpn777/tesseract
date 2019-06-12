@@ -30,6 +30,7 @@ interface GetSessionDataRequest {
 interface Session<T = any> {
   on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
   getData(request?: GetSessionDataRequest): T
+  getLinq(request?: GetSessionDataRequest): T
   updateColumns(columns: TesseractColumn<T>[]): void
   destroy(): void
 }
