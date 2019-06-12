@@ -224,37 +224,43 @@ var usersSession = EVH.createSession({
 })
 
 var sessionDef = {
-    table: 'messageQueue',
-    columns:  [{
-        name: 'id',
-    }, {
-        name: 'user',
-        resolve: {
-            childrenTable: 'users',
-            underlyingField: 'user',
-            displayField: 'name'
-        }
-    },{
-        name: 'deleted',
-        defaultValue: false
-    }, {
-        name: 'message',
-    }, {
-        name: 'status'
-    }, {
-        name: 'count',
-        value: 1,
-        aggregator: 'sum'
-    }],
-    
-    // filter: [{
-    //     field: 'status',
-    //     comparison: '==',
-    //     value: 3
-    // }],
-    sort: [  { field: 'status', direction: 'desc' }],
-    groupBy: [{ dataIndex: 'user' }]
-    // immediateUpdate: true
+    table: {
+        table: 'messageQueue',
+        columns:  [{
+            name: 'id',
+            primaryKey: true
+        }, {
+            name: 'user',
+            resolve: {
+                childrenTable: 'users',
+                underlyingField: 'user',
+                displayField: 'name'
+            }
+        },{
+            name: 'deleted',
+            defaultValue: false
+        }, {
+            name: 'message',
+        }, {
+            name: 'status'
+        }, {
+            name: 'count',
+            value: 1,
+            aggregator: 'sum'
+        }],
+         filter: [{
+            field: 'user',
+            comparison: '==',
+            value: 'lauren'
+        }],
+        sort: [  { field: 'status', direction: 'desc' }],
+        groupBy: [{ dataIndex: 'status' }]
+    },
+    filter: [{
+        field: 'status',
+        comparison: '==',
+        value: 2
+    }]
 }
 // console.log(sessionDef)
 var messageSession = EVH.createSession(sessionDef)
@@ -289,7 +295,7 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 
 // console.log(messages.getById(1).userName)
 
-// for(var i = 0;i<10;i++){
+// for(var i = 0;i<100;i++){
 //     sessionDef.id = guid()
 //     EVH.createSession(sessionDef)
 // }
@@ -313,14 +319,14 @@ setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
     
-    // console.log('messageSession',messageSession.groupData())
+    console.log('messageSession',messageSession.getData())
     // setInterval(()=>{
     //     sessionDef.id = guid()
     //     let tempSession = EVH.createSession(sessionDef)
     //     console.log('session iterations', sessionIterations++, tempSession.getCount(), nrOfUpdates)
     //     setTimeout(()=>{tempSession.destroy()}, 50000)
-    // }, 500)
-    console.log('users', usersSession.returnTree(1, 'parentId'))
+    // }, 1000)
+    // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
 
 }, 300)
