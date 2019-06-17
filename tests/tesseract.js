@@ -45,70 +45,70 @@ var users = EVH.createTesseract('users', {
     }]
 })
 
-// var union = EVH.createUnion('pierdzielec', {
-//     subSessions:{
-//         a: {
-//             table: 'messageQueue',
-//             columns: [{
-//                 name: 'id',
-//                 primaryKey: true,
-//             }, {
-//                 name: 'type',
-//                 value: 'message'
-//             }, {
-//                 name: 'message',
-//             }, {
-//                 name: 'user',
-//             }, {
-//                 name: 'parentId',
-//                 value: x => `${x.user}/undefined`
-//             }, {
-//                 name: 'userName',
-//                 resolve: {
-//                     childrenTable: 'users',
-//                     underlyingField: 'user',
-//                     displayField: 'name'
-//                 }
-//             }]
-//         },
-//         b: {
-//             table: 'users',
-//             columns: [{
-//                 name: 'id',
-//                 primaryKey: true,
-//             }, {
-//                 name: 'type',
-//                 value: 'user'
-//             }, {
-//                 name: 'user',
-//                 value: x=>x.id
-//             }, {
-//                 name: 'name',
-//             }, {
-//                 name: 'parentId',
-//                 value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
-//             }, {
-//                 name: 'userName',
-//                 value: x => x.name
-//             }]
-//         }
-//     },
-//     columns: [{
-//         name: 'userName',
-//     }, {
-//         name: 'message',
-//     }, {
-//         name: 'user',
-//     }, {
-//         name: 'type',
-//     }, {
-//         name: 'id',
-//         value: x => `${x.user}/${x.message}`,
-//         primaryKey: true,
-//     }, {
-//         name: 'parentId',
-//     }]
-// })
+var union = EVH.createUnion('pierdzielec', {
+    subSessions:{
+        a: {
+            table: 'messageQueue',
+            columns: [{
+                name: 'id',
+                primaryKey: true,
+            }, {
+                name: 'type',
+                value: 'message'
+            }, {
+                name: 'message',
+            }, {
+                name: 'user',
+            }, {
+                name: 'parentId',
+                value: x => `${x.user}/undefined`
+            }, {
+                name: 'userName',
+                resolve: {
+                    childrenTable: 'users',
+                    underlyingField: 'user',
+                    displayField: 'name'
+                }
+            }]
+        },
+        b: {
+            table: 'users',
+            columns: [{
+                name: 'id',
+                primaryKey: true,
+            }, {
+                name: 'type',
+                value: 'user'
+            }, {
+                name: 'user',
+                value: x=>x.id
+            }, {
+                name: 'name',
+            }, {
+                name: 'parentId',
+                value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
+            }, {
+                name: 'userName',
+                value: x => x.name
+            }]
+        }
+    },
+    columns: [{
+        name: 'userName',
+    }, {
+        name: 'message',
+    }, {
+        name: 'user',
+    }, {
+        name: 'type',
+    }, {
+        name: 'id',
+        value: x => `${x.user}/${x.message}`,
+        primaryKey: true,
+    }, {
+        name: 'parentId',
+    }]
+})
 
 // var usersSession = EVH.createSession({
 //     table: 'users',
@@ -319,7 +319,7 @@ setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
     
-    console.log('messageSession',messageSession.getData())
+    // console.log('messageSession',messageSession.getData())
     // setInterval(()=>{
     //     sessionDef.id = guid()
     //     let tempSession = EVH.createSession(sessionDef)
@@ -328,6 +328,7 @@ setTimeout(() => {
     // }, 1000)
     // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
+    console.log('Union from 2 sessions', union.getLinq().toArray())
 
 }, 300)
 setTimeout(()=>{}, 1000000)
