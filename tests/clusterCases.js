@@ -215,7 +215,7 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
     sort: [  { field: 'name', direction: 'asc' }]
 })
 
-  console.log("summary", session.getData().map(x => x.object));
+  console.log("summary", session.getLinq().select(x => x.object).toArray());
 
   await node3.connect({ syncSchema: true });
   console.log("node3 online");
@@ -224,7 +224,7 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
 
     await node3.clear()
     await wait(10)
-    console.log("summary", session.getData().map(x => x.object));
+    console.log("summary", session.getLinq().select(x => x.object).toArray());
     console.log('messages very after',node1.get('messages').getCount())
     console.log('messages very after',node2.get('messages').getCount())
     console.log('messages very after',node3.get('messages').getCount())
