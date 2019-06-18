@@ -214,15 +214,26 @@ console.log('node2 pulled', config.pullTesseractsInOtherCluster, )
     }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
+const session2 = await node2.createSessionAsync({
+  table: 'users'
+})
+session2.on('dataUpdate', x=>{console.log('tessy clear received for node 2',x.toJSON())})
+
+
 
   console.log("summary", session.getLinq().select(x => x.object).toArray());
 
   await node3.connect({ syncSchema: true });
   console.log("node3 online");
-
+  const session1 = await node1.createSessionAsync({
+    table: 'users'
+  })
+  session1.on('dataUpdate', x=>{console.log('tessy clear received for node 1', x.toJSON())})
   const tessio = await node3.getTesseract('messages')
 
     await node3.clear()
+
+
     await wait(10)
     console.log("summary", session.getLinq().select(x => x.object).toArray());
     console.log('messages very after',node1.get('messages').getCount())
