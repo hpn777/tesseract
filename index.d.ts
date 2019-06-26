@@ -106,7 +106,7 @@ type Column<T, S, D extends keyof S> =
 
 interface Query<T, S, D extends keyof (T | S)> {
   id?: string
-  table: T[D]
+  table: T[D] | Query<T, S, D>
   columns?: Column<T, S, D>[]
   filter?: Filter[]
   sort?: Sort[]

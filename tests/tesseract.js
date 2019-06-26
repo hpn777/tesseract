@@ -10,7 +10,7 @@ var _ = require('lodash')
 var linq = require('linq')
 
 
-var messages = EVH.createTesseract('messageQueue', {
+var messages = EVH.createTesseract('M+_essageQueue', {
     columns: [{
         name: 'id',
         primaryKey: true,
@@ -48,7 +48,7 @@ var users = EVH.createTesseract('users', {
 var union = EVH.createUnion('pierdzielec', {
     subSessions:{
         a: {
-            table: 'messageQueue',
+            table: 'M+_essageQueue',
             columns: [{
                 name: 'id',
                 primaryKey: true,
@@ -225,7 +225,7 @@ var usersSession = EVH.createSession({
 
 var sessionDef = {
     table: {
-        table: 'messageQueue',
+        table: 'M+_essageQueue',
         columns:  [{
             name: 'id',
             primaryKey: true
@@ -262,6 +262,17 @@ var sessionDef = {
         value: 2
     }]
 }
+
+let pullTableNames = (liveQuery) => {
+    return _.uniq([
+        ...(typeof liveQuery.table == 'string' ? [liveQuery.table]: pullTableNames(liveQuery.table)), 
+        ...(liveQuery.columns?liveQuery.columns:[])
+            .filter(x => x.resolve && x.resolve.childrenTable)
+            .map((x) => x.resolve.childrenTable),
+        ...Object.values(liveQuery.subSessions || {}).map((x) => pullTableNames(x))
+    ].flat())
+}
+console.log(pullTableNames(sessionDef))
 // console.log(sessionDef)
 var messageSession = EVH.createSession(sessionDef)
 
