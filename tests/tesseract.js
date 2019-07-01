@@ -223,6 +223,7 @@ var usersSession = EVH.createSession({
     table: 'users'
 })
 
+
 var sessionDef = {
     table: {
         table: 'M+_essageQueue',
@@ -248,19 +249,19 @@ var sessionDef = {
             value: 1,
             aggregator: 'sum'
         }],
-         filter: [{
-            field: 'user',
-            comparison: '==',
-            value: 'lauren'
-        }],
+        //  filter: [{
+        //     field: 'user',
+        //     comparison: '==',
+        //     value: 'lauren'
+        // }],
         sort: [  { field: 'status', direction: 'desc' }],
         groupBy: [{ dataIndex: 'status' }]
     },
-    filter: [{
-        field: 'status',
-        comparison: '==',
-        value: 2
-    }]
+    // filter: [{
+    //     field: 'status',
+    //     comparison: '==',
+    //     value: 2
+    // }]
 }
 
 let pullTableNames = (liveQuery) => {
@@ -274,10 +275,17 @@ let pullTableNames = (liveQuery) => {
 }
 console.log(pullTableNames(sessionDef))
 // console.log(sessionDef)
-var messageSession = EVH.createSession(sessionDef)
+var messageSession = EVH.createSession({
+    table: 'M+_essageQueue',
+    filter: [{
+        field: 'deleted',
+        comparison: '!=',
+        value: true
+    }]
+})
 
 // usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
-// messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
+messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
 var ii = 1
@@ -294,6 +302,7 @@ messages.add({id: ii++, message: 'bla2', user: 2, status: 2, deleted: false})
 messages.add({id: ii++, message: 'bla3', user: 2, status: 2, deleted: false})
 
 messages.update({id: 2, message: 'cipa2', status: 2})
+
 
 // setTimeout(()=>{
 //     messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
@@ -326,11 +335,13 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 10)
 debugger
 let sessionIterations = 1
+console.log('removing stuff')
+    messages.remove([2])
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
     
-    // console.log('messageSession',messageSession.getData())
+    console.log('messageSession',messageSession.getData())
     // setInterval(()=>{
     //     sessionDef.id = guid()
     //     let tempSession = EVH.createSession(sessionDef)
@@ -339,7 +350,7 @@ setTimeout(() => {
     // }, 1000)
     // console.log('users', usersSession.returnTree(1, 'parentId'))
     // console.log('Union from 2 sessions', JSON.stringify(union.returnTree('1/undefined', 'parentId'), null, 2))
-    console.log('Union from 2 sessions', union.getLinq().toArray())
+    // console.log('Union from 2 sessions', union.getLinq().toArray())
 
-}, 300)
+}, 1000)
 setTimeout(()=>{}, 1000000)
