@@ -10,7 +10,7 @@ var _ = require('lodash')
 var linq = require('linq')
 
 
-var messages = EVH.createTesseract('M+_essageQueue', {
+var messages = EVH.createTesseract('messageQueue', {
     columns: [{
         name: 'id',
         primaryKey: true,
@@ -21,7 +21,6 @@ var messages = EVH.createTesseract('M+_essageQueue', {
         aggregator: 'avg'
     }, {
         name: 'user',
-        vlue: (data) => {data.id}
     }, {
         name: 'deleted',
     }, {
@@ -45,10 +44,41 @@ var users = EVH.createTesseract('users', {
     }]
 })
 
+// let testFunnySession = EVH.createSession({
+//     table: 'users',
+//     columns: [{
+//         name: 'id',
+//         primaryKey: true,
+//     }, {
+//         name: 'parentId',
+//     }, {
+//         name: 'expTest',
+//         expression: 'id/2'
+//     }, {
+//         name: 'name',
+//     },{
+//         name: 'dupa',
+//         resolve:{
+//             underlyingField: 'id',
+//             session: {
+//                 table: 'messageQueue',
+//                 columns: [{
+//                     name: 'user',
+//                     primaryKey: true,
+//                 },{
+//                     name: 'message',
+//                 }]
+//             },
+//             displayField: 'message',
+//         }
+
+//     }]
+// })
+
 var union = EVH.createUnion('pierdzielec', {
     subSessions:{
         a: {
-            table: 'M+_essageQueue',
+            table: 'messageQueue',
             columns: [{
                 name: 'id',
                 primaryKey: true,
@@ -219,14 +249,14 @@ var union = EVH.createUnion('pierdzielec', {
 //     id: 'liveQuery'
 // })
 
-var usersSession = EVH.createSession({
-    table: 'users'
-})
+// var usersSession = EVH.createSession({
+//     table: 'users'
+// })
 
 
 var sessionDef = {
     table: {
-        table: 'M+_essageQueue',
+        table: 'messageQueue',
         columns:  [{
             name: 'id',
             primaryKey: true
@@ -275,17 +305,17 @@ let pullTableNames = (liveQuery) => {
 }
 console.log(pullTableNames(sessionDef))
 // console.log(sessionDef)
-var messageSession = EVH.createSession({
-    table: 'M+_essageQueue',
-    filter: [{
-        field: 'deleted',
-        comparison: '!=',
-        value: true
-    }]
-})
+// var messageSession = EVH.createSession({
+//     table: 'messageQueue',
+//     filter: [{
+//         field: 'deleted',
+//         comparison: '!=',
+//         value: true
+//     }]
+// })
 
 // usersSession2.on('dataUpdate', (x)=>{console.log('usersSession2 updates', x.toJSON())})
-messageSession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
+// testFunnySession.on('dataUpdate', (x)=>{console.log('messageSession updates', x.toJSON())})
 
 
 var ii = 1
@@ -319,15 +349,15 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 //     sessionDef.id = guid()
 //     EVH.createSession(sessionDef)
 // }
-// let nrOfUpdates = 0
-// const nrOfItems = 4000000
-// console.time('perf')
-// while(ii++ < nrOfItems){
-//     if(ii%100000 === 0) 
-//         console.log(ii)
-//         messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
-// }
-// console.timeEnd('perf')
+let nrOfUpdates = 0
+const nrOfItems = 2000000
+console.time('perf')
+while(ii++ < nrOfItems){
+    if(ii%100000 === 0) 
+        console.log(ii)
+        messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
+}
+console.timeEnd('perf')
 
 // setInterval(()=>{ 
 //     ++nrOfUpdates
@@ -335,13 +365,13 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 // }, 10)
 debugger
 let sessionIterations = 1
-console.log('removing stuff')
-    messages.remove([2])
+// console.log('removing stuff')
+//     messages.remove([2])
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('usersSession2', usersSession2.getLinq().select(x=>x.object).toArray())
     
-    console.log('messageSession',messageSession.getData())
+    // console.log('testFunnySession',testFunnySession.getLinq().select(x=>x.object).toArray())
     // setInterval(()=>{
     //     sessionDef.id = guid()
     //     let tempSession = EVH.createSession(sessionDef)
