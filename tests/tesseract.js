@@ -75,70 +75,70 @@ var users = EVH.createTesseract('users', {
 //     }]
 // })
 
-var union = EVH.createUnion('pierdzielec', {
-    subSessions:{
-        a: {
-            table: 'messageQueue',
-            columns: [{
-                name: 'id',
-                primaryKey: true,
-            }, {
-                name: 'type',
-                value: 'message'
-            }, {
-                name: 'message',
-            }, {
-                name: 'user',
-            }, {
-                name: 'parentId',
-                value: x => `${x.user}/undefined`
-            }, {
-                name: 'userName',
-                resolve: {
-                    childrenTable: 'users',
-                    underlyingField: 'user',
-                    displayField: 'name'
-                }
-            }]
-        },
-        b: {
-            table: 'users',
-            columns: [{
-                name: 'id',
-                primaryKey: true,
-            }, {
-                name: 'type',
-                value: 'user'
-            }, {
-                name: 'user',
-                value: x=>x.id
-            }, {
-                name: 'name',
-            }, {
-                name: 'parentId',
-                value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
-            }, {
-                name: 'userName',
-                value: x => x.name
-            }]
-        }
-    },
-    columns: [{
-        name: 'userName',
-    }, {
-        name: 'message',
-    }, {
-        name: 'user',
-    }, {
-        name: 'type',
-    }, {
-        name: 'id',
-        value: x => `${x.user}/${x.message}`,
-        primaryKey: true,
-    }, {
-        name: 'parentId',
-    }]
-})
+// var union = EVH.createUnion('pierdzielec', {
+//     subSessions:{
+//         a: {
+//             table: 'messageQueue',
+//             columns: [{
+//                 name: 'id',
+//                 primaryKey: true,
+//             }, {
+//                 name: 'type',
+//                 value: 'message'
+//             }, {
+//                 name: 'message',
+//             }, {
+//                 name: 'user',
+//             }, {
+//                 name: 'parentId',
+//                 value: x => `${x.user}/undefined`
+//             }, {
+//                 name: 'userName',
+//                 resolve: {
+//                     childrenTable: 'users',
+//                     underlyingField: 'user',
+//                     displayField: 'name'
+//                 }
+//             }]
+//         },
+//         b: {
+//             table: 'users',
+//             columns: [{
+//                 name: 'id',
+//                 primaryKey: true,
+//             }, {
+//                 name: 'type',
+//                 value: 'user'
+//             }, {
+//                 name: 'user',
+//                 value: x=>x.id
+//             }, {
+//                 name: 'name',
+//             }, {
+//                 name: 'parentId',
+//                 value: (x, y, underlyingValue) => `${underlyingValue}/undefined`
+//             }, {
+//                 name: 'userName',
+//                 value: x => x.name
+//             }]
+//         }
+//     },
+//     columns: [{
+//         name: 'userName',
+//     }, {
+//         name: 'message',
+//     }, {
+//         name: 'user',
+//     }, {
+//         name: 'type',
+//     }, {
+//         name: 'id',
+//         value: x => `${x.user}/${x.message}`,
+//         primaryKey: true,
+//     }, {
+//         name: 'parentId',
+//     }]
+// })
 
 // var usersSession = EVH.createSession({
 //     table: 'users',
@@ -182,69 +182,69 @@ var union = EVH.createUnion('pierdzielec', {
 //     sort: [  { field: 'name', direction: 'asc' }]
 // })
 
-// EVH.createSession({
-//     id:'liveQuery',
-//     table: 'users',
-//     subSessions: {
-//         a: {
-//             table: 'messageQueue',
-//             columns:  [{
-//                 name: 'user',
-//                 primaryKey: true,
-//             }, {
-//                 name: 'deleted'
-//             }, {
-//                 name: 'count',
-//                 value: 1,
-//                 aggregator: 'sum'
-//             }, {
-//                 name: 'min',
-//                 value: 1,
-//                 aggregator: 'min'
-//             }],
-//             filter: [{
-//                 field: 'deleted',
-//                 comparison: 'eq',
-//                 value: false,
-//             }],
-//             groupBy: [{ dataIndex: 'user' }]
-//         }
-//     },
-//     columns: [{
-//         name: 'id',
-//         primaryKey: true,
-//     }, {
-//         name: 'name',
-//     }, {
-//         name: 'expTest',
-//     }, {
-//         name: 'msgCount',
-//         resolve: {
-//             underlyingField: 'id',
-//             session: 'a',
-//             displayField: 'count'
-//         }
-//     }, {
-//         name: 'msgMin',
-//         resolve: {
-//             underlyingField: 'id',
-//             session: 'a',
-//             displayField: 'min'
-//         }
-//     },{
-//         name: 'halfCount',
-//         expression: 'msgCount/3'
-//     },{
-//         name: 'fullName',
-//         value: '${name}-${id}'
-//     }],
-//     // filter: [{
-//     //     field: 'msgCount',
-//     //     comparison: 'eq',
-//     //     value: 1,
-//     // }],
-//     sort: [  { field: 'name', direction: 'asc' }]
-// })
+EVH.createSession({
+    id:'liveQuery',
+    table: 'users',
+    subSessions: {
+        a: {
+            table: 'messageQueue',
+            columns:  [{
+                name: 'user',
+                primaryKey: true,
+            }, {
+                name: 'deleted'
+            }, {
+                name: 'count',
+                value: 1,
+                aggregator: 'sum'
+            }, {
+                name: 'min',
+                value: 1,
+                aggregator: 'min'
+            }],
+            filter: [{
+                field: 'deleted',
+                comparison: 'eq',
+                value: false,
+            }],
+            groupBy: [{ dataIndex: 'user' }]
+        }
+    },
+    columns: [{
+        name: 'id',
+        primaryKey: true,
+    }, {
+        name: 'name',
+    }, {
+        name: 'expTest',
+    }, {
+        name: 'msgCount',
+        resolve: {
+            underlyingField: 'id',
+            session: 'a',
+            displayField: 'count'
+        }
+    }, {
+        name: 'msgMin',
+        resolve: {
+            underlyingField: 'id',
+            session: 'a',
+            displayField: 'min'
+        }
+    },{
+        name: 'halfCount',
+        expression: 'msgCount/3'
+    },{
+        name: 'fullName',
+        value: '${name}-${id}'
+    }],
+    // filter: [{
+    //     field: 'msgCount',
+    //     comparison: 'eq',
+    //     value: 1,
+    // }],
+    sort: [  { field: 'name', direction: 'asc' }]
+})
 // var usersSession2 = EVH.createSession({
 //     id: 'liveQuery'
 // })
