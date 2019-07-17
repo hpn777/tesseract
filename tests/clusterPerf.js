@@ -2,6 +2,8 @@ var {mergeColumns} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
 var EVH = new (require('../lib/clusterRedis'))()
 var EVH2 = new (require('../lib/clusterRedis'))()
+var _ = require('lodash')
+var linq = require('linq')
 
 EVH.connect({clientName: 'client1'})
 .then(()=>{
@@ -57,6 +59,57 @@ EVH.connect({clientName: 'client1'})
                 console.log('dataUpdate',cc)
         })
 
+        var sessionDef = {
+            table: {
+                table: 'messageQueue',
+                columns:  [{
+                    name: 'id',
+                    primaryKey: true
+                }, {
+                    name: 'user',
+                    resolve: {
+                        childrenTable: 'users',
+                        underlyingField: 'user',
+                        displayField: 'name'
+                    }
+                },{
+                    name: 'deleted',
+                    defaultValue: false
+                }, {
+                    name: 'message',
+                }, {
+                    name: 'status'
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }],
+                //  filter: [{
+                //     field: 'user',
+                //     comparison: '==',
+                //     value: 'lauren'
+                // }],
+                sort: [  { field: 'status', direction: 'desc' }],
+                groupBy: [{ dataIndex: 'status' }]
+            },
+            // filter: [{
+            //     field: 'status',
+            //     comparison: '==',
+            //     value: 2
+            // }]
+        }
+        
+        let pullTableNames = (liveQuery) => {
+            return _.uniq([
+                ...(typeof liveQuery.table == 'string' ? [liveQuery.table]: pullTableNames(liveQuery.table)), 
+                ...(liveQuery.columns?liveQuery.columns:[])
+                    .filter(x => x.resolve && x.resolve.childrenTable)
+                    .map((x) => x.resolve.childrenTable),
+                ...Object.values(liveQuery.subSessions || {}).map((x) => pullTableNames(x))
+            ].flat())
+        }
+        console.log(pullTableNames(sessionDef))
+        console.log(EVH.createSession(sessionDef).get('id'))
         // console.log(messages.getById(1).userName)
         console.time('perf')
         let dupa = ()=>{
@@ -96,7 +149,7 @@ EVH.connect({clientName: 'client1'})
 
 EVH2.connect({clientName: 'client2', syncSchema: true})
 .then(()=>{
-    EVH2.on('add', (x)=>{console.log(x.get('id'))})
+    EVH2.on('add', (x)=>{console.log('added ',x.get('id'))})
 })
 
 setInterval(()=>{

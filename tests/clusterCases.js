@@ -231,14 +231,22 @@ session2.on('dataUpdate', x=>{console.log('tessy clear received for node 2',x.to
   session1.on('dataUpdate', x=>{console.log('tessy clear received for node 1', x.toJSON())})
   const tessio = await node3.getTesseract('messages')
 
-    await node3.clear()
+    //await node3.clear()
 
 
     await wait(10)
-    console.log("summary", session.getLinq().select(x => x.object).toArray());
+    console.log("summary", session2.getLinq().select(x => x.object).toArray());
     console.log('messages very after',node1.get('messages').getCount())
     console.log('messages very after',node2.get('messages').getCount())
     console.log('messages very after',node3.get('messages').getCount())
-    };
-
+    await wait(10)
+    node2.get('users').reset(
+      [
+        { id: 1, name: "rafal2" },
+        { id: 2, name: "daniel2" },
+        { id: 3, name: "lauren2" }
+      ],
+      config.disableClusterUpdateOnReset
+    );
+  };
 main();
