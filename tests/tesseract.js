@@ -9,7 +9,6 @@ var EVH = new (require('../lib/eventHorizon'))({
 var _ = require('lodash')
 var linq = require('linq')
 
-
 var messages = EVH.createTesseract('messageQueue', {
     columns: [{
         name: 'id',

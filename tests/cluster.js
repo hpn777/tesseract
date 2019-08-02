@@ -60,9 +60,69 @@ Promise.all([
     let users = node2.get('users')
     let messages = node2.get('messages')
 
-    console.log('users before',users.getData().map(x=>x.object))
-    console.log('messages before',messages.getData().map(x=>x.object))
+    console.log('users before',users.getData())
+    console.log('messages before',messages.getData())
     
+    var session2 = node1.createSession({
+        id:'liveQuery',
+        table: 'users',
+        subSessions: {
+            a: {
+                table: 'messages',
+                columns:  [{
+                    name: 'user',
+                    primaryKey: true,
+                }, {
+                    name: 'deleted'
+                }, {
+                    name: 'count',
+                    value: 1,
+                    aggregator: 'sum'
+                }, {
+                    name: 'min',
+                    value: 1,
+                    aggregator: 'min'
+                }],
+                groupBy: [{ dataIndex: 'user' }]
+            }
+        },
+        columns: [{
+            name: 'id',
+            primaryKey: true,
+        }, {
+            name: 'name',
+        }, {
+            name: 'expTest',
+        }, {
+            name: 'msgCount',
+            resolve: {
+                underlyingField: 'id',
+                session: 'a',
+                displayField: 'count'
+            }
+        }, {
+            name: 'msgMin',
+            resolve: {
+                underlyingField: 'id',
+                session: 'a',
+                displayField: 'min'
+            }
+        },{
+            name: 'halfCount',
+            expression: 'msgCount/3'
+        },{
+            name: 'fullName',
+            value: '${name}-${id}'
+        }],
+        // filter: [{
+        //     field: 'msgCount',
+        //     comparison: 'eq',
+        //     value: 1,
+        // }],
+        sort: [  { field: 'name', direction: 'asc' }]
+    })
+    session2.on('dataUpdate', (x)=>{console.log('session2 dataUpdated', x.toJSON())})
+
     users.add([{id: 1, name: 'rafal'},{id: 2, name: 'daniel'},{id: 3, name: 'lauren'}])
     users.update([{id: 1, name: 'rafal'},{id: 2, name: 'daniel'},{id: 3, name: 'lauren'}])
 
@@ -103,19 +163,21 @@ Promise.all([
         sort: [{ field: 'id', direction: 'desc' }]
     })
 
+    
+
     setTimeout(()=>{
-        console.log('users after',node2.get('users').getCount(), users.getData().map(x=>x.object))
-        console.log('messages after',node2.get('messages').getCount(),messages.getData().map(x=>x.object))
-        console.log('users after',node1.get('users').getCount(), users.getData().map(x=>x.object))
-        console.log('messages after',node1.get('messages').getCount(),messages.getData().map(x=>x.object))
-        users.clear()
-        messages.clear()
+        // console.log('users after',node2.get('users').getCount(), node2.get('users').getData())
+        // console.log('messages after',node2.get('messages').getCount(),node2.get('messages').getData())
+        // console.log('users after',node1.get('users').getCount(), node1.get('users').getData())
+        // console.log('messages after',node1.get('messages').getCount(),node1.get('messages').getData())
+        // users.clear()
+        // messages.clear()
         // node1.get('messages').clear()
         setTimeout(()=>{
-            console.log('users very after',node2.get('users').getCount(), users.getData().map(x=>x.object))
-            console.log('messages very after',node2.get('messages').getCount(),messages.getData().map(x=>x.object))
-            console.log('users very after',node1.get('users').getCount(), users.getData().map(x=>x.object))
-            console.log('messages very after',node1.get('messages').getCount(),messages.getData().map(x=>x.object))
+            // console.log('users very after',node2.get('users').getCount(), node2.get('users').getData())
+            // console.log('messages very after',node2.get('messages').getCount(),node2.get('messages').getData())
+            // console.log('users very after',node1.get('users').getCount(), node1.get('users').getData())
+            // console.log('messages very after',node1.get('messages').getCount(),node1.get('messages').getData())
         }, 300)
     }, 10)
 }, 300)
