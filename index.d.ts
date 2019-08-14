@@ -189,7 +189,7 @@ declare class EventHorizon {
   registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
-  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>, reuseSession?: boolean): Session
   generateHash(): string
   getSession(sessionName: string): Session
 }
