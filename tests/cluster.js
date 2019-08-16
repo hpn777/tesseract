@@ -131,11 +131,11 @@ Promise.all([
     messages.add({id: ii++, message: 'cipa', user: 1, status: 1})
     messages.add({id: ii++, message: 'bla', user: 2, status: 1})
     messages.add({id: ii++, message: 'bla2', user: 2, status: 2})
-    messages.add({id: ii++, message: 'bla3', user: 2, status: 2})
+    messages.addAsync({id: ii++, message: 'bla3', user: 2, status: 2}).then(x=>console.log('bla3 added'))
 
-    messages.update({id: 2, message: 'cipa2', status: 2})
+    messages.updateAsync({id: 2, message: 'cipa2', status: 2}).then(x=>console.log('cipa2 updated'))
     messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 4, message: 'cipa3', status: 2}])
-    messages.remove([1, 2])
+    messages.removeAsync([1, 2]).then(x=>console.log('[1, 2] removed'))
 
     let session = node2.createSession({
         id: 'messages_querry',
