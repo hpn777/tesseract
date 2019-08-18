@@ -418,7 +418,7 @@ messages.remove([1, 2])
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 0000000
+const nrOfItems = 000000
 console.time('perf')
 while(ii++ < nrOfItems){
     if(ii%100000 === 0) 
