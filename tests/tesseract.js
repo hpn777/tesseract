@@ -371,7 +371,8 @@ let pullTableNames = (liveQuery) => {
     ].flat())
 }
 console.log(pullTableNames(sessionDef))
-EVH.createSession(sessionDef)
+let sessionEmbeded = EVH.createSession(sessionDef)
+
 // console.log(sessionDef)
 // var messageSession = EVH.createSession({
 //     table: 'messageQueue',
@@ -440,6 +441,7 @@ setTimeout(() => {
     console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
     console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
     console.log('usersSession3', usersSession3.getCount(), usersSession3.getLinq().select(x=>x.object).toArray())
+    sessionEmbeded.destroy()
     setTimeout(() => {
         usersSession3.destroy()
         // usersSession2.destroy()
