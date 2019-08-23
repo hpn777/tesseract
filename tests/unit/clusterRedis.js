@@ -32,14 +32,14 @@ tape('Tesseract Redis cluster test', t => {
 
     node2.connect({clientName: 'client2', syncSchema: true})
         .then(()=>{
-            let session = node2.createSession(messagesSession)
-            setTimeout(()=>{
-                let data = session.getLinq().select(x => x.object).toArray()
-                assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
-                node1.close()
-                node2.close()
-                t.end()
-            }, 100)
+            node2.createSessionAsync(messagesSession)
+                .then((session) => {
+                    let data = session.getLinq().select(x => x.object).toArray()
+                    assertArraysMatch(data, dataResult, e => t.fail(e), () => t.pass('Data OK'))
+                    node1.close()
+                    node2.close()
+                    t.end()
+                })
         })
     
 

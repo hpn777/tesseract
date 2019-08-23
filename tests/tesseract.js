@@ -17,17 +17,22 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'message', 
     }, {
         name: 'status',
-        aggregator: 'avg'
+        aggregator: 'avg',
+        secondaryKey: true
     }, {
         name: 'user',
+        secondaryKey: true
     }, {
         name: 'deleted',
+        secondaryKey: true
     }, {
         name: 'update',
         value: data =>  new Date(),
         aggregator: 'max'
     }]
 })
+
+EVH.get('messageQueue').getData().filter(x=>x.propertyId)
 
 var users = EVH.createTesseract('users', {
     columns: [{
@@ -206,7 +211,7 @@ EVH.createSession({
                 comparison: 'eq',
                 value: false,
             }],
-            // groupBy: [{ dataIndex: 'user' }]
+            groupBy: [{ dataIndex: 'user' }]
         }
     },
     columns: [{
@@ -271,7 +276,7 @@ EVH.createSession({
                 comparison: 'eq',
                 value: false,
             }],
-            // groupBy: [{ dataIndex: 'user' }]
+            groupBy: [{ dataIndex: 'user' }]
         }
     },
     columns: [{
@@ -366,7 +371,8 @@ let pullTableNames = (liveQuery) => {
     ].flat())
 }
 console.log(pullTableNames(sessionDef))
-EVH.createSession(sessionDef)
+let sessionEmbeded = EVH.createSession(sessionDef)
+
 // console.log(sessionDef)
 // var messageSession = EVH.createSession({
 //     table: 'messageQueue',
@@ -394,8 +400,8 @@ messages.add({id: ii++, message: 'bla', user: 3, status: 2, deleted: false})
 messages.add({id: ii++, message: 'bla2', user: 2, status: 2, deleted: false})
 messages.add({id: ii++, message: 'bla3', user: 2, status: 2, deleted: false})
 
-messages.update({id: 2, message: 'cipa2', status: 2})
-
+messages.update({id: 2, message: 'cipa2', status: 3})
+messages.remove([1, 2])
 
 // setTimeout(()=>{
 //     messages.update({id: 5, message: 'pierdol sie dupo jedna', status: 1, deleted: true})
@@ -413,7 +419,7 @@ messages.update({id: 2, message: 'cipa2', status: 2})
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 0000000
+const nrOfItems = 000000
 console.time('perf')
 while(ii++ < nrOfItems){
     if(ii%100000 === 0) 
@@ -432,8 +438,10 @@ let sessionIterations = 1
 //     messages.remove([2])
 setTimeout(() => {
     // console.log(usersSession.getData().map(x=>x.object))
+    console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
     console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
     console.log('usersSession3', usersSession3.getCount(), usersSession3.getLinq().select(x=>x.object).toArray())
+    sessionEmbeded.destroy()
     setTimeout(() => {
         usersSession3.destroy()
         // usersSession2.destroy()
