@@ -9,6 +9,9 @@ var EVH = new (require('../lib/eventHorizon'))({
 var _ = require('lodash')
 var linq = require('linq')
 
+
+console.log(linq.from([["1"], ["2"], ["3"], [undefined], [undefined]]).orderBy().toArray())
+
 var messages = EVH.createTesseract('messageQueue', {
     columns: [{
         name: 'id',
@@ -300,6 +303,9 @@ EVH.createSession({
             session: 'a',
             displayField: 'min'
         }
+    }, {
+        name: 'testvalue',
+        value: x => x.msgCount * 10,
     },{
         name: 'halfCount',
         expression: 'msgCount/3'
