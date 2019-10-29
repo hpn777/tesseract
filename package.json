@@ -13,7 +13,7 @@
   "dependencies": {
     "ioredis": "^4.3.0",
     "linq": "^3.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "rxjs": "6.3.3"
   },
   "devDependencies": {
