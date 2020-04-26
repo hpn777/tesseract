@@ -134,16 +134,6 @@ testMatrix([
   tape(`test case 1 ${async ? "async" : ""} ${options}`, async t => {
     const [clusterSync, persistent] = options;
 
-    if (!async && clusterSync) {
-      t.skip("EDGECASE clear is not safe without async");
-      return t.end();
-    }
-
-    if (async && clusterSync && persistent) {
-      t.skip("EDGECASE clear does not wait for reset");
-      return t.end();
-    }
-
     const { collectEvents, cleanup, tessIn, tessOut } = await setup(options);
     const events = collectEvents(tessOut);
 
@@ -156,13 +146,13 @@ testMatrix([
       ]);
       await tessIn.removeAsync(2);
     } else {
-      tessIn.add([{ id: 3, name: "daniel" }]);
-      tessIn.clear();
+      tessIn.add([{ id: 3, name: "daniel" }], true);
+      tessIn.clear(true);
       tessIn.add([
         { id: 1, name: "rafal" },
         { id: 2, name: "lauren", status: 1 }
-      ]);
-      tessIn.remove([2]);
+      ],true);
+      tessIn.remove([2],true);
     }
 
     t.deepLooseEqual(
@@ -170,7 +160,7 @@ testMatrix([
       [
         ["dataUpdate", { id: 3, name: "daniel" }],
         ["dataRemove", 3],
-        clusterSync && persistent && ["dataUpdate"], // empty snapshot for persistent
+        async && clusterSync && persistent && ["dataUpdate"], // empty snapshot for persistent
         [
           "dataUpdate",
           { id: 1, name: "rafal" },
@@ -213,7 +203,7 @@ async function setup([clusterSync, persistent, local]) {
     tessOut = await node2.getTesseract("users");
   }
 
-  function collectEvents(tesseract, timeout = 30) {
+  function collectEvents(tesseract, timeout = 10) {
     const events = [];
 
     return new Promise(resolve => {

@@ -5,21 +5,23 @@
   "scripts": {
     "test": "docker-compose up redis tests",
     "redis": "docker-compose up redis",
-    "nats": "docker-compose up",
     "all": "docker-compose up redis",
     "down": "docker-compose down",
-    "shell": "docker-compose run --rm shell sh"
+    "shell": "docker-compose run --rm shell sh",
+    "browserify": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
+    "browserify_min": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js"
   },
   "dependencies": {
     "ioredis": "^4.3.0",
     "linq": "^3.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.15",
+    "md5.js": "^1.3.5",
     "rxjs": "6.3.3"
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
+    "browserify": "^16.5.0",
     "flat": "^4.1.0",
-    "rxjs": "6.3.3",
     "tape": "4.9.1"
   },
   "main": "index.js",

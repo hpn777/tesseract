@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.4"
 services:
       
   redis:
@@ -14,19 +14,8 @@ services:
     volumes:
       - './:/home'
     command: ["bash", "-c", "${FILE}"]
-    ipc: host
-    shm_size: 4GB
     depends_on:
       - redis
-    networks:
-      - hpndev
-
-  shell:
-    build: ./docker/dev/
-    volumes:
-      - './:/home'
-    command: ["bash", "-c", "${FILE}"]
-    ipc: host
     networks:
       - hpndev
 
