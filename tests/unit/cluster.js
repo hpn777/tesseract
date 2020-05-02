@@ -203,7 +203,7 @@ async function setup([clusterSync, persistent, local]) {
     tessOut = await node2.getTesseract("users");
   }
 
-  function collectEvents(tesseract, timeout = 10) {
+  function collectEvents(tesseract, timeout = 5) {
     const events = [];
 
     return new Promise(resolve => {
@@ -228,7 +228,7 @@ async function setup([clusterSync, persistent, local]) {
       node1.close();
       node2 && node2.close();
       t.end();
-    }, 50);
+    }, 5);
   }
 
   return {
