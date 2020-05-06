@@ -8,8 +8,8 @@
     "all": "docker-compose up redis",
     "down": "docker-compose down",
     "shell": "docker-compose run --rm shell sh",
-    "browserify": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
-    "browserify_min": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js"
+    "build": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
+    "build_min": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js"
   },
   "dependencies": {
     "ioredis": "^4.3.0",
