@@ -320,8 +320,10 @@ EVH.createSession({
     }],
     sort: [  { field: 'name', direction: 'asc' }]
 })
-var usersSession3 = EVH.getSession('liveQuery2')
-
+var liveQuery2 = EVH.getSession('liveQuery2')
+liveQuery2.on('dataUpdate',  x => {
+    console.log('liveQuery2 update', x.toJSON())
+})
 // var usersSession = EVH.createSession({
 //     table: 'users'
 // })
@@ -426,13 +428,13 @@ messages.remove([1, 2])
 // }
 let nrOfUpdates = 0
 const nrOfItems = 1000000
-console.time('perf')
-while(ii++ < nrOfItems){
-    if(ii%100000 === 0) 
-        console.log(ii)
-        messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
-}
-console.timeEnd('perf')
+// console.time('perf')
+// while(ii++ < nrOfItems){
+//     if(ii%100000 === 0) 
+//         console.log(ii)
+//         messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
+// }
+// console.timeEnd('perf')
 
 // setInterval(()=>{ 
 //     ++nrOfUpdates
@@ -448,10 +450,10 @@ setTimeout(() => {
     console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
     console.log('usersSession3', usersSession3.getCount(), usersSession3.getLinq().select(x=>x.object).toArray())
     sessionEmbeded.destroy()
-    setTimeout(() => {
-        usersSession3.destroy()
-        // usersSession2.destroy()
-    }, 500)
+    // setTimeout(() => {
+    //     usersSession3.destroy()
+    //     // usersSession2.destroy()
+    // }, 500)
     // console.log('testFunnySession',testFunnySession.getLinq().select(x=>x.object).toArray())
     // setInterval(()=>{
     //     sessionDef.id = guid()
