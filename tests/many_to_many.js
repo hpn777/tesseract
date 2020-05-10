@@ -1,7 +1,7 @@
 var {mergeColumns, guid} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
 var EVH = new (require('../lib/eventHorizon'))({
-    namespace: 'dupa'
+    namespace: 'test_namespace'
     // commandPort: {
     //     host: 'exec', 
     //     port: 6789
@@ -142,13 +142,6 @@ var session = EVH.createSession({
     columns: [
         {name: 'id', primaryKey: true},
         {name: 'name'},
-        // {name: 'moduleClassName'},
-        // {name: 'moduleType'},
-        // {name: 'moduleGroup'},
-        // {name: 'config'},
-        // {name: 'parentId'},
-        // {name: 'owner_id'},
-        // {name: 'description'},
         {
             name: 'user_role',
             resolve: {
