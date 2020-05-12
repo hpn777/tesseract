@@ -151,7 +151,7 @@ var session = EVH.createSession({
             }
         }
     ],
-    filter: [{
+    permanentFilter: [{
         field: 'user_role',
         value: undefined,
         comparison: 'neq'

@@ -59,7 +59,7 @@ EVH.createSession({
             displayField: 'rowId'
         }
     }],
-    permanentFilters: [{
+    permanentFilter: [{
         field: 'acl',
         comparison: 'neq',
         value: undefined,
