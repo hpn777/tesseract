@@ -9,9 +9,6 @@ var EVH = new (require('../lib/eventHorizon'))({
 var _ = require('lodash')
 var linq = require('linq')
 
-
-console.log(linq.from([["1"], ["2"], ["3"], [undefined], [undefined]]).orderBy().toArray())
-
 var messages = EVH.createTesseract('messageQueue', {
     columns: [{
         name: 'id',
@@ -254,76 +251,10 @@ EVH.createSession({
 })
 var usersSession2 = EVH.getSession('liveQuery')
 
-EVH.createSession({
-    id:'liveQuery2',
-    table: 'users',
-    subSessions: {
-        a: {
-            table: 'messageQueue',
-            columns:  [{
-                name: 'user',
-                primaryKey: true,
-            }, {
-                name: 'deleted'
-            }, {
-                name: 'count',
-                value: 1,
-                aggregator: 'sum'
-            }, {
-                name: 'min',
-                value: 1,
-                aggregator: 'min'
-            }],
-            filter: [{
-                field: 'deleted',
-                comparison: 'eq',
-                value: false,
-            }],
-            groupBy: [{ dataIndex: 'user' }]
-        }
-    },
-    columns: [{
-        name: 'id',
-        primaryKey: true,
-    }, {
-        name: 'name',
-    }, {
-        name: 'expTest',
-    }, {
-        name: 'msgCount',
-        resolve: {
-            underlyingField: 'id',
-            session: 'a',
-            displayField: 'count'
-        }
-    }, {
-        name: 'msgMin',
-        resolve: {
-            underlyingField: 'id',
-            session: 'a',
-            displayField: 'min'
-        }
-    }, {
-        name: 'testvalue',
-        value: x => x.msgCount * 10,
-    },{
-        name: 'halfCount',
-        expression: 'msgCount/3'
-    },{
-        name: 'fullName',
-        value: '${name}-${id}'
-    }],
-    filter: [{
-        field: 'msgCount',
-        comparison: 'eq',
-        value: 1,
-    }],
-    sort: [  { field: 'name', direction: 'asc' }]
-})
-var liveQuery2 = EVH.getSession('liveQuery2')
-liveQuery2.on('dataUpdate',  x => {
-    console.log('liveQuery2 update', x.toJSON())
-})
+
+// liveQuery2.on('dataUpdate',  x => {
+//     console.log('liveQuery2 update', x.toJSON())
+// })
 // var usersSession = EVH.createSession({
 //     table: 'users'
 // })
@@ -427,13 +358,13 @@ messages.remove([1, 2])
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 1000000
+const nrOfItems = 100000
 // console.time('perf')
-// while(ii++ < nrOfItems){
-//     if(ii%100000 === 0) 
-//         console.log(ii)
-//         messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
-// }
+while(ii++ < nrOfItems){
+    if(ii%100000 === 0) 
+        console.log(ii)
+        messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
+}
 // console.timeEnd('perf')
 
 // setInterval(()=>{ 
@@ -445,10 +376,41 @@ let sessionIterations = 1
 // console.log('removing stuff')
 //     messages.remove([2])
 setTimeout(() => {
+    console.time('dupa')
+    var dupa = EVH.createSession({
+        id:'liveQuery2',
+        table: 'messageQueue',
+        columns:  [{
+            name: 'id',
+            primaryKey: true
+        }, {
+            name: 'userName',
+            resolve: {
+                childrenTable: 'users',
+                underlyingField: 'user',
+                displayField: 'name'
+            }
+        }, {
+            name: 'user',
+        },{
+            name: 'fullName',
+            value: '${userName}-${user}'
+        },{
+            name: 'deleted',
+            defaultValue: false
+        }, {
+            name: 'message',
+        }, {
+            name: 'status'
+        }],
+        sort: [  { field: 'name', direction: 'asc' }]
+    }).getLinq().select(x=>x.object).toArray()
+    console.log('done', dupa)
+    console.timeEnd('dupa')
     // console.log(usersSession.getData().map(x=>x.object))
-    console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
-    console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
-    console.log('usersSession3', usersSession3.getCount(), usersSession3.getLinq().select(x=>x.object).toArray())
+    // console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
+    // console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
+    // console.log('usersSession3', usersSession3.getCount(), usersSession3.getLinq().select(x=>x.object).toArray())
     sessionEmbeded.destroy()
     // setTimeout(() => {
     //     usersSession3.destroy()
