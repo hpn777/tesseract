@@ -5,6 +5,12 @@ var eventHorizon = new(require('../lib/eventHorizon'))({
   // }
 })
 
+const wait = (time = 1000) => new Promise(res => {
+  setTimeout(() => {
+    res()
+  }, time)
+})
+
 const people = eventHorizon.createTesseract('person', {
   id: 'person',
   columns: [{
@@ -81,68 +87,6 @@ const session = eventHorizon.createSession({
   ]
 })
 
-/****************
- * EXPECTATIONS *
- ****************/
-const expectedResult = [
-  // After adding persons
-  {
-    addedIds: [1, 2, 3],
-    addedData: [{
-        id: 1,
-        numberOfMessages: undefined
-      },
-      {
-        id: 2,
-        numberOfMessages: undefined
-      },
-      {
-        id: 3,
-        numberOfMessages: undefined
-      }
-    ],
-    updatedIds: [],
-    updatedData: [],
-    removedIds: [],
-    removedData: []
-  },
-
-  // After adding messages
-  {
-    addedIds: [],
-    addedData: [],
-    updatedIds: [1, 2, 3],
-    updatedData: [{
-        id: 1,
-        numberOfMessages: 3
-      },
-      {
-        id: 2,
-        numberOfMessages: 2
-      },
-      {
-        id: 3,
-        numberOfMessages: 1
-      }
-    ],
-    removedIds: [],
-    removedData: []
-  },
-
-  // After changing one of the messages status
-  {
-    addedIds: [],
-    addedData: [],
-    updatedIds: [3],
-    updatedData: [{
-      id: 3,
-      numberOfMessages: undefined
-    }],
-    removedIds: [],
-    removedData: []
-  }
-]
-
 session.on('dataUpdate', x => {
   console.log('session dataUpdate', session.get('id'), x.toJSON())
 })
@@ -157,10 +101,6 @@ people.add([{
   {
     id: 2,
     name: 'Person #2'
-  },
-  {
-    id: 3,
-    name: 'Person #3'
   },
 ])
 
@@ -203,25 +143,40 @@ messages.add([
     personId: 2,
     status: 'sent'
   },
-
-  // Person #1 visible messages count 1
-  {
-    id: 8,
-    personId: 3,
-    status: 'sent'
-  },
 ])
 
 // Make person #3 visible messages count 0
-setTimeout(() => {
-  messages.update([{
-    id: 8,
-    status: 'deleted'
+
+const main = async () => {
+
+  await wait(500)
+  people.add([{
+    id: 3,
+    name: 'Person #3'
+  }, {
+    id: 3,
+    name: 'Person #4'
   }, ])
-  setTimeout(() => {
-    messages.update([{
-      id: 8,
-      status: 'sent'
-    }, ])
-  }, 200)
-}, 200)
+
+  await wait(500)
+  messages.add([{
+    id: 8,
+    personId: 3,
+    status: 'sent'
+  }, {
+    id: 9,
+    personId: 3,
+    status: 'sent'
+  }, {
+    id: 10,
+    personId: 3,
+    status: 'sent'
+  }, {
+    id: 11,
+    personId: 3,
+    status: 'sent'
+  }, ])
+
+}
+
+main()
