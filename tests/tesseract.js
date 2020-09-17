@@ -1,6 +1,9 @@
-var {mergeColumns, guid} = require('../lib/utils')
+var {
+    mergeColumns,
+    guid
+} = require('../lib/utils')
 var Tesseract = require('../lib/tesseract')
-var EVH = new (require('../lib/eventHorizon'))({
+var EVH = new(require('../lib/eventHorizon'))({
     // commandPort: {
     //     host: 'exec', 
     //     port: 6789
@@ -14,7 +17,7 @@ var messages = EVH.createTesseract('messageQueue', {
         name: 'id',
         primaryKey: true,
     }, {
-        name: 'message', 
+        name: 'message',
     }, {
         name: 'status',
         aggregator: 'avg',
@@ -27,12 +30,12 @@ var messages = EVH.createTesseract('messageQueue', {
         secondaryKey: true
     }, {
         name: 'update',
-        value: data =>  new Date(),
+        value: data => new Date(),
         aggregator: 'max'
     }]
 })
 
-EVH.get('messageQueue').getData().filter(x=>x.propertyId)
+EVH.get('messageQueue').getData().filter(x => x.propertyId)
 
 var users = EVH.createTesseract('users', {
     columns: [{
@@ -187,12 +190,12 @@ var users = EVH.createTesseract('users', {
 // })
 
 EVH.createSession({
-    id:'liveQuery',
+    id: 'liveQuery',
     table: 'users',
     subSessions: {
         a: {
             table: 'messageQueue',
-            columns:  [{
+            columns: [{
                 name: 'user',
                 primaryKey: true,
             }, {
@@ -211,7 +214,9 @@ EVH.createSession({
                 comparison: 'eq',
                 value: false,
             }],
-            groupBy: [{ dataIndex: 'user' }]
+            groupBy: [{
+                dataIndex: 'user'
+            }]
         }
     },
     columns: [{
@@ -235,10 +240,10 @@ EVH.createSession({
             session: 'a',
             displayField: 'min'
         }
-    },{
+    }, {
         name: 'halfCount',
         expression: 'msgCount/3'
-    },{
+    }, {
         name: 'fullName',
         value: '${name}-${id}'
     }],
@@ -247,7 +252,10 @@ EVH.createSession({
     //     comparison: 'eq',
     //     value: 1,
     // }],
-    sort: [  { field: 'name', direction: 'asc' }]
+    sort: [{
+        field: 'name',
+        direction: 'asc'
+    }]
 })
 var usersSession2 = EVH.getSession('liveQuery')
 
@@ -263,7 +271,7 @@ var usersSession2 = EVH.getSession('liveQuery')
 var sessionDef = {
     table: {
         table: 'messageQueue',
-        columns:  [{
+        columns: [{
             name: 'id',
             primaryKey: true
         }, {
@@ -273,7 +281,7 @@ var sessionDef = {
                 underlyingField: 'user',
                 displayField: 'name'
             }
-        },{
+        }, {
             name: 'deleted',
             defaultValue: false
         }, {
@@ -290,8 +298,13 @@ var sessionDef = {
         //     comparison: '==',
         //     value: 'lauren'
         // }],
-        sort: [  { field: 'status', direction: 'desc' }],
-        groupBy: [{ dataIndex: 'status' }]
+        sort: [{
+            field: 'status',
+            direction: 'desc'
+        }],
+        groupBy: [{
+            dataIndex: 'status'
+        }]
     },
     // filter: [{
     //     field: 'status',
@@ -302,10 +315,10 @@ var sessionDef = {
 
 let pullTableNames = (liveQuery) => {
     return _.uniq([
-        ...(typeof liveQuery.table == 'string' ? [liveQuery.table]: pullTableNames(liveQuery.table)), 
-        ...(liveQuery.columns?liveQuery.columns:[])
-            .filter(x => x.resolve && x.resolve.childrenTable)
-            .map((x) => x.resolve.childrenTable),
+        ...(typeof liveQuery.table == 'string' ? [liveQuery.table] : pullTableNames(liveQuery.table)),
+        ...(liveQuery.columns ? liveQuery.columns : [])
+        .filter(x => x.resolve && x.resolve.childrenTable)
+        .map((x) => x.resolve.childrenTable),
         ...Object.values(liveQuery.subSessions || {}).map((x) => pullTableNames(x))
     ].flat())
 }
@@ -328,18 +341,64 @@ let sessionEmbeded = EVH.createSession(sessionDef)
 
 var ii = 1
 
-users.add({id: 1, parentId: 1, name: 'rafal'})
-users.add({id: 2, parentId: 1, name: 'daniel'})
-users.add({id: 3, parentId: 1, name: 'lauren'})
+users.add({
+    id: 1,
+    parentId: 1,
+    name: 'rafal'
+})
+users.add({
+    id: 2,
+    parentId: 1,
+    name: 'daniel'
+})
+users.add({
+    id: 3,
+    parentId: 1,
+    name: 'lauren'
+})
 
 
-messages.add({id: ii++, message: 'dupa', user: 3, status: 1, deleted: false})
-messages.add({id: ii++, message: 'cipa', user: 1, status: 1, deleted: false})
-messages.add({id: ii++, message: 'bla', user: 3, status: 2, deleted: false})
-messages.add({id: ii++, message: 'bla2', user: 2, status: 2, deleted: false})
-messages.add({id: ii++, message: 'bla3', user: 2, status: 2, deleted: false})
+messages.add({
+    id: ii++,
+    message: 'dupa',
+    user: 3,
+    status: 1,
+    deleted: false
+})
+messages.add({
+    id: ii++,
+    message: 'cipa',
+    user: 1,
+    status: 1,
+    deleted: false
+})
+messages.add({
+    id: ii++,
+    message: 'bla',
+    user: 3,
+    status: 2,
+    deleted: false
+})
+messages.add({
+    id: ii++,
+    message: 'bla2',
+    user: 2,
+    status: 2,
+    deleted: false
+})
+messages.add({
+    id: ii++,
+    message: 'bla3',
+    user: 2,
+    status: 2,
+    deleted: false
+})
 
-messages.update({id: 2, message: 'cipa2', status: 3})
+messages.update({
+    id: 2,
+    message: 'cipa2',
+    status: 3
+})
 messages.remove([1, 2])
 
 // setTimeout(()=>{
@@ -358,12 +417,18 @@ messages.remove([1, 2])
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 100000
+const nrOfItems = 2000000
 // console.time('perf')
-while(ii++ < nrOfItems){
-    if(ii%100000 === 0) 
+while (ii++ < nrOfItems) {
+    if (ii % 100000 === 0)
         console.log(ii)
-        messages.update([{id: ii, message: 'jdoijs oifcj nds;of', user: Math.ceil(Math.random()*3), status: 2, deleted: false}])
+    messages.update([{
+        id: ii,
+        message: 'jdoijs oifcj nds;of',
+        user: Math.ceil(Math.random() * 3),
+        status: 2,
+        deleted: false
+    }])
 }
 // console.timeEnd('perf')
 
@@ -376,11 +441,10 @@ let sessionIterations = 1
 // console.log('removing stuff')
 //     messages.remove([2])
 setTimeout(() => {
-    console.time('dupa')
     var dupa = EVH.createSession({
-        id:'liveQuery2',
+        id: 'liveQuery2',
         table: 'messageQueue',
-        columns:  [{
+        columns: [{
             name: 'id',
             primaryKey: true
         }, {
@@ -392,10 +456,10 @@ setTimeout(() => {
             }
         }, {
             name: 'user',
-        },{
+        }, {
             name: 'fullName',
             value: '${userName}-${user}'
-        },{
+        }, {
             name: 'deleted',
             defaultValue: false
         }, {
@@ -403,9 +467,15 @@ setTimeout(() => {
         }, {
             name: 'status'
         }],
-        sort: [  { field: 'name', direction: 'asc' }]
-    }).getLinq().select(x=>x.object).toArray()
-    console.log('done', dupa)
+        sort: [{
+            field: 'name',
+            direction: 'asc'
+        }]
+    })
+    console.time('dupa')
+
+
+    console.log('done', dupa.getLinq().select(x => x.object).toArray().length)
     console.timeEnd('dupa')
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
@@ -428,4 +498,4 @@ setTimeout(() => {
     // console.log('Union from 2 sessions', union.getLinq().toArray())
 
 }, 1000)
-setTimeout(()=>{}, 1000000)
+setTimeout(() => {}, 1000000)
