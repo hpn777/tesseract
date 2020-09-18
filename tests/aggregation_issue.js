@@ -4,13 +4,11 @@ var eventHorizon = new(require('../lib/eventHorizon'))({
   //     port: 6789
   // }
 })
-
 const wait = (time = 1000) => new Promise(res => {
   setTimeout(() => {
     res()
   }, time)
 })
-
 const people = eventHorizon.createTesseract('person', {
   id: 'person',
   columns: [{
@@ -20,7 +18,6 @@ const people = eventHorizon.createTesseract('person', {
     name: 'name',
   }]
 })
-
 const messages = eventHorizon.createTesseract('message', {
   id: 'message',
   columns: [{
@@ -32,7 +29,6 @@ const messages = eventHorizon.createTesseract('message', {
     name: 'status'
   }]
 })
-
 const session = eventHorizon.createSession({
   table: 'person',
   subSessions: {
@@ -86,78 +82,19 @@ const session = eventHorizon.createSession({
     }
   ]
 })
-
 session.on('dataUpdate', x => {
   console.log('session dataUpdate', session.get('id'), x.toJSON())
 })
-
-/************
- * SCENARIO *
- ************/
-people.add([{
-    id: 1,
-    name: 'Person #1'
-  },
-  {
-    id: 2,
-    name: 'Person #2'
-  },
-])
-
-messages.add([
-  // Person #1 visible messages count 3
-  {
-    id: 1,
-    personId: 1,
-    status: 'delivered'
-  },
-  {
-    id: 2,
-    personId: 1,
-    status: 'delivered'
-  },
-  {
-    id: 3,
-    personId: 1,
-    status: 'sent'
-  },
-  {
-    id: 4,
-    personId: 1,
-    status: 'deleted'
-  },
-
-  // Person #2 visible messages count 2
-  {
-    id: 5,
-    personId: 2,
-    status: 'delivered'
-  },
-  {
-    id: 6,
-    personId: 2,
-    status: 'deleted'
-  },
-  {
-    id: 7,
-    personId: 2,
-    status: 'sent'
-  },
-])
-
 // Make person #3 visible messages count 0
-
 const main = async () => {
-
   await wait(500)
   people.add([{
-    id: 3,
+    id: 2,
     name: 'Person #3'
   }, {
     id: 3,
     name: 'Person #4'
   }, ])
-
   await wait(500)
   messages.add([{
     id: 8,
@@ -176,7 +113,33 @@ const main = async () => {
     personId: 3,
     status: 'sent'
   }, ])
+  await wait(100)
+  console.log('remove data')
+  console.log('sending an update data')
+  messages.update([{
+    id: 8,
+    status: 'removed'
+  }])
 
+  await wait(10)
+  console.log('sending an update data')
+  messages.update([{
+    id: 9,
+    status: 'removed'
+  }])
+
+  await wait(10)
+  console.log('sending an update data')
+  messages.update([{
+    id: 10,
+    status: 'removed'
+  }])
+
+  await wait(10)
+  console.log('sending an update data')
+  messages.update([{
+    id: 11,
+    status: 'removed'
+  }])
 }
-
 main()
