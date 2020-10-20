@@ -14,9 +14,9 @@ const data = [
   { maybeNumber: 10.5, maybeString: "foo" },
   { maybeNumber: 10, maybeString: "foo" },
   { maybeNumber: 10, maybeString: "bar2" },
-  { maybeNumber: 10, maybeString: undefined },
+  { maybeNumber: 10, maybeString: null },
   { maybeNumber: 10, maybeString: "" },
-  { maybeNumber: undefined, maybeString: "bar" },
+  { maybeNumber: null, maybeString: "bar" },
   { maybeNumber: 0, maybeString: "123" },
   { maybeNumber: 30, maybeString: "" }
 ];
@@ -49,10 +49,10 @@ test("applyOrder sorting using expression", t => {
   t.deepEqual(sorted, [
     { maybeNumber: -5, maybeString: "👻" },
     { maybeNumber: 0, maybeString: "123" },
-    { maybeNumber: undefined, maybeString: "bar" },
+    { maybeNumber: null, maybeString: "bar" },
     // 0 or 1 partition split for the first filter
     // (groupped records are equivalent for first filter)
-    { maybeNumber: 10, maybeString: undefined },
+    { maybeNumber: 10, maybeString: null },
     { maybeNumber: 10, maybeString: "" },
     { maybeNumber: 30, maybeString: "" },
     { maybeNumber: 10, maybeString: "bar2" },
@@ -65,20 +65,20 @@ test("applyOrder sorting using expression", t => {
 testSorting(
   data,
   [{ field: "maybeNumber", direction: "asc" }],
-  [[undefined], [-5],[0], [10], [10], [10], [10], [10.5], [30]]
+  [[null], [-5],[0], [10], [10], [10], [10], [10.5], [30]]
 );
 
 testSorting(
   data,
   [{ field: "maybeNumber", direction: "desc" }],
-  [[30], [10.5], [10], [10], [10], [10], [0], [-5], [undefined]]
+  [[30], [10.5], [10], [10], [10], [10], [0], [-5], [null]]
 );
 
 testSorting(
   data,
   [{ field: "maybeString", direction: "asc" }],
   [
-    [undefined],
+    [null],
     [""],
     [""],
     ["👻"],
@@ -102,7 +102,7 @@ testSorting(
     ["👻"],
     [""],
     [""],
-    [undefined]
+    [null]
   ]
 );
 
@@ -115,13 +115,13 @@ testSorting(
   [
     [30, ""],
     [10.5, "foo"],
-    [10, undefined],
+    [10, null],
     [10, ""],
     [10, "bar2"],
     [10, "foo"],
     [0, "123"],
     [-5, "👻"],
-    [undefined, "bar"]
+    [null, "bar"]
   ]
 );
 
@@ -137,10 +137,10 @@ testSorting(
     [10, "foo"],
     [10, "bar2"],
     [10, ""],
-    [10, undefined],
+    [10, null],
     [0, "123"],
     [-5, "👻"],
-    [undefined, "bar"]
+    [null, "bar"]
   ]
 );
 
