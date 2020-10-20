@@ -16,7 +16,7 @@ RUN yum -y install epel-release wget
 
 RUN yum -y install git
 
-RUN curl --silent --location https://rpm.nodesource.com/setup_13.x | bash - \
- && yum -y install nodejs
+RUN curl --silent --location https://rpm.nodesource.com/setup_14.x | bash - \
+    && yum -y install nodejs
 
 RUN yum -y install nc
