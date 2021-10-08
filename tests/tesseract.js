@@ -21,13 +21,13 @@ var messages = EVH.createTesseract('messageQueue', {
     }, {
         name: 'status',
         aggregator: 'avg',
-        secondaryKey: true
+        // secondaryKey: true
     }, {
         name: 'user',
-        secondaryKey: true
+        // secondaryKey: true
     }, {
         name: 'deleted',
-        secondaryKey: true
+        // secondaryKey: true
     }, {
         name: 'update',
         value: data => new Date(),
@@ -417,18 +417,18 @@ messages.remove([1, 2])
 //     EVH.createSession(sessionDef)
 // }
 let nrOfUpdates = 0
-const nrOfItems = 2000000
+const nrOfItems = 20
 // console.time('perf')
 while (ii++ < nrOfItems) {
     if (ii % 100000 === 0)
         console.log(ii)
-    messages.update([{
-        id: ii,
-        message: 'jdoijs oifcj nds;of',
-        user: Math.ceil(Math.random() * 3),
-        status: 2,
-        deleted: false
-    }])
+    messages.update([[
+        ii,
+       'jdoijs oifcj nds;of',
+        Math.ceil(Math.random() * 3),
+        2,
+        false
+    ]])
 }
 // console.timeEnd('perf')
 
@@ -477,6 +477,7 @@ setTimeout(() => {
 
     console.log('done', dupa.getLinq().select(x => x.object).toArray().length)
     console.timeEnd('dupa')
+    console.log(messages.getData())
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
     // console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
