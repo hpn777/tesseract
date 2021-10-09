@@ -477,7 +477,9 @@ setTimeout(() => {
 
     console.log('done', dupa.getLinq().select(x => x.object).toArray().length)
     console.timeEnd('dupa')
-    console.log(messages.getData())
+    console.log(messages.getData(), dupa.getLinq().select(x =>x.object).toArray())
+    messages.clear(false,true)
+    console.log(messages.getData(),  dupa.getLinq().select(x =>x.object).toArray())
     // console.log(usersSession.getData().map(x=>x.object))
     // console.log('indexes', messages.secondaryIndexes, messages.dataIndex, messages.getCount())
     // console.log('usersSession2', usersSession2.getCount(), usersSession2.getLinq().select(x=>x.object).toArray())
