@@ -2359,6 +2359,12 @@ class Session extends Model {
 		return result
 	}
 
+	clear() {
+		this.dataCache = []
+		this.dataMap = {}
+		this.requireDataReset = true
+	}
+
 	_getData(request) {
 		const config = this.config
 
@@ -2533,11 +2539,11 @@ class Session extends Model {
 
 	returnTree(rootIdValue, parentIdField, groups) {
 		var root = this.dataMap[rootIdValue]
-
 		if (root) {
 			if (!groups) {
 				groups = this.getLinq()
-					.groupBy(x => this.dataWrapper.setData(x)[parentIdField])
+          .select(x => x.object)
+					.groupBy(x => x[parentIdField])
 			}
 
 			var newItem = this.dataWrapper.setData(root).object
@@ -2545,14 +2551,12 @@ class Session extends Model {
 			if (subGroup) {
 				newItem.children = []
 				subGroup
-					.select(x => this.dataWrapper.setData(x))
 					.forEach(x => {
-						if (x[this.idProperty] !== x[parentIdField]) {
+						if (x[this.idProperty] !== rootIdValue) {
 							var childrenItem = this.returnTree(x[this.idProperty], parentIdField, groups)
 							newItem.children.push(childrenItem)
 						}
 					})
-
 			}
 
 			newItem.leaf = !newItem.children
@@ -2881,13 +2885,18 @@ class Tesseract extends Model {
 		})
 	}
 
-	reset(data, disableClusterUpdate = false) {
+	reset(data, disableClusterUpdate = false, suppressEvents = false) {
 		if (this.clusterSync && !disableClusterUpdate) {
 			this.trigger('clusterReset', data || this.getData())
 		} else if (data) {
 			this.dataMap = {}
 			this.dataCache = this.generateData(data);
-			this.trigger('dataUpdate', this.dataCache, true, UPDATE_REASON_DATA_RESET) //TOD implement data reset properly
+			if(!suppressEvents){
+				this.trigger('dataUpdate', this.dataCache, true, UPDATE_REASON_DATA_RESET) //TODO implement data reset properly
+			}
+			else{
+				this.sessions.each(x => x.clear())
+			}
 		}
 
 		return this.dataCache
@@ -2984,7 +2993,7 @@ class Tesseract extends Model {
 		})
 	}
 
-	clear(disableClusterUpdate = false) {
+	clear(disableClusterUpdate = false, suppressEvents = false) {
 		return new Promise((resolve) => {
 			if (this.clusterSync && !disableClusterUpdate) {
 				this.trigger('clusterRemove', this.dataCache.map(x => x[this.idProperty]))
@@ -2993,7 +3002,12 @@ class Tesseract extends Model {
 					resolve()
 				})
 			} else {
-				this.trigger('dataRemove', this.dataCache.map(x => x[this.idProperty]))
+				if(!suppressEvents){
+					this.trigger('dataRemove', this.dataCache.map(x => x[this.idProperty]))
+				}
+				else{
+					this.sessions.each(x => x.clear())
+				}
 				this.dataCache = []
 				this.dataMap = {}
 				resolve()
