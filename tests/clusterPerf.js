@@ -6,8 +6,9 @@ var _ = require('lodash')
 var linq = require('linq')
 
 EVH.connect({clientName: 'client1'})
-.then(()=>{
-    //EVH.clear()
+.then(async()=>{
+    console.log('conneced to client1')
+    await EVH.clear()
     EVH.createTesseract('messageQueue', {
         clusterSync: true,
         persistent: true,
@@ -52,11 +53,15 @@ EVH.connect({clientName: 'client1'})
         messages.update([{id: 5, message: 'retretrt', status: 1}, {id: 2, message: 'cipa2', status: 2}])
         
         messages.remove([2])
-        
+        let beginTime = new Date()
         let cc = 0
-        messages.on('dataUpdate', ()=>{
-            if(cc++%10000 === 0)
-                console.log('dataUpdate',cc)
+        messages.on('dataUpdate', x=>{
+            // console.log(x[0].id)
+            if(x[0].id++%10000 === 0){
+                console.log('dataUpdate',x[0].id, (new Date()) - beginTime)
+                beginTime = new Date()
+            }
+                
         })
 
         var sessionDef = {
@@ -110,18 +115,13 @@ EVH.connect({clientName: 'client1'})
         }
         console.log(pullTableNames(sessionDef))
         console.log(EVH.createSession(sessionDef).get('id'))
-        // console.log(messages.getById(1).userName)
-        console.time('perf')
-        let dupa = ()=>{
-            messages.update([[ii, 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', 2, Math.ceil(Math.random()*3)]])
-            if(ii++ <2000000){
-                if(ii%10 === 0)
-                    setImmediate(()=>{dupa()})
-                else
-                   dupa()
+         console.log('--------------', messages.dataCache.length)
+        // console.time('perf')
+        let dupa = async ()=>{
+            while(ii <2000000){
+                await messages.update([{id: ii++, message: 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', user: 2, status: Math.ceil(Math.random()*3)}])
+                
             }
-            else
-            console.timeEnd('perf')
         }
         dupa()
     })
@@ -157,110 +157,110 @@ setInterval(()=>{
 }, 10000)
 
 setTimeout(()=>{
-    var usersSession = EVH.createSession({
-        table: 'users',
-        columns: [{
-            name: 'id',
-            primaryKey: true,
-        }, {
-            name: 'name',
-        }, {
-            name: 'msgCount',
-            resolve: {
-                underlyingField: 'id',
-                session: {
-                    table: 'messageQueue',
-                    columns:  [{
-                        name: 'user',
-                        primaryKey: true,
-                    }, {
-                        name: 'count',
-                        value: 1,
-                        aggregator: 'sum'
-                    }],
-                    filter: [{
-                        type: 'custom',
-                        value: 'user >1',
-                    }],
-                    groupBy: [{ dataIndex: 'user' }]
-                },
-                valueField: 'user',
-                displayField: 'count'
-            }
-        }],
-        filter: [{
-            type: 'custom',
-            value: 'msgCount > 1',
-        }],
-        sort: [  { field: 'name', direction: 'asc' }]
-    })
+    // var usersSession = EVH.createSession({
+    //     table: 'users',
+    //     columns: [{
+    //         name: 'id',
+    //         primaryKey: true,
+    //     }, {
+    //         name: 'name',
+    //     }, {
+    //         name: 'msgCount',
+    //         resolve: {
+    //             underlyingField: 'id',
+    //             session: {
+    //                 table: 'messageQueue',
+    //                 columns:  [{
+    //                     name: 'user',
+    //                     primaryKey: true,
+    //                 }, {
+    //                     name: 'count',
+    //                     value: 1,
+    //                     aggregator: 'sum'
+    //                 }],
+    //                 filter: [{
+    //                     type: 'custom',
+    //                     value: 'user >1',
+    //                 }],
+    //                 groupBy: [{ dataIndex: 'user' }]
+    //             },
+    //             valueField: 'user',
+    //             displayField: 'count'
+    //         }
+    //     }],
+    //     filter: [{
+    //         type: 'custom',
+    //         value: 'msgCount > 1',
+    //     }],
+    //     sort: [  { field: 'name', direction: 'asc' }]
+    // })
     
-    var usersSession2 = EVH2.createSession({
-        table: 'users',
-        columns: [{
-            name: 'id',
-            primaryKey: true,
-        }, {
-            name: 'name',
-        }, {
-            name: 'msgCount',
-            resolve: {
-                underlyingField: 'id',
-                session: {
-                    table: 'messageQueue',
-                    columns:  [{
-                        name: 'user',
-                        primaryKey: true,
-                    }, {
-                        name: 'count',
-                        value: 1,
-                        aggregator: 'sum'
-                    }],
-                    filter: [{
-                        type: 'custom',
-                        value: 'user == 2',
-                    }],
-                    groupBy: [{ dataIndex: 'user' }]
-                },
-                valueField: 'user',
-                displayField: 'count'
-            }
-        },{
-            name: 'halfCount',
-            value: x => x.msgCount/2
-        }],
-        filter: [{
-            type: 'custom',
-            value: 'msgCount > 1',
-        }],
-        sort: [  { field: 'name', direction: 'asc' }]
-    })
+    // var usersSession2 = EVH2.createSession({
+    //     table: 'users',
+    //     columns: [{
+    //         name: 'id',
+    //         primaryKey: true,
+    //     }, {
+    //         name: 'name',
+    //     }, {
+    //         name: 'msgCount',
+    //         resolve: {
+    //             underlyingField: 'id',
+    //             session: {
+    //                 table: 'messageQueue',
+    //                 columns:  [{
+    //                     name: 'user',
+    //                     primaryKey: true,
+    //                 }, {
+    //                     name: 'count',
+    //                     value: 1,
+    //                     aggregator: 'sum'
+    //                 }],
+    //                 filter: [{
+    //                     type: 'custom',
+    //                     value: 'user == 2',
+    //                 }],
+    //                 groupBy: [{ dataIndex: 'user' }]
+    //             },
+    //             valueField: 'user',
+    //             displayField: 'count'
+    //         }
+    //     },{
+    //         name: 'halfCount',
+    //         value: x => x.msgCount/2
+    //     }],
+    //     filter: [{
+    //         type: 'custom',
+    //         value: 'msgCount > 1',
+    //     }],
+    //     sort: [  { field: 'name', direction: 'asc' }]
+    // })
     
-    var messageSession = EVH2.createSession({
-        table: 'messageQueue',
-        columns:  [{
-            name: 'tessUserName',
-        }, {
-            name: 'status',
-            aggregator: 'avg'
-        },{
-            name: 'userName',
-            resolve: {
-                underlyingField: 'user',
-                childrenTable: 'users',
-                valueField: 'id',
-                displayField: 'name'
-            }
-        }],
-        // filter: [{
-        //     //field: 'status',
-        //     type: 'custom',
-        //    // comparison: 'eq',
-        //     value: 'status == 2',
-        // }],
-        sort: [  { field: 'status', direction: 'desc' }],
-        // immediateUpdate: true
-    })
+    // var messageSession = EVH2.createSession({
+    //     table: 'messageQueue',
+    //     columns:  [{
+    //         name: 'tessUserName',
+    //     }, {
+    //         name: 'status',
+    //         aggregator: 'avg'
+    //     },{
+    //         name: 'userName',
+    //         resolve: {
+    //             underlyingField: 'user',
+    //             childrenTable: 'users',
+    //             valueField: 'id',
+    //             displayField: 'name'
+    //         }
+    //     }],
+    //     // filter: [{
+    //     //     //field: 'status',
+    //     //     type: 'custom',
+    //     //    // comparison: 'eq',
+    //     //     value: 'status == 2',
+    //     // }],
+    //     sort: [  { field: 'status', direction: 'desc' }],
+    //     // immediateUpdate: true
+    // })
     
     // usersSession.on('dataUpdate', (x)=>{console.log(x.toJSON())})
     
