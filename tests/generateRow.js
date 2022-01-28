@@ -28,7 +28,6 @@ var messages = EVH.createTesseract('test', {
 
 messages.update({id: 1, orderAdd: 1, price: 10})
 messages.update({id: 1, orderAdd: 1, price: 10})
-messages.update({id: 1, orderAdd: 1, price: 10})
-messages.update({id: 1, orderAdd: 1, price: 10})
+messages.update({id: 1, orderAdd: 1})
 
 console.log(messages.getData())
