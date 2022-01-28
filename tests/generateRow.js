@@ -12,18 +12,23 @@ var messages = EVH.createTesseract('test', {
     }, {
         name: 'update',
         value: data => new Date(),
+    },{
+        name: 'price',
+        title: 'Price',
+        value: (data, value) => value,
+        type: 'price',
     }, {
         name: 'orderAdd',
         title: 'Order Add',
         type: 'number',
-        value: (obj, value, attributName, newValue) => newValue ? (value + newValue) : value,
+        value: (obj, newValue, oldValue) => newValue ? (oldValue + newValue) : oldValue,
         defaultValue: 0
     }]
 })
 
-messages.update({id: 1, orderAdd: 1})
-messages.update({id: 1, orderAdd: 1})
-messages.update({id: 1, orderAdd: 1})
-messages.update({id: 1, orderAdd: 1})
+messages.update({id: 1, orderAdd: 1, price: 10})
+messages.update({id: 1, orderAdd: 1, price: 10})
+messages.update({id: 1, orderAdd: 1, price: 10})
+messages.update({id: 1, orderAdd: 1, price: 10})
 
 console.log(messages.getData())
