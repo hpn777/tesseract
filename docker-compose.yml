@@ -1,6 +1,6 @@
 version: "3.4"
 services:
-      
+
   redis:
     image: redis
     hostname: redis
@@ -10,27 +10,28 @@ services:
       - 6379:6379
 
   exec:
-    build: ./docker/dev/
+    image: node
     volumes:
-      - './:/home'
-    command: ["bash", "-c", "${FILE}"]
+      - "./:/home"
+    working_dir: "/home"
+    command: [ "bash", "-c", "${FILE}" ]
     depends_on:
       - redis
     networks:
       - hpndev
 
   tests:
-    build: ./docker/dev/
+    image: node
     volumes:
-      - './:/home'
-    command: ["node", "./tests/unit"]
+      - "./:/home"
+    working_dir: "/home"
+    command: [ "node", "./tests/unit" ]
     depends_on:
       - redis
     networks:
       - hpndev
 
-  
-
 networks:
   hpndev:
+
 
