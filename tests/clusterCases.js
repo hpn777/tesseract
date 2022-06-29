@@ -133,13 +133,13 @@ const liveQuery = {
 
 const main = async () => {
   const node1 = new TessCluster({
-    nodeId: 'node1'
+    // nodeId: 'node1'
   });
   const node2 = new TessCluster({
-    nodeId: 'node2'
+    // nodeId: 'node2'
   });
   const node3 = new TessCluster({
-    nodeId: 'node3'
+    // nodeId: 'node3'
   });
 
   await node1.connect({
@@ -284,7 +284,7 @@ const main = async () => {
   })
   const tessio = await node3.getTesseract('messages')
 
-  await node3.clear()
+  // await node3.clear()
 
 
   await wait(10)
