@@ -1,8 +1,8 @@
 var eventHorizon = new(require('../lib/eventHorizon'))({
-  // commandPort: {
-  //     host: 'exec', 
-  //     port: 6789
-  // }
+  commandPort: {
+      host: 'exec', 
+      port: 6789
+  }
 })
 const wait = (time = 1000) => new Promise(res => {
   setTimeout(() => {
