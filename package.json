@@ -1,6 +1,6 @@
 {
   "name": "tessio",
-  "version": "3.2.5",
+  "version": "3.2.6",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
     "test": "docker-compose up redis tests",
@@ -12,7 +12,7 @@
     "build_min": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js"
   },
   "dependencies": {
-    "ioredis": "^4.3.0",
+    "ioredis": "^5.2.3",
     "linq": "^3.2.0",
     "lodash": "^4.17.15",
     "md5.js": "^1.3.5",

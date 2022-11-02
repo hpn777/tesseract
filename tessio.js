@@ -1515,7 +1515,7 @@ class ExpressionEngine extends Model {
 				Operand: null,
 				children: [],
 				expanded: true,
-				ToString: me.ToString
+				toString: me.toString
 			};
 
 			if (entryString.split(bracketsRegex).length > 0) {//tokenizing brackets
@@ -1579,7 +1579,7 @@ class ExpressionEngine extends Model {
 							parentNodeCondition = bracketTokens[conditionalExprs[i]];
 						node.children.push(parentNodeCondition);
 					}
-					node.subExpression = node.ToString();
+					node.subExpression = node.toString();
 				}
 			}
 			else if (entryString.split(logicalOperatorsRegex).length >= 3) {//parsing logical operators
@@ -1620,7 +1620,7 @@ class ExpressionEngine extends Model {
 
 				node.children.push(leftNode);
 				node.children.push(rightNode);
-				node.subExpression = node.ToString();
+				node.subExpression = node.toString();
 
 			}
 			else if (entryString.split(arithmeticOperatorsRegex).length >= 3) {//parsing arithmetic operators
@@ -1638,7 +1638,7 @@ class ExpressionEngine extends Model {
 				rightNode = parseExpression(arithmeticSides.slice(2, arithmeticSides.length).join(''));
 				node.children.push(leftNode);
 				node.children.push(rightNode);
-				node.subExpression = node.ToString();
+				node.subExpression = node.toString();
 			}
 			else if (entryString.split(attributeExprRegex).length >= 3 && isNaN(entryString)) {//parsing stdout operators; check if isNaN to avoid decimal numbers
 				var arithmeticSides = entryString.split(attributeExprRegex);
@@ -1655,7 +1655,7 @@ class ExpressionEngine extends Model {
 				rightNode = parseExpression(arithmeticSides.slice(2, arithmeticSides.length).join(''));
 				node.children.push(leftNode);
 				node.children.push(rightNode);
-				node.subExpression = node.ToString();
+				node.subExpression = node.toString();
 			}
 			else if (entryString.split(functionExprRegex).length == 3) {//parsing functions
 				var functionSides = entryString.split(/(^[a-zA-Z0-9]+)/);
@@ -1669,7 +1669,7 @@ class ExpressionEngine extends Model {
 					leftNode = bracketTokens[arithmeticLeft];
 
 				node.children.push(leftNode);
-				node.subExpression = node.ToString();
+				node.subExpression = node.toString();
 			}
 			else {//parsing values and variables
 				if (bracketTokens[entryString]) {
@@ -1708,30 +1708,30 @@ class ExpressionEngine extends Model {
 		return parseExpression(entryString);
 	}
 
-	ToString() {
+	toString() {
 		var tempString = '';
 
 		if (this.Type == 'attributes') {
-			tempString += '(' + this.children.map(x => x.ToString()).join(` ${this.Operand} `) + ')'
+			tempString += '(' + this.children.map(x => x.toString()).join(` ${this.Operand} `) + ')'
 		}
 		else if (this.Type == 'lambda') {
 			tempString += this.Value;
-			tempString += this.Operand + this.children[0].ToString();
+			tempString += this.Operand + this.children[0].toString();
 		}
 		else if (this.Operand && this.children.length == 1) {
-			tempString += this.Operand + '(' + this.children[0].ToString();
+			tempString += this.Operand + '(' + this.children[0].toString();
 			tempString += ')';
 		}
 		else if (this.children.length && this.Operand !== '?:' && this.Operand !== '.') {
-			tempString += '(' + this.children.map(x => x.ToString()).join(` ${this.Operand} `) +')'
+			tempString += '(' + this.children.map(x => x.toString()).join(` ${this.Operand} `) +')'
 		}
 		else if (this.children.length && this.Operand === '.') {
-			tempString += this.children[0].ToString() + this.Operand + this.children[1].ToString();
+			tempString += this.children[0].toString() + this.Operand + this.children[1].toString();
 		}
 		else if (this.children.length == 3 && this.Operand == '?:') {
-			tempString += '(' + this.children[0].ToString();
-			tempString += ' ? ' + this.children[1].ToString();
-			tempString += ' : ' + this.children[2].ToString();
+			tempString += '(' + this.children[0].toString();
+			tempString += ' ? ' + this.children[1].toString();
+			tempString += ' : ' + this.children[2].toString();
 			tempString += ')';
 		}
 		else {
@@ -1824,6 +1824,15 @@ class ExpressionEngine extends Model {
 	toLinq (x) {
 		
 		return linq.from(this.value)
+	}
+
+	select(node) {
+		var scope = this.scope;
+		var args = {};
+		return this.value.select(x => {
+			args[node.Value] = x;
+			return scope.executeExpressionTree.call(scope, node.children[0], args);
+		});
 	}
 
 	where(node) {
@@ -2013,18 +2022,21 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 */
 
-const {ExpressionEngine, Functions} = require('./expressionEngine');
+const {
+	ExpressionEngine,
+	Functions
+} = require('./expressionEngine');
 
 class Filter extends ExpressionEngine {
 
-    constructor(...args) {
-        super(...args)
+	constructor(...args) {
+		super(...args)
 
-        var value = this.get('value')
+		var value = this.get('value')
 
 		const comparison = this.get('comparison')
-        const field = this.get('field')
-        const type = this.get('type')
+		const field = this.get('field')
+		const type = this.get('type')
 
 		switch (type) {
 			case 'boolean':
@@ -2049,9 +2061,11 @@ class Filter extends ExpressionEngine {
 					return Functions[comparison](row[field], value)
 				}
 		}
-    }
+	}
 
-	applyFilter() { return true }
+	applyFilter() {
+		return true
+	}
 
 	custom(expression, row) {
 		var customExpression = this.expressions[expression];
@@ -2091,7 +2105,7 @@ class Filters {
         this.length = items.length
     }
 
-	applyFilters(row) {
+    applyFilters(row) {
         return this.items.reduce((valid, filter) => {
             return valid && filter.applyFilter(row)
         }, true)
@@ -2154,10 +2168,11 @@ class Session extends Model {
 		this.tesseract = this.get('tesseract')
 		this.getTesseract = this.get('getTesseract')
 		this.config = this.get('config')
-		this.columns = this.config.columns || this.tesseract.getSimpleHeader()
+		var tesseractHeader = this.tesseract.getSimpleHeader()
+		this.columns = this.config.columns || tesseractHeader
 
 		// generating proxy config
-		var allColumns = mergeColumns(this.tesseract.columns, this.columns)
+		var allColumns = mergeColumns(tesseractHeader, this.columns)
 		this.defaultObjDef = createSessionProxyConfig(this.getTesseract, allColumns, this.columns)
 		this.dataWrapper = new this.defaultObjDef()
 		//---------------------
@@ -2381,9 +2396,8 @@ class Session extends Model {
 				this.requireSorting = true
 			}
 
-			if ((request.filter && request.filter.length) || (config.filter && config.filter.length)) {
-
-				if (this.permanentFilter && this.permanentFilter.lngth) { // TODO broken need to fixed
+			if (Array.isArray(request.filter)) {
+				if (this.permanentFilter && this.permanentFilter.lngth) {
 					request.filter = this.permanentFilter.concat(request.filter)
 				}
 
@@ -2542,7 +2556,7 @@ class Session extends Model {
 		if (root) {
 			if (!groups) {
 				groups = this.getLinq()
-          .select(x => x.object)
+					.select(x => x.object)
 					.groupBy(x => x[parentIdField])
 			}
 
@@ -2649,7 +2663,8 @@ class Tesseract extends Model {
 		resolve,
 		columns,
 		clusterSync,
-		persistent
+		persistent,
+		defferedDataUpdateTime
 	}) {
 
 		super({
@@ -2672,6 +2687,7 @@ class Tesseract extends Model {
 		this.persistent = persistent
 		this.idProperty = idProperty
 		this.clusterSync = clusterSync
+		this.defferedDataUpdateTime = defferedDataUpdateTime
 
 		const idColumn = this.columns.find(x => x.primaryKey)
 
@@ -2680,13 +2696,6 @@ class Tesseract extends Model {
 		}
 
 		this.idIndex = this.columns.findIndex(x => x.name === this.idProperty)
-
-		// name 'removed'?
-		if (this.columns.findIndex(x => x.name === 'removed')) {
-			this.columns.push({
-				name: 'removed'
-			})
-		}
 
 		// generating proxy config
 		this.objDef = this.generateObjDef(this.columns)
@@ -2699,26 +2708,39 @@ class Tesseract extends Model {
 		// -----------
 
 		this.refresh = new smartDebounce(() => {
-			this.dataCache = this.generateData(this.dataCache)
+			this.dataCache = _.debounce.generateData(this.dataCache)
 			this.generateIndex()
 			this.trigger('dataUpdate', this.dataCache)
-		}, 100).run
+		}, 100, { maxWait: 100 })
 
-		this.refreshTesseract = new smartDebounce(silent => {
+		this.refreshTesseract = new _.debounce(silent => {
 			this.dataCache.forEach(row => {
 				this.generateRow(row, this.columns, row)
 			})
 			if (!silent) {
 				this.trigger('dataUpdate', this.dataCache)
 			}
-		}, 100).run
+		}, 100, { maxWait: 100 })
 
-		this.collectGarbage = new smartDebounce(() => {
+		this.collectGarbage = new _.debounce(() => {
 			if (this.hasGarbage) {
 				this.dataCache = this.dataCache.filter(x => !x.removed)
 				this.hasGarbage = false
 			}
-		}, 100).run
+		}, 100, { maxWait: 100 })
+
+		this.updatedRows = []
+		this.removedRows = []
+		if(defferedDataUpdateTime > 0){
+			this.defferedDataUpdate = _.debounce((updatedData, disableClusterUpdate, updateReason) =>{
+				this.trigger('dataUpdate', updatedData, disableClusterUpdate, updateReason)
+				this.updatedRows = []
+			}, 10, { maxWait: defferedDataUpdateTime })
+			this.defferedDataRemove = _.debounce((removedRows, disableClusterUpdate, updateReason) =>{
+				this.trigger('dataRemove', removedRows, disableClusterUpdate, updateReason)
+				this.removedRows = []
+			}, 10, { maxWait: defferedDataUpdateTime })
+		}		
 	}
 
 	generateIndex() {
@@ -2834,7 +2856,7 @@ class Tesseract extends Model {
 		return this.dataMap[id]
 	}
 
-	add(data, disableClusterUpdate = false) {
+	async add(data, disableClusterUpdate = false) {
 
 		if (!data) {
 			return
@@ -2844,24 +2866,35 @@ class Tesseract extends Model {
 			data = [data]
 		}
 
+		var tempRows = []
 		if (this.clusterSync && !disableClusterUpdate) {
-			this.trigger('clusterAdd', data)
+			await this.clusterAdd(data)
 		} else {
-			var addedRows = [];
-
 			for (var i = 0; i < data.length; i++) {
 				var tempRow = this.dataMap[data[i][this.idProperty]]
 				if (!tempRow) {
 					tempRow = this.generateRow(data[i], this.columns)
 					this.dataCache.push(tempRow)
-					addedRows.push(tempRow)
+					this.updatedRows.push(tempRow)
+					tempRows.push(tempRow)
 				}
 			}
 
-			if (addedRows.length > 0) {
-				this.trigger('dataUpdate', addedRows, disableClusterUpdate)
+			if (this.updatedRows.length > 0) {
+				if(this.defferedDataUpdateTime > 0){
+					if(this.removedRows.length !== 0){
+						this.defferedDataRemove.flush()
+					}
+					this.defferedDataUpdate(this.updatedRows, disableClusterUpdate, UPDATE_REASON_DATA)
+				}
+				else{
+					this.trigger('dataUpdate', this.updatedRows, disableClusterUpdate, UPDATE_REASON_DATA)
+					this.updatedRows = []
+				}
 			}
 		}
+
+		return tempRows
 	}
 
 	addAsync(data, disableClusterUpdate = false) {
@@ -2891,10 +2924,12 @@ class Tesseract extends Model {
 		} else if (data) {
 			this.dataMap = {}
 			this.dataCache = this.generateData(data);
-			if(!suppressEvents){
+			if (!suppressEvents) {
+				if(this.defferedDataUpdateTime > 0){
+					this.defferedDataUpdate.flush()
+				}
 				this.trigger('dataUpdate', this.dataCache, true, UPDATE_REASON_DATA_RESET) //TODO implement data reset properly
-			}
-			else{
+			} else {
 				this.sessions.each(x => x.clear())
 			}
 		}
@@ -2902,16 +2937,15 @@ class Tesseract extends Model {
 		return this.dataCache
 	}
 
-	update(data, disableClusterUpdate = false) {
+	async update(data, disableClusterUpdate = false) {
 		if (data) {
-			var updatedRows = []
-
 			if (!Array.isArray(data)) {
 				data = [data]
 			}
 
+			var tempRows = []
 			if (this.clusterSync && !disableClusterUpdate) {
-				this.trigger('clusterUpdate', data)
+				await this.clusterUpdate(data)
 			} else {
 				for (var i = 0; i < data.length; i++) {
 					var tempRow = this.dataMap[data[i][this.idProperty]]
@@ -2921,15 +2955,25 @@ class Tesseract extends Model {
 						tempRow = this.generateRow(data[i], this.columns)
 						this.dataCache.push(tempRow);
 					}
-					updatedRows.push(tempRow);
+					tempRows.push(tempRow)
+					this.updatedRows.push(tempRow);
 				}
-				if (updatedRows.length) {
-					this.trigger('dataUpdate', updatedRows, disableClusterUpdate, UPDATE_REASON_DATA)
+				if (this.updatedRows.length) {
+					if(this.defferedDataUpdateTime > 0){
+						if(this.removedRows.length !== 0){
+							this.defferedDataRemove.flush()
+						}
+						this.defferedDataUpdate(this.updatedRows, disableClusterUpdate, UPDATE_REASON_DATA)
+					}
+					else{
+						this.trigger('dataUpdate', this.updatedRows, disableClusterUpdate, UPDATE_REASON_DATA)
+						this.updatedRows = []
+					}
 				}
 			}
 		}
 
-		return updatedRows
+		return tempRows
 	}
 
 	updateAsync(data, disableClusterUpdate = false) {
@@ -2953,11 +2997,11 @@ class Tesseract extends Model {
 		})
 	}
 
-	remove(data, disableClusterUpdate = false) {
+	async remove(data, disableClusterUpdate = false) {
 		var tempId
 
 		if (this.clusterSync && !disableClusterUpdate) {
-			this.trigger('clusterRemove', data)
+			await this.clusterRemove(data)
 		} else {
 			this.hasGarbage = true
 			for (var i = 0; i < data.length; i++) {
@@ -2966,9 +3010,19 @@ class Tesseract extends Model {
 					this.dataMap[tempId].removed = true
 					this.removeFromIndex(this.dataMap[tempId])
 					this.collectGarbage()
+					this.removedRows.push(tempId)
 				}
 			}
-			this.trigger('dataRemove', data)
+			if(this.defferedDataUpdateTime > 0){
+				if(this.updatedRows.length !== 0){
+					this.defferedDataUpdate.flush()
+				}
+				this.defferedDataRemove(this.removedRows, disableClusterUpdate)
+			}
+			else{
+				this.trigger('dataRemove', this.removedRows, disableClusterUpdate)
+				this.removedRows = []
+			}
 		}
 	}
 
@@ -2996,16 +3050,16 @@ class Tesseract extends Model {
 	clear(disableClusterUpdate = false, suppressEvents = false) {
 		return new Promise((resolve) => {
 			if (this.clusterSync && !disableClusterUpdate) {
-				this.trigger('clusterRemove', this.dataCache.map(x => x[this.idProperty]))
+				this.clusterRemove(this.dataCache.map(x => x[this.idProperty]))
 				this.trigger('clusterReset', [])
 				this.once('dataRemove', () => {
 					resolve()
 				})
 			} else {
-				if(!suppressEvents){
+				if (!suppressEvents) {
+					//TODO flush deffered update first
 					this.trigger('dataRemove', this.dataCache.map(x => x[this.idProperty]))
-				}
-				else{
+				} else {
 					this.sessions.each(x => x.clear())
 				}
 				this.dataCache = []
@@ -3021,13 +3075,6 @@ class Tesseract extends Model {
 		var updatedColumns = [];
 		if (reset) {
 			updatedColumns = newColumns;
-		}
-
-		if (updatedColumns.findIndex((x) => x.name === 'removed')) {
-			updatedColumns.push({
-				name: 'removed',
-				columnType: 'bool'
-			})
 		}
 
 		this.columns = updatedColumns
@@ -3063,7 +3110,7 @@ class Tesseract extends Model {
 
 		this.updateIndex(data, dataHolder)
 
-		if(Array.isArray(data)){
+		if (Array.isArray(data)) {
 			arrayDataType = true
 		}
 
@@ -3074,14 +3121,10 @@ class Tesseract extends Model {
 			const value = column.value
 			var propertyValue = arrayDataType ? data[i] : data[propertyName]
 
-			if (copyData && propertyValue !== undefined) {
-				dataHolder[propertyName] = propertyValue
-			}
-
 			if (defaultValue !== undefined && dataHolder[propertyName] === undefined) {
 				const valueType = typeof (defaultValue)
 				if (valueType === 'function') {
-					dataHolder[propertyName] = defaultValue(dataHolder, dataHolder[propertyName], propertyName);
+					dataHolder[propertyName] = defaultValue(dataHolder, propertyValue, propertyName);
 				} else if (valueType == 'string') {
 					dataHolder[propertyName] = _.template.call(dataHolder, defaultValue)(dataHolder)
 				} else {
@@ -3092,12 +3135,14 @@ class Tesseract extends Model {
 			if (value !== undefined) {
 				const valueType = typeof (value)
 				if (valueType === 'function') {
-					dataHolder[propertyName] = value(dataHolder, dataHolder[propertyName], propertyName);
+					dataHolder[propertyName] = value(dataHolder, propertyValue, dataHolder[propertyName], propertyName);
 				} else if (valueType == 'string') {
 					dataHolder[propertyName] = _.template.call(dataHolder, value)(dataHolder)
 				} else {
 					dataHolder[propertyName] = value
 				}
+			} else if (copyData && propertyValue !== undefined) {
+				dataHolder[propertyName] = propertyValue
 			}
 
 			if (column.expression !== undefined) {
@@ -3121,7 +3166,7 @@ class Tesseract extends Model {
 		columns.forEach((column, index) => {
 			classMeat += `"${column.name}"\n`
 		})
-		classMeat += '}'
+		classMeat += '"removed"\n}'
 
 		return (new Function(classMeat))()
 	}
@@ -3188,7 +3233,9 @@ const {
 } = require('./expressionEngine')
 const expressionEngine = new ExpressionEngine()
 
-Number.prototype.localeCompare =  function(x) { return this - x}
+Number.prototype.localeCompare = function (x) {
+    return this - x
+}
 
 // Tesseract utils
 let generateSummaryRow = (data, objWrapper, columns, groupedColumn, branchValue, branchPath, parent) => {
@@ -3262,50 +3309,34 @@ let generateSummaryRow = (data, objWrapper, columns, groupedColumn, branchValue,
 }
 
 let getSimpleHeader = (allColumns, excludeHiddenColumns) => {
-    var selectedColumns = [];
-    var columns = allColumns.filter((x) => {
-        return x.name !== 'removed'
-    })
-
-    for (var i = 0; i < columns.length; i++) {
-        if (!excludeHiddenColumns || (excludeHiddenColumns && !columns[i].hidden)) {
-            selectedColumns.push({
-                name: columns[i].name,
-                title: columns[i].title,
-                type: columns[i].type,
-                primaryKey: columns[i].primaryKey
-            });
-        }
-    }
-
-    return selectedColumns;
+    return allColumns
+        .filter(x => (!excludeHiddenColumns || (excludeHiddenColumns && !x.hidden)))
+        .map(x => {
+            return {
+                name: x.name,
+                title: x.title || x.name,
+                type: x.type || 'auto',
+                hidden: x.hidden,
+                primaryKey: x.primaryKey
+            }
+        })
 }
 
 let getHeader = (allColumns, excludeHiddenColumns) => {
-    var selectedColumns = [];
-
-    var columns = allColumns
-        .filter((x) => x.name !== 'removed')
+    return allColumns
+        .filter(x => (!excludeHiddenColumns || (excludeHiddenColumns && !x.hidden)))
         .map(x => {
             if (x.resolve || x.value) {
                 return {
                     name: x.name,
-                    title: x.title,
-                    type: x.type
+                    title: x.title || x.name,
+                    type: x.type || 'auto',
+                    hidden: x.hidden,
+                    primaryKey: x.primaryKey
                 }
             } else
                 return x
         })
-
-    if (excludeHiddenColumns) {
-        for (var i = 0; i < columns.length; i++) {
-            if (!columns[i].hidden)
-                selectedColumns.push(columns[i]);
-        }
-    } else
-        selectedColumns = columns;
-
-    return selectedColumns;
 }
 
 let groupData = (
@@ -3677,6 +3708,14 @@ function smartDebounce(debouncedFn = () => {}, timeout = 100, leading = false) {
     this.run = (...args) => {
         debouncedClearQueue(...args)
         flashDebounced()
+    }
+    this.run.flush = () => {
+        debouncedClearQueue.flush()
+        flashDebounced.cancel()
+    }
+    this.run.cancel = () => {
+        debouncedClearQueue.cancel()
+        flashDebounced.cancel()
     }
 }
 
