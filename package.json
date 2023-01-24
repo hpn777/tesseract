@@ -22,7 +22,8 @@
     "benchmark": "^2.1.4",
     "browserify": "^16.5.0",
     "flat": "^4.1.0",
-    "tape": "4.9.1"
+    "tape": "4.9.1",
+    "uglifyjs": "^2.4.11"
   },
   "main": "index.js",
   "directories": {

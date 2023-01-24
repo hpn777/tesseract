@@ -1115,9 +1115,9 @@ class EventHorizon {
 		let result = null
 		let childrenTable = this.tesseracts.get(resolve.childrenTable)
 
-		if (!childrenTable) {
-			console.trace('childrenTable is invalid.', resolve)
-		}
+		// if (!childrenTable) {
+		// 	console.trace('childrenTable is invalid.', resolve)
+		// }
 
 		let underlyingData = childrenTable.getById(data[resolve.underlyingField])
 		if (underlyingData) {
@@ -2707,8 +2707,8 @@ class Tesseract extends Model {
 		this.generateIndex()
 		// -----------
 
-		this.refresh = new smartDebounce(() => {
-			this.dataCache = _.debounce.generateData(this.dataCache)
+		this.refresh = new _.debounce(() => {
+			this.dataCache = this.generateData(this.dataCache)
 			this.generateIndex()
 			this.trigger('dataUpdate', this.dataCache)
 		}, 100, { maxWait: 100 })
@@ -3552,15 +3552,13 @@ let createSessionProxyConfig = (getTesseract, allColumns, selectedColumns) => {
         if (item.resolve !== undefined) {
             let childrenTable = getTesseract(item.resolve.childrenTable)
 
-            if (!childrenTable) {
-                console.trace("childrenTable is invalid.")
-            } else if (!childrenTablesMap[item.resolve.childrenTable]) {
+            if (childrenTable !== undefined && !childrenTablesMap[item.resolve.childrenTable]) {
                 childrenTablesMap[item.resolve.childrenTable] = {}
                 childrenTablesMap[item.resolve.childrenTable][item.resolve.displayField] = childrenTable.columns.findIndex(x => x.name === item.resolve.displayField)
             }
             classMeat += `get ${item.name}(){`
             classMeat += `let childrenTable = getTesseract("${item.resolve.childrenTable}");`
-            classMeat += 'if(!childrenTable){console.trace("childrenTable is invalid."); return;}'
+            classMeat += 'if(!childrenTable){return;}'
             if (item.resolve.underlyingField === item.name || !selectedPropertyMap[item.resolve.underlyingField]) {
                 classMeat += `let underlyingData = childrenTable.getById(this.raw.${item.resolve.underlyingField});`
             } else {
