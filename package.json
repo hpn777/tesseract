@@ -1,9 +1,9 @@
 {
   "name": "tessio",
-  "version": "3.2.6",
+  "version": "3.2.7",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
-    "test": "docker-compose up redis tests",
+    "test": "docker compose up redis tests",
     "redis": "docker-compose up redis",
     "all": "docker-compose up redis",
     "down": "docker-compose down",

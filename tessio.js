@@ -1115,10 +1115,6 @@ class EventHorizon {
 		let result = null
 		let childrenTable = this.tesseracts.get(resolve.childrenTable)
 
-		// if (!childrenTable) {
-		// 	console.trace('childrenTable is invalid.', resolve)
-		// }
-
 		let underlyingData = childrenTable.getById(data[resolve.underlyingField])
 		if (underlyingData) {
 			if (underlyingData.removed === true) {
@@ -2943,12 +2939,21 @@ class Tesseract extends Model {
 				data = [data]
 			}
 
+			if(data.length === 0){
+				return
+			}
+
 			var tempRows = []
 			if (this.clusterSync && !disableClusterUpdate) {
 				await this.clusterUpdate(data)
 			} else {
 				for (var i = 0; i < data.length; i++) {
-					var tempRow = this.dataMap[data[i][this.idProperty]]
+					let tempRow
+					if (Array.isArray(data[i])) {
+            			tempRow = this.dataMap[data[i][this.idIndex]]
+					}else{
+						tempRow = this.dataMap[data[i][this.idProperty]]
+					}
 					if (tempRow) {
 						this.generateRow(data[i], this.columns, tempRow)
 					} else {
@@ -3094,11 +3099,12 @@ class Tesseract extends Model {
 		})
 	}
 
-	generateRow(data, columns, dataHolder = undefined) {
+	generateRow(data, columns, dataHolder = undefined, updateDataMap = true) {
 		let copyData = true
 		let arrayDataType = false
 
 		if (dataHolder !== undefined) {
+			updateDataMap = false
 			if (dataHolder === data) {
 				copyData = false
 			}
@@ -3156,8 +3162,11 @@ class Tesseract extends Model {
 				dataHolder[propertyName] = this.resolve(column.resolve, dataHolder)
 			}
 		}
+		
+		if(updateDataMap){
+			this.dataMap[dataHolder[this.idProperty]] = dataHolder
+		}
 
-		this.dataMap[dataHolder[this.idProperty]] = dataHolder
 		return dataHolder;
 	}
 
@@ -3317,6 +3326,7 @@ let getSimpleHeader = (allColumns, excludeHiddenColumns) => {
                 title: x.title || x.name,
                 type: x.type || 'auto',
                 hidden: x.hidden,
+                enum: x.enum,
                 primaryKey: x.primaryKey
             }
         })
