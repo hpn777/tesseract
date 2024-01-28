@@ -23,7 +23,7 @@
     "browserify": "^16.5.0",
     "flat": "^4.1.0",
     "tape": "4.9.1",
-    "uglifyjs": "^2.4.11"
+    "uglify-js": "^3.17.4"
   },
   "main": "index.js",
   "directories": {
