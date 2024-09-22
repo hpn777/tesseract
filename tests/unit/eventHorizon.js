@@ -7,7 +7,7 @@ const { tapeAssert, assertArraysMatch } = require('./utils')
 const Tesseract = require('../../lib/tesseract')
 const EventHorizon = require('../../lib/eventHorizon')
 
-tape('EventHorizon / Resolver test', t => {
+tape('EventHorizon / Resolver test', async t => {
 
     let messagesDef = {
         id: 'messages',
@@ -42,7 +42,7 @@ tape('EventHorizon / Resolver test', t => {
     let messages = eventHorizon.createTesseract('messages', messagesDef)
     let users = eventHorizon.createTesseract('users', usersDef)
 
-    let session = eventHorizon.createSession({
+    let session = await eventHorizon.createSession({
         table: 'messages',
         filter: [{
             type: 'number',
@@ -114,7 +114,7 @@ tape('EventHorizon / Resolver test', t => {
         { id: 1, name: 'rafal' } 
     ]
 
-    var usersSession = eventHorizon.createSession({
+    var usersSession = await eventHorizon.createSession({
         table: 'users',
         subSessions: {
             a: {
