@@ -6,19 +6,20 @@ const { applyOrder, createSessionProxyConfig } = require("../../lib/utils");
 const objectDef = createSessionProxyConfig(() => undefined, [
   { name: "maybeNumber" },
   { name: "maybeString" },
+  { name: "status" },
   { name: "partitionByZeroish", expression: "maybeNumber > 0 ? 1 : 0" }
 ]);
 
 const data = [
-  { maybeNumber: -5, maybeString: "👻" },
-  { maybeNumber: 10.5, maybeString: "foo" },
-  { maybeNumber: 10, maybeString: "foo" },
-  { maybeNumber: 10, maybeString: "bar2" },
-  { maybeNumber: 10, maybeString: null },
-  { maybeNumber: 10, maybeString: "" },
-  { maybeNumber: null, maybeString: "bar" },
-  { maybeNumber: 0, maybeString: "123" },
-  { maybeNumber: 30, maybeString: "" }
+  { maybeNumber: -5, maybeString: "👻", status: true },
+  { maybeNumber: 10.5, maybeString: "foo", status: true },
+  { maybeNumber: 10, maybeString: "foo", status: false },
+  { maybeNumber: 10, maybeString: "bar2", status: true },
+  { maybeNumber: 10, maybeString: null, status: false },
+  { maybeNumber: 10, maybeString: "", status: false },
+  { maybeNumber: null, maybeString: "bar", status: true },
+  { maybeNumber: 0, maybeString: "123", status: true },
+  { maybeNumber: 30, maybeString: "", status: false }
 ];
 
 test("applyOrder without sort", t => {
@@ -44,7 +45,7 @@ test("applyOrder sorting using expression", t => {
     ],
     data,
     objectDef
-  );
+  ).map(x => ({ maybeNumber: x.maybeNumber, maybeString: x.maybeString }));
 
   t.deepEqual(sorted, [
     { maybeNumber: -5, maybeString: "👻" },
@@ -72,6 +73,12 @@ testSorting(
   data,
   [{ field: "maybeNumber", direction: "desc" }],
   [[30], [10.5], [10], [10], [10], [10], [0], [-5], [null]]
+);
+
+testSorting(
+  data,
+  [{ field: "status", direction: "desc" }],
+  [[true], [true], [true], [true], [true], [false], [false], [false], [false]]
 );
 
 testSorting(

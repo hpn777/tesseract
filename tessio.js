@@ -1293,8 +1293,11 @@ class EventHorizon {
 				idsCache = {}
 			}, 100)
 
-			newTesseract = this.createTesseract(name, options)
-			newTesseract.update(session.groupData(), true)
+			newTesseract = this.get(name) 
+			if(!newTesseract){
+				newTesseract = this.createTesseract(name, options)
+				newTesseract.update(session.groupData(), true)
+			}
 			session.on('dataUpdate', (data) => {
 				if (data.addedIds.length !== 0)
 					mapIds(idsCache, data.addedIds)
@@ -1304,8 +1307,11 @@ class EventHorizon {
 				clearQueue.run()
 			}, session)
 		} else {
-			newTesseract = this.createTesseract(name, options)
-			newTesseract.update(session.getLinq().select(x => x.object).toArray(), true)
+			newTesseract = this.get(name) 
+			if(!newTesseract){
+				newTesseract = this.createTesseract(name, options)
+				newTesseract.update(session.getLinq().select(x => x.object).toArray(), true)
+			}
 			session.on('dataUpdate', (data) => {
 				if (data.addedIds.length !== 0)
 					newTesseract.add(data.addedData.select(x => x.object).toArray())
@@ -3651,6 +3657,21 @@ function compareFieldSource(field, i, asc) {
     const left = asc ? `a${i}` : `b${i}`
     const right = asc ? `b${i}` : `a${i}`
 
+    // return `
+    //     const a${i} = a.${field}, b${i} = b.${field};
+
+    //     if (${left} === undefined || ${left} === null) {
+    //         return -1;
+    //     } else if (${right} === undefined || ${right} === null) {
+    //         return 1;
+    //     }
+
+    //     const r${i} = ${left}.localeCompare(${right});
+    //     if (r${i} !== 0) {
+    //         return r${i};
+    //     }
+    // `
+
     return `
         const a${i} = a.${field}, b${i} = b.${field};
 
@@ -3659,10 +3680,16 @@ function compareFieldSource(field, i, asc) {
         } else if (${right} === undefined || ${right} === null) {
             return 1;
         }
-
-        const r${i} = ${left}.localeCompare(${right});
-        if (r${i} !== 0) {
-            return r${i};
+        switch (typeof ${left}) {
+            case 'boolean':
+                return ${left} === true ? 1 : -1;
+            case 'bigint':
+                return ${left} > ${right} ? 1 : -1;
+            default:
+                const r${i} = ${left}.localeCompare(${right});
+                if (r${i} !== 0) {
+                    return r${i};
+                }
         }
     `
 }
