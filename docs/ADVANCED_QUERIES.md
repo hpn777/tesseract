@@ -579,3 +579,276 @@ const highValueQuery = createDynamicSalesQuery(
 
 console.log('Dynamic high value query:', highValueQuery.getData());
 ```
+
+## Advanced GroupBy and SubSessions
+
+### Understanding GroupBy Operations
+
+GroupBy operations in Tesseract allow you to aggregate data across multiple dimensions, similar to SQL GROUP BY clauses but with real-time updates.
+
+```javascript
+// Multi-dimensional grouping
+const multiDimensionalSession = eventHorizon.createSession({
+    id: 'multi-dimensional-sales',
+    table: 'sales',
+    groupBy: [
+        { dataIndex: 'region' },      // First level grouping
+        { dataIndex: 'quarter' },     // Second level grouping  
+        { dataIndex: 'product' }      // Third level grouping
+    ],
+    columns: [
+        { name: 'region' },
+        { name: 'quarter' },
+        { name: 'product' },
+        {
+            name: 'totalSales',
+            value: 'amount',
+            aggregator: 'sum'
+        },
+        {
+            name: 'salesCount',
+            value: 1,
+            aggregator: 'sum'
+        },
+        {
+            name: 'avgSaleValue',
+            value: 'amount',
+            aggregator: 'avg'
+        }
+    ],
+    includeLeafs: false  // Only show aggregated groups, not individual records
+});
+
+// Get hierarchical grouped data
+const groupedSalesData = multiDimensionalSession.groupData();
+console.log('Multi-dimensional sales analysis:');
+
+function displayGroupHierarchy(data, level = 0) {
+    const indent = '  '.repeat(level);
+    
+    data.forEach(item => {
+        if (level === 0) {
+            console.log(`${indent}🌍 Region: ${item.region} - Total: $${item.totalSales}`);
+        } else if (level === 1) {
+            console.log(`${indent}📅 Q${item.quarter} - Sales: $${item.totalSales} (${item.salesCount} orders)`);
+        } else if (level === 2) {
+            console.log(`${indent}📦 ${item.product} - $${item.totalSales} (avg: $${item.avgSaleValue.toFixed(2)})`);
+        }
+        
+        // Recursively display children
+        if (item.children && item.children.length > 0) {
+            displayGroupHierarchy(item.children, level + 1);
+        }
+    });
+}
+
+displayGroupHierarchy(groupedSalesData);
+```
+
+### SubSessions for Relational Aggregation
+
+SubSessions enable complex relational queries by creating aggregated views of related tables that automatically update when source data changes.
+
+```javascript
+// Create related tables for demonstration
+const customersTable = eventHorizon.createTesseract('customers', {
+    columns: [
+        { name: 'id', primaryKey: true, columnType: 'number' },
+        { name: 'name', columnType: 'text' },
+        { name: 'segment', columnType: 'text' },
+        { name: 'region', columnType: 'text' }
+    ]
+});
+
+const ordersTable = eventHorizon.createTesseract('orders', {
+    columns: [
+        { name: 'id', primaryKey: true, columnType: 'number' },
+        { name: 'customer_id', columnType: 'number' },
+        { name: 'order_value', columnType: 'number' },
+        { name: 'order_date', columnType: 'date' },
+        { name: 'status', columnType: 'text' }
+    ]
+});
+
+// Add sample data
+customersTable.add([
+    { id: 1, name: 'Acme Corp', segment: 'Enterprise', region: 'North' },
+    { id: 2, name: 'TechStart Inc', segment: 'Startup', region: 'West' },
+    { id: 3, name: 'Global Systems', segment: 'Enterprise', region: 'East' }
+]);
+
+ordersTable.add([
+    { id: 101, customer_id: 1, order_value: 50000, order_date: new Date('2023-01-15'), status: 'completed' },
+    { id: 102, customer_id: 1, order_value: 25000, order_date: new Date('2023-02-01'), status: 'completed' },
+    { id: 103, customer_id: 2, order_value: 15000, order_date: new Date('2023-01-20'), status: 'pending' },
+    { id: 104, customer_id: 3, order_value: 75000, order_date: new Date('2023-02-10'), status: 'completed' }
+]);
+
+// Create session with subSessions for customer analysis
+const customerAnalysisSession = eventHorizon.createSession({
+    id: 'customer-analysis',
+    table: 'customers',
+    subSessions: {
+        // SubSession for order statistics
+        orderMetrics: {
+            table: 'orders',
+            columns: [
+                {
+                    name: 'customer_id',
+                    primaryKey: true
+                },
+                {
+                    name: 'totalOrderValue',
+                    value: 'status == "completed" ? order_value : 0',
+                    aggregator: 'sum'
+                },
+                {
+                    name: 'pendingOrderValue', 
+                    value: 'status == "pending" ? order_value : 0',
+                    aggregator: 'sum'
+                },
+                {
+                    name: 'orderCount',
+                    value: 1,
+                    aggregator: 'sum'
+                },
+                {
+                    name: 'avgOrderValue',
+                    value: 'order_value',
+                    aggregator: 'avg'
+                },
+                {
+                    name: 'lastOrderDate',
+                    value: 'order_date',
+                    aggregator: 'max'
+                }
+            ],
+            groupBy: [{ dataIndex: 'customer_id' }]
+        }
+    },
+    // Group customers by segment for aggregated analysis
+    groupBy: [{ dataIndex: 'segment' }],
+    columns: [
+        { name: 'segment' },
+        {
+            name: 'customerCount',
+            value: 1,
+            aggregator: 'sum'
+        },
+        {
+            name: 'segmentRevenue',
+            value: 'completedOrderValue || 0',
+            aggregator: 'sum',
+            resolve: {
+                underlyingField: 'id',
+                session: 'orderMetrics',
+                valueField: 'customer_id', 
+                displayField: 'totalOrderValue'
+            }
+        },
+        {
+            name: 'segmentPipeline',
+            value: 'pendingOrderValue || 0',
+            aggregator: 'sum',
+            resolve: {
+                underlyingField: 'id',
+                session: 'orderMetrics',
+                valueField: 'customer_id',
+                displayField: 'pendingOrderValue'
+            }
+        },
+        {
+            name: 'totalOrders',
+            value: 'orderCount || 0',
+            aggregator: 'sum', 
+            resolve: {
+                underlyingField: 'id',
+                session: 'orderMetrics',
+                valueField: 'customer_id',
+                displayField: 'orderCount'
+            }
+        },
+        {
+            name: 'revenuePerCustomer',
+            value: 'segmentRevenue / customerCount',
+            aggregator: 'expression'
+        }
+    ],
+    includeLeafs: false
+});
+
+console.log('Customer Segment Analysis:');
+const segmentData = customerAnalysisSession.groupData();
+segmentData.forEach(segment => {
+    console.log(`\n💼 ${segment.segment} Segment:`);
+    console.log(`  👥 Customers: ${segment.customerCount}`);
+    console.log(`  💰 Revenue: $${segment.segmentRevenue.toLocaleString()}`);
+    console.log(`  📊 Pipeline: $${segment.segmentPipeline.toLocaleString()}`);
+    console.log(`  📦 Total Orders: ${segment.totalOrders}`);
+    console.log(`  💵 Revenue per Customer: $${segment.revenuePerCustomer.toLocaleString()}`);
+});
+```
+
+### Real-time Updates with GroupBy and SubSessions
+
+```javascript
+// Monitor changes in grouped and relational data
+customerAnalysisSession.on('dataUpdate', (updateData) => {
+    console.log('\n🔄 Customer Analysis Updated');
+    console.log('Updated segment data:');
+    
+    const updatedData = customerAnalysisSession.groupData();
+    updatedData.forEach(segment => {
+        console.log(`  ${segment.segment}: $${segment.segmentRevenue.toLocaleString()} revenue, ${segment.customerCount} customers`);
+    });
+});
+
+// Simulate real-time updates
+console.log('\n🎬 Simulating business activity...');
+
+setTimeout(() => {
+    console.log('\n📦 New large order placed...');
+    ordersTable.add({
+        id: 105,
+        customer_id: 2,
+        order_value: 45000,
+        order_date: new Date(),
+        status: 'completed'
+    });
+}, 2000);
+
+setTimeout(() => {
+    console.log('\n🏢 New enterprise customer added...');
+    customersTable.add({
+        id: 4,
+        name: 'MegaCorp Ltd',
+        segment: 'Enterprise', 
+        region: 'South'
+    });
+    
+    // Add order for new customer
+    ordersTable.add({
+        id: 106,
+        customer_id: 4,
+        order_value: 100000,
+        order_date: new Date(),
+        status: 'pending'
+    });
+}, 4000);
+
+setTimeout(() => {
+    console.log('\n✅ Pending order completed...');
+    ordersTable.update([{
+        id: 103,
+        customer_id: 2,
+        order_value: 15000,
+        order_date: new Date('2023-01-20'),
+        status: 'completed'  // Changed from pending to completed
+    }]);
+}, 6000);
+```
+
+console.log('✅ Advanced GroupBy and SubSessions examples completed');
+console.log('🔗 SubSessions enable real-time relational aggregation');
+console.log('📊 GroupBy supports multi-dimensional data analysis');
+console.log('⚡ All operations maintain live updates as data changes');

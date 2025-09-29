@@ -158,9 +158,79 @@ Creates a tesseract from a session, handling groupBy and event wiring.
 - **session**: Session instance.
 
 #### createSession(parameters, reuseSession = false)
-Creates a new session or reuses an existing one.
-- **parameters**: Session configuration.
+Creates a new session or reuses an existing one. Sessions provide filtered, sorted, and grouped views of data with optional relational queries through subSessions.
+
+**Parameters:**
+- **parameters**: Session configuration object with the following properties:
+  - **id**: Optional session identifier
+  - **table**: Source table name (string) or nested session config (object)
+  - **filter**: Array of filter objects for data filtering
+  - **sort**: Array of sort configurations
+  - **columns**: Column definitions for the session
+  - **groupBy**: Array of grouping configurations for data aggregation
+  - **subSessions**: Object defining relational queries to other tables
+  - **includeLeafs**: Boolean to include leaf nodes in grouped data
 - **reuseSession**: If true, reuses an existing session.
+
+**SubSessions Configuration:**
+SubSessions enable relational queries similar to SQL JOINs with real-time updates:
+
+```javascript
+subSessions: {
+    sessionName: {
+        table: 'relatedTable',        // Related table name
+        columns: [                    // Aggregated columns definition
+            {
+                name: 'groupField',   // Field to group by
+                primaryKey: true
+            },
+            {
+                name: 'aggregatedValue',
+                value: 'fieldToAggregate', // Field or expression to aggregate
+                aggregator: 'sum|avg|max|min|count'
+            }
+        ],
+        filter: [...],                // Optional filters for the subSession
+        groupBy: [{ dataIndex: 'groupField' }] // Required groupBy configuration
+    }
+}
+```
+
+**Column Resolve Configuration:**
+Use resolve to link main session columns with subSession data:
+
+```javascript
+columns: [
+    {
+        name: 'resolvedColumn',
+        resolve: {
+            underlyingField: 'idField',      // Field in main table
+            session: 'subSessionName',       // Reference to subSession
+            valueField: 'groupField',        // Field in subSession to match
+            displayField: 'aggregatedValue'  // Field to display from subSession
+        }
+    }
+]
+```
+
+**GroupBy Configuration:**
+GroupBy enables data aggregation with multiple levels:
+
+```javascript
+groupBy: [
+    { dataIndex: 'level1Field' },    // First grouping level
+    { dataIndex: 'level2Field' },    // Second grouping level
+    { dataIndex: 'level3Field' }     // Third grouping level
+]
+```
+
+**Aggregator Types:**
+- **sum**: Sum of values
+- **avg**: Average of values  
+- **max**: Maximum value
+- **min**: Minimum value
+- **count**: Count of records
+- **expression**: Custom expression-based aggregation
 
 #### generateHash(obj)
 Generates a hash for a session configuration.
