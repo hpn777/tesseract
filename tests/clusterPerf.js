@@ -118,7 +118,7 @@ EVH.connect({clientName: 'client1'})
          console.log('--------------', messages.dataCache.length)
         // console.time('perf')
         let dupa = async ()=>{
-            while(ii <2000000){
+            while(ii <200000){
                 await messages.update([{id: ii++, message: 'jdoijs oifcj nds;of js[oid dh fiudsh fiuw hdsiufh sdiu hfidsu hfiudspa', user: 2, status: Math.ceil(Math.random()*3)}])
                 
             }
