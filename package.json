@@ -9,6 +9,7 @@
     "build:browser:min": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js",
     "test": "npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts",
     "test:perf": "npm run build && npx ts-node -P tsconfig.tests.json tests/performanceBenchmark.ts",
+    "test:sql-converter": "npm run build && npx ts-node -P tsconfig.tests.json tests/sqlToTessioConverter.ts",
     "test:docker": "docker compose up --build --exit-code-from tests tests"
   },
   "dependencies": {
