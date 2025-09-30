@@ -14,7 +14,10 @@ services:
     volumes:
       - "./:/home"
     working_dir: "/home"
-    command: [ "bash", "-c", "${FILE}" ]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: [ "bash", "-lc", "npm ci || npm i && npm run build && ${FILE}" ]
     depends_on:
       - redis
     networks:
@@ -25,7 +28,10 @@ services:
     volumes:
       - "./:/home"
     working_dir: "/home"
-    command: [ "node", "./tests/unit" ]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: [ "bash", "-lc", "npm ci || npm i && npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts" ]
     depends_on:
       - redis
     networks:

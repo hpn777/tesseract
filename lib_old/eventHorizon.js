@@ -20,7 +20,7 @@ const Tesseract = require('./tesseract')
 let {
 	smartDebounce,
 	guid
-} = require('../lib/utils')
+} = require('./utils')
 const {
 	Collection
 } = require('./dataModels/backbone')

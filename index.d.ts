@@ -1,4 +1,7 @@
-declare module 'tessio'
+// Re-export common dependencies
+export const backbone: any;
+export const lodash: any;
+export const linq: any;
 
 type UnionToIntersection<U> =
   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
@@ -12,12 +15,22 @@ type Bulkable<T> = T | T[]
 type Id = number | string
 
 interface DataUpdate<T> {
+  addedIds: (keyof T)[]
+  addedData: any  // LINQ enumerable
   updatedIds: (keyof T)[]
-  updatedData: T[]
+  updatedData: any  // LINQ enumerable
   updateReason?: UpdateReason,
   removedIds: (keyof T)[]
-  removedData: T[]
-  toJSON(): T
+  removedData: any  // LINQ enumerable
+  toJSON(): {
+    addedIds: (keyof T)[]
+    addedData: T[]
+    updatedIds: (keyof T)[]
+    updatedData: T[]
+    updateReason?: UpdateReason,
+    removedIds: (keyof T)[]
+    removedData: T[]
+  }
 }
 
 interface GetSessionDataRequest {
@@ -27,19 +40,23 @@ interface GetSessionDataRequest {
   limit?: number;
 }
 
-interface Session<T = any> {
+export interface Session<T = any> {
   on(e: 'dataUpdate', callback: (update: DataUpdate<T>) => void): void
-  getData(request?: GetSessionDataRequest): T
-  getLinq(request?: GetSessionDataRequest): T
+  getData(request?: GetSessionDataRequest): T[]
+  getLinq(request?: GetSessionDataRequest): any  // Returns LINQ enumerable
+  getById(id: Id): T
+  getCount(): number
   updateColumns(columns: TesseractColumn<T>[]): void
+  groupData(groupBy?: GroupBy[], includeLeafs?: boolean, nodeId?: string): T[]
+  groupSelectedData(selectedRowsIds: any, groupBy?: GroupBy[], includeLeafs?: boolean, nodeId?: string): T[]
   destroy(): void
 }
 
 interface CompareFilter {
   type?: string
   field: string
-  // TODO: Pull from /lib/expressionEngine.js
-  comparison: 'lt' | 'eq' | 'gt' | string
+  // From /lib/expressionEngine.js - supported comparison operators
+  comparison: 'lt' | '<' | 'eq' | '==' | '=' | 'gt' | '>' | 'gte' | '>=' | 'lte' | '<=' | 'ne' | '!=' | 'in' | 'notin' | 'like' | '~' | '!~' | 'between' | string
   value: any
 }
 
@@ -48,7 +65,7 @@ interface CustomFilter {
   value: string
 }
 
-type Filter = CustomFilter | CompareFilter
+export type Filter = CustomFilter | CompareFilter
 
 interface Sort {
   field: string
@@ -72,10 +89,12 @@ type AggregatorFunction = (
 interface ColumnRegular<T> {
   name: keyof T
   primaryKey?: boolean
+  secondaryKey?: boolean
+  columnType?: 'string' | 'text' | 'number' | 'date' | 'boolean' | 'object'
   value?(data: any): any
   defaultValue?(data: any): any
   expression?: string
-  aggregator?: 'sum' | 'avg' | 'max' | 'min' | AggregatorFunction
+  aggregator?: 'sum' | 'avg' | 'max' | 'min' | 'count' | 'expression' | AggregatorFunction
 }
 
 interface ResolveSession<T, S, D extends keyof S> {
@@ -104,7 +123,7 @@ interface ColumnResolved<T, S, D extends keyof S> {
 type Column<T, S, D extends keyof S> =
   ColumnRegular<T> | ColumnResolved<T, S, D>
 
-interface Query<T, S, D extends keyof (T | S)> {
+export interface Query<T, S, D extends keyof (T | S)> {
   id?: string
   table: T[D] | Query<T, S, D>
   columns?: Column<T, S, D>[]
@@ -113,6 +132,7 @@ interface Query<T, S, D extends keyof (T | S)> {
   groupBy?: GroupBy[]
   start?: number;
   limit?: number;
+  includeLeafs?: boolean;
   subSessions?: SubSessions<T, S, D>
 }
 
@@ -125,22 +145,28 @@ interface UnionQuery<T, S, D extends keyof (T | S)> {
   columns: Column<T, S, D>[]
 }
 
-interface TesseractColumn<T> {
+export interface TesseractColumn<T> {
   name: keyof T
   primaryKey?: boolean
+  secondaryKey?: boolean
+  columnType?: 'string' | 'text' | 'number' | 'date' | 'boolean' | 'object'
   value?(data: any): any
+  defaultValue?(data: any): any
+  expression?: string
+  aggregator?: 'sum' | 'avg' | 'max' | 'min' | AggregatorFunction
 }
 
-interface TesseractOptions<T> {
+export interface TesseractOptions<T> {
   id: string
   idProperty?: keyof T
   resolve?: ResolveFunction
   columns: TesseractColumn<T>[]
   clusterSync?: boolean
   persistent?: boolean
+  defferedDataUpdateTime?: number
 }
 
-declare class Tesseract<T> {
+export declare class Tesseract<T = any> {
 
   constructor(options: TesseractOptions<T>)
 
@@ -165,44 +191,51 @@ declare class Tesseract<T> {
   update(data: Bulkable<Partial<T>>, disableClusterUpdate?: boolean): DataRow<T>[]
   remove(data: Id[], disableClusterUpdate?: boolean): void
   get(key: string): T
-  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session<T>
   getData(): DataRow<T>[]
   getById(id: Id): T
-  clear(disableClusterUpdate?: boolean):  Promise<any>
+  getSimpleHeader(): TesseractColumn<T>[]
+  clear(disableClusterUpdate?: boolean): Promise<any>
   reset(data: T[], disableClusterUpdate?: boolean): DataRow<T>[]
 }
 
-interface EventHorizonOptions {
-  namespace: string
+export interface EventHorizonOptions {
+  namespace?: string
+  commandPort?: any
 }
 
-declare class EventHorizon {
-  constructor(option: EventHorizonOptions)
+export declare class EventHorizon {
+  constructor(options?: EventHorizonOptions)
   on(...args: any[]): any
   off(...args: any[]): any
   once(...args: any[]): any
   trigger(...args: any[]): any
   resolve(resolve: any, data: any): any
   get(key: string): any
-  getTesseract(table: string): DataRow<any>[] | undefined
+  getTesseract(table: string): Tesseract<any> | undefined
   createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   registerTesseract(tesseract: Tesseract<any>): void
   registerSession(session: Session): void
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
-  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>, reuseSession?: boolean): Session
-  generateHash(): string
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>, reuseSession?: boolean): Session<T>
+  createUnion<T, S, D extends keyof (T | S)>(name: string, options: UnionQuery<T, S, D>): Tesseract<T>
+  generateHash(obj: any): string
   getSession(sessionName: string): Session
 }
 
 interface ClusterConnectOptions {
-  clientName: string
+  redis?: {
+    host?: string
+    port?: number
+  }
   syncSchema?: boolean
 }
 
-declare class Cluster {
-
-  constructor(option: EventHorizonOptions, evH?: EventHorizon)
+export declare class TessSync {
+  constructor(options?: EventHorizonOptions, evH?: EventHorizon)
   connect(options: ClusterConnectOptions): Promise<any>
+  close(): void
+  clear(): Promise<any>
   createTesseract<T>(name: string, options: TesseractOptions<T>): Promise<Tesseract<T>> | Tesseract<T>
   on(...args: any[]): any
   off(...args: any[]): any
@@ -210,17 +243,21 @@ declare class Cluster {
   trigger(...args: any[]): any
   resolve(resolve: any, data: any): any
   get(key: string): any
-  clear(): Promise<any>
-  getTesseract(table: string): DataRow<any> | undefined
-  pullTesseract(name: string, timeout: number, retryNr: number): Promise<DataRow<any>>
+  getTesseract(table: string): Tesseract<any> | undefined
+  pullTesseract(name: string, timeout?: number, retryNr?: number): Promise<Tesseract<any>>
   createTesseractFromSession<T>(name: string, session: Session): Tesseract<T>
-  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session
-  createSessionAsync<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Promise<Session>
+  createSession<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Session<T>
+  createSessionAsync<T, S, D extends keyof (T | S)>(query: Query<T, S, D>): Promise<Session<T>>
   createUnion<T, S, D extends keyof (T | S)>(name: string, query: UnionQuery<T, S, D>): Tesseract<T>
   getSession(sessionName: string): Session
 }
 
-declare enum UpdateReason {
+// Alias for backward compatibility
+export declare class Cluster extends TessSync {}
+export declare class ClusterRedis extends TessSync {}
+
+export enum UpdateReason {
   UPDATE_REASON_DATA = 'dataUpdate',
   UPDATE_REASON_COLUMNS_CHANGED = 'columnsChanged',
+  UPDATE_REASON_DATA_RESET = 'dataReset',
 }

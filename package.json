@@ -3,13 +3,15 @@
   "version": "3.2.13",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
-    "test": "docker compose up redis tests",
-    "redis": "docker-compose up redis",
-    "all": "docker-compose up redis",
-    "down": "docker-compose down",
-    "shell": "docker-compose run --rm shell sh",
-    "build": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
-    "build_min": "browserify -r ./export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:browser": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
+    "build:browser:min": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js",
+    "test": "npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts",
+    "test:docker": "docker compose up --build --exit-code-from tests tests",
+    "test:unit": "npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts",
+    "test:expression": "npm run build && npx ts-node -P tsconfig.tests.json tests/expressionEngine.ts",
+    "test:subsessions": "npm run build && npx ts-node -P tsconfig.tests.json tests/subSessions.ts"
   },
   "dependencies": {
     "ioredis": "^5.2.3",
@@ -19,15 +21,22 @@
     "rxjs": "6.3.3"
   },
   "devDependencies": {
+    "@types/benchmark": "^2.1.5",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^18.19.127",
+    "@types/tape": "^5.8.1",
     "benchmark": "^2.1.4",
     "browserify": "^16.5.0",
     "flat": "^4.1.0",
     "tape": "4.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.5",
     "uglify-js": "^3.17.4"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
-    "lib": "lib",
+    "lib": "dist/lib",
     "test": "tests"
   },
   "repository": {

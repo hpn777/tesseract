@@ -1,8 +1,8 @@
-let EventHorizon = require('./lib/eventHorizon')
-let Tesseract = require('./lib/tesseract')
-let Cluster = require('./lib/clusterRedis')
-let ClusterRedis = require('./lib/clusterRedis')
-let backbone = require('./lib/dataModels/backbone')
+let EventHorizon = require('./dist/lib/eventHorizon')
+let Tesseract = require('./dist/lib/tesseract')
+let Cluster = require('./dist/lib/clusterRedis')
+let ClusterRedis = require('./dist/lib/clusterRedis')
+let backbone = require('./dist/lib/dataModels/backbone')
 let lodash = require('lodash')
 let linq = require('linq')
 
