@@ -41,29 +41,24 @@ export interface SessionConfig {
   config: any;
 }
 
-/**
- * Session class for managing filtered/grouped data views
- * methods: getData, filterData, groupData, groupSelectedData
- * events: update, dataRemove
- */
 export class Session extends Model {
-  public filters: Filters;
-  public isLive: boolean = true;
+  private filters: Filters;
+  private isLive: boolean = true;
   public tesseract: any;
   public getTesseract: () => Promise<any>;
   public config: any;
-  public columns: any[];
-  public defaultObjDef: any;
-  public dataWrapper: any;
-  public requireFiltring: boolean = false;
-  public hasGarbage: boolean = true;
-  public idProperty: string;
-  public idIndex: number;
-  public permanentFilter: any;
-  public dataCache: any[] = [];
-  public dataMap: { [key: string]: any } = {};
-  public requireSorting: boolean = false;
-  public requireDataReset: boolean = false;
+  private columns: any[];
+  private defaultObjDef: any;
+  private dataWrapper: any;
+  private requireFiltring: boolean = false;
+  private hasGarbage: boolean = true;
+  private idProperty: string;
+  private idIndex: number;
+  private permanentFilter: any;
+  private dataCache: any[] = [];
+  private dataMap: { [key: string]: any } = {};
+  private requireSorting: boolean = false;
+  private requireDataReset: boolean = false;
 
   constructor(model: SessionConfig, _options?: any) {
     super(model);

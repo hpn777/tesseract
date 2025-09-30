@@ -1,5 +1,7 @@
 // Core type definitions for Tesseract
 
+import { Tesseract } from "./export";
+
 export interface DataRow {
   [key: string]: any;
 }
@@ -26,6 +28,7 @@ export interface ColumnDef {
     // semantic column classification used in some places
     columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric';
     // additional fields used by utils/session building
+    defaultValue?: string | number | Function;
     value?: string | number | Function;
     hidden?: boolean;
     enum?: any[];
@@ -35,8 +38,7 @@ export interface ColumnDef {
 export interface FilterDef {
   field: string;
   // core code checks `comparison`, legacy places used `type`
-  comparison?: '=' | '>' | '<' | '>=' | '<=' | '!=' | 'in' | 'notin' | 'like' | '~' | '!~' | 'between' | string;
-  type?: '=' | '>' | '<' | '>=' | '<=' | '!=' | 'in' | 'notin' | 'like' | '~' | '!~' | 'between' | string;
+  comparison?: '==' | '>' | '<' | '>=' | '<=' | '!=' | 'in' | 'notin' | 'like' | 'notlike' | '~' | '!~' | 'custom';
   value: any;
 }
 

@@ -8,10 +8,8 @@
     "build:browser": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",
     "build:browser:min": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" | uglifyjs > ./tessio_min.js",
     "test": "npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts",
-    "test:docker": "docker compose up --build --exit-code-from tests tests",
-    "test:unit": "npm run build && npx ts-node -P tsconfig.tests.json tests/index.ts",
-    "test:expression": "npm run build && npx ts-node -P tsconfig.tests.json tests/expressionEngine.ts",
-    "test:subsessions": "npm run build && npx ts-node -P tsconfig.tests.json tests/subSessions.ts"
+    "test:perf": "npm run build && npx ts-node -P tsconfig.tests.json tests/performanceBenchmark.ts",
+    "test:docker": "docker compose up --build --exit-code-from tests tests"
   },
   "dependencies": {
     "ioredis": "^5.2.3",

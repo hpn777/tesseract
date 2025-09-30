@@ -16,6 +16,7 @@ copies or substantial portions of the Software.
 
 import * as _ from 'lodash';
 import { Tesseract } from './tesseract';
+import { Session } from './session';
 import { smartDebounce } from './utils';
 import { Collection } from './dataModels/backbone';
 import { 
@@ -27,29 +28,11 @@ import {
   TesseractOptions,
   ColumnDef,
   ResolveConfig,
-  CreateSessionParameters
+  CreateSessionParameters,
 } from '../types';
 
 const UPDATE_REASON_DATA = 'dataUpdate';
 const UPDATE_REASON_DATA_RESET = 'dataReset';
-
-interface Session {
-  get(key: string): any;
-  getLinq(): any;
-  getData(): DataRow[];
-  getSimpleHeader(): any[];
-  groupData(): DataRow[];
-  groupSelectedData(idsCache: { [key: string]: boolean }): DataRow[];
-  collectGarbage(): void;
-  updateData(data: DataRow[], dissableClusterUpdate?: boolean, updateReason?: string): void;
-  createSession(parameters: CreateSessionParameters): Session;
-  on(event: string, callback: EventCallback, context?: any): void;
-  off(event?: string, callback?: EventCallback, context?: any): void;
-  trigger(event: string, ...args: any[]): void;
-  destroy(): void;
-  config: SessionConfig & { groupBy?: { dataIndex: string }[] };
-  tesseract: Tesseract;
-}
 
 /**
  * EventHorizon - Central event management and data orchestration system
@@ -198,8 +181,8 @@ export class EventHorizon {
   public registerSession(newSession: Session): void {
     if (!newSession.config.columns) return;
 
-    const columnsWithResolve = newSession.config.columns.filter(x => (x as any).resolve);
-    
+    const columnsWithResolve = newSession.config.columns.filter((x: ColumnDef) => x.resolve) as ColumnDef[];
+
     columnsWithResolve.forEach(column => {
       const resolveConfig = (column as any).resolve as ResolveConfig;
       if (!resolveConfig.childrenTable) {
@@ -422,7 +405,7 @@ export class EventHorizon {
     if (tesseract) {
       parameters.id = parameters.id || sessionName;
       this.sessions.add(tesseract.createSession(parameters as any));
-      const session = this.sessions.get(parameters.id) as unknown as Session;
+      const session = this.sessions.get(parameters.id) as Session;
 
       session.on('destroy', () => {
         tempCaches.forEach(x => {
@@ -457,7 +440,7 @@ export class EventHorizon {
   }
 
   public getSession(sessionName: string): Session | undefined {
-    return this.sessions.get(sessionName) as unknown as Session | undefined;
+    return this.sessions.get(sessionName) as Session | undefined;
   }
 }
 

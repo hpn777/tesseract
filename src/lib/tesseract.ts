@@ -18,12 +18,10 @@ import { Model, Collection, SetOptions } from './dataModels/backbone';
 import * as _ from 'lodash';
 import * as linq from 'linq';
 import { getHeader, getSimpleHeader } from './utils';
-import { ColumnDef as TypesColumnDef } from '../types';
-
-// Forward declaration for Session
-export interface ISession {
-  clearSession(): void;
-}
+import { Session } from './session';
+import { 
+  ColumnDef
+} from '../types';
 
 // Minimal expressionEngine facade to support expressions
 const expressionEngine = {
@@ -33,7 +31,7 @@ const expressionEngine = {
 
 export interface TesseractConfig {
   data?: any[];
-  columns?: TypesColumnDef[];
+  columns?: ColumnDef[];
   primaryKey?: string;
   clusterSync?: boolean;
   defferedDataUpdateTime?: number;
@@ -42,47 +40,31 @@ export interface TesseractConfig {
   persistent?: boolean;
 }
 
-export interface ColumnDef {
-  id?: string;
-  name: string;
-  title?: string;
-  primaryKey?: boolean;
-  secondaryKey?: boolean;
-  value?: string | Function;
-  defaultValue?: any;
-  type?: string;
-  columnType?: 'dimension' | 'metric';
-  aggregator?: 'sum' | 'avg' | 'max' | 'min' | 'count' | 'first' | 'last' | 'expression' | 'none' | Function;
-  expression?: string;
-  customExpression?: any;
-  resolve?: string | Function;
-}
-
 const UPDATE_REASON_DATA = 'dataUpdate';
 const UPDATE_REASON_DATA_RESET = 'dataReset';
 
 export class Tesseract extends Model {
   public id: string;
   public columns: ColumnDef[];
-  public dataCache: any[] = [];
-  public dataMap: { [key: string]: any } = {};
-  public sessions: Collection;
+  private dataCache: any[] = [];
+  private dataMap: { [key: string]: any } = {};
+  public sessions: Collection
   public idProperty: string = 'id';
   public idIndex: number = 0;
   public clusterSync: boolean = false;
   public persistent: boolean = false;
-  public secondaryIndexes: string[] = [];
-  public dataIndex: { [key: string]: { [key: string]: any[] } } = {};
-  public hasGarbage: boolean = false;
-  public objDef: any;
-  public defferedDataUpdateTime: number = 0;
-  public updatedRows: any[] = [];
-  public removedRows: any[] = [];
-  public defferedDataUpdate?: Function;
-  public defferedDataRemove?: Function;
+  private secondaryIndexes: string[] = [];
+  private dataIndex: { [key: string]: { [key: string]: any[] } } = {};
+  private hasGarbage: boolean = false;
+  private objDef: any;
+  private defferedDataUpdateTime: number = 0;
+  private updatedRows: any[] = [];
+  private removedRows: any[] = [];
+  private defferedDataUpdate?: Function;
+  private defferedDataRemove?: Function;
   public refreshData?: Function;
   public refreshTesseract?: Function;
-  public collectGarbage?: Function;
+  private collectGarbage?: Function;
   // Wire-in resolver function from constructor options (EventHorizon.resolve)
   public resolverFn?: (resolver: any, data: any) => any;
   
@@ -94,18 +76,15 @@ export class Tesseract extends Model {
     this.columns = (config.columns || []).map((raw: any) => {
       const name = (raw && (raw.name ?? (raw.id as string))) as string;
       const col: ColumnDef = {
-        id: (raw?.id ?? name) as string,
         name,
         title: raw?.title,
         primaryKey: raw?.primaryKey,
         secondaryKey: !!raw?.secondaryKey,
         value: raw?.value,
         defaultValue: raw?.defaultValue,
-        type: raw?.type ?? raw?.columnType,
         columnType: raw?.columnType,
         aggregator: raw?.aggregator,
         expression: raw?.expression,
-        customExpression: undefined,
         resolve: raw?.resolve,
       };
       return col;
@@ -232,7 +211,7 @@ export class Tesseract extends Model {
     }
   }
 
-  public createSession(config: any): ISession {
+  public createSession(config: any): Session {
     const id = config.id || this.generateGuid();
     
     // Import Session dynamically to avoid circular dependency
