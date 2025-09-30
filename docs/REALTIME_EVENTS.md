@@ -18,6 +18,10 @@ Tesseract uses an event-driven architecture to provide real-time updates when da
 ### Basic Event Setup
 
 ```javascript
+// For npm package usage:
+// const { EventHorizon } = require('tessio');
+
+// For local development:
 const { EventHorizon } = require('../index');
 const eventHorizon = new EventHorizon();
 

@@ -15,6 +15,10 @@ This guide covers fundamental CRUD operations and data manipulation with Tessera
 ### Simple Table Creation
 
 ```javascript
+// For npm package usage:
+// const { EventHorizon } = require('tessio');
+
+// For local development:
 const { EventHorizon } = require('../index');
 const eventHorizon = new EventHorizon();
 
@@ -52,7 +56,7 @@ const ordersTable = eventHorizon.createTesseract('orders', {
 
 ```javascript
 // Add a single product
-const newProduct = await productsTable.add({
+const newProduct = productsTable.add({
     id: 1,
     name: 'Wireless Headphones',
     price: 99.99,
@@ -74,17 +78,17 @@ const products = [
     { id: 4, name: 'Smartphone', price: 699.99, category: 'Electronics', inStock: true, createdAt: new Date() }
 ];
 
-const addedProducts = await productsTable.add(products);
+const addedProducts = productsTable.add(products);
 console.log(`Added ${addedProducts.length} products`);
 ```
 
 ### Asynchronous Addition with Promise
 
 ```javascript
-// Add data and wait for confirmation
-const addProductAsync = async () => {
+// Add data synchronously (Tesseract add is synchronous)
+const addProduct = () => {
     try {
-        const result = await productsTable.addAsync({
+        const result = productsTable.add({
             id: 5,
             name: 'Gaming Mouse',
             price: 79.99,

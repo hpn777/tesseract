@@ -27,11 +27,15 @@ The latest version of Tesseract includes:
 
 ```javascript
 // OLD (v1.x) - Direct table access
-const tesseract = require('tesseract');
+const tesseract = require('tessio');
 const table = new tesseract.Table('users', config);
 
-// NEW (v2.x) - EventHorizon pattern
-const { EventHorizon } = require('tesseract');
+// NEW (v2.x+) - EventHorizon pattern
+// For npm package usage:
+// const { EventHorizon } = require('tessio');
+
+// For local development:
+const { EventHorizon } = require('./index');
 const eventHorizon = new EventHorizon();
 const table = eventHorizon.createTesseract('users', config);
 ```

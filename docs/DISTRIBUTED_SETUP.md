@@ -45,7 +45,11 @@ const redisConfig = {
 ### Setting up TessSync
 
 ```javascript
-const { TessSync, EventHorizon } = require('../index');
+// For npm package usage:
+// const { ClusterRedis: TessSync, EventHorizon } = require('tessio');
+
+// For local development:
+const { ClusterRedis: TessSync, EventHorizon } = require('../index');
 
 // Create a TessSync instance for distributed operations
 const cluster = new TessSync(

@@ -13,6 +13,10 @@ npm install
 ### Basic Usage
 
 ```javascript
+// For npm package usage:
+// const { Tesseract, EventHorizon } = require('tessio');
+
+// For local development:
 const { Tesseract, EventHorizon } = require('./index');
 
 // Create an EventHorizon instance (data manager)
