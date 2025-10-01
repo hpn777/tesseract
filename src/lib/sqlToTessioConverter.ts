@@ -77,6 +77,12 @@ export class SqlToTessioConverter {
 
     /**
      * Convert a SQL query to Tessio session parameters
+     * 
+     * Key Features:
+     * - Supports nested table structures for proper WHERE + GROUP BY handling
+     * - Applies filters before aggregation to avoid architectural limitations
+     * - Converts SQL aggregation functions to Tessio aggregators
+     * - Handles subqueries as SubSessions where possible
      */
     public convertSql(sql: string): SqlParseResult {
         this.warnings = [];
@@ -304,20 +310,39 @@ export class SqlToTessioConverter {
         // Handle SELECT columns (including subqueries)
         config.columns = this.parseSelectClause(parsed.select, subQueries);
 
-        // Handle WHERE clause (including subqueries)
-        if (parsed.where) {
-            config.filter = this.parseWhereClause(parsed.where, subQueries);
+        // Critical Fix: Handle WHERE + GROUP BY combination with nested table structure
+        // This fixes the architectural limitation where filters cannot access fields after aggregation
+        if (parsed.where && parsed.groupBy) {
+            // Use nested table structure: apply filters before aggregation
+            const baseTable = config.table;
+            const filters = this.parseWhereClause(parsed.where, subQueries);
+            
+            config.table = {
+                table: baseTable,
+                filter: filters
+            };
+            
+            // Add GROUP BY to the outer config
+            config.groupBy = this.parseGroupByClause(parsed.groupBy);
+            this.addAggregationColumns(config, parsed.select);
+            
+            this.warnings.push('WHERE + GROUP BY converted to nested table structure (filters applied before aggregation)');
+        } else {
+            // Handle WHERE clause normally (no GROUP BY)
+            if (parsed.where) {
+                config.filter = this.parseWhereClause(parsed.where, subQueries);
+            }
+
+            // Handle GROUP BY normally (no WHERE)
+            if (parsed.groupBy) {
+                config.groupBy = this.parseGroupByClause(parsed.groupBy);
+                this.addAggregationColumns(config, parsed.select);
+            }
         }
 
         // Handle ORDER BY
         if (parsed.orderBy) {
             config.sort = this.parseOrderByClause(parsed.orderBy);
-        }
-
-        // Handle GROUP BY
-        if (parsed.groupBy) {
-            config.groupBy = this.parseGroupByClause(parsed.groupBy);
-            this.addAggregationColumns(config, parsed.select);
         }
 
         // Handle LIMIT and OFFSET
@@ -335,7 +360,25 @@ export class SqlToTessioConverter {
 
         // Handle HAVING (post-aggregation filters)
         if (parsed.having) {
-            this.warnings.push('HAVING clauses should be handled as post-processing filters on grouped data');
+            // HAVING clauses work on aggregated data, so they become regular filters
+            // but only if we're not already using nested table structure for WHERE
+            if (parsed.where && parsed.groupBy) {
+                // We already have nested structure, HAVING filters go on outer level
+                const havingFilters = this.parseWhereClause(parsed.having, subQueries);
+                if (config.filter) {
+                    config.filter.push(...havingFilters);
+                } else {
+                    config.filter = havingFilters;
+                }
+                this.warnings.push('HAVING clause converted to filters on aggregated columns');
+            } else if (parsed.groupBy) {
+                // Only GROUP BY, no WHERE - HAVING becomes regular filters
+                config.filter = this.parseWhereClause(parsed.having, subQueries);
+                this.warnings.push('HAVING clause converted to filters on aggregated columns');
+            } else {
+                this.warnings.push('HAVING clause without GROUP BY - treating as WHERE clause');
+                config.filter = this.parseWhereClause(parsed.having, subQueries);
+            }
         }
 
         // Handle subqueries as subSessions
@@ -788,6 +831,12 @@ export class SqlToTessioConverter {
         let example = `// Original SQL:\n// ${sql}\n\n`;
         example += `// Converted to Tessio:\n`;
         example += `const session = eventHorizon.createSession(${JSON.stringify(result.sessionConfig, null, 2)});\n\n`;
+        
+        // Add explanation for nested table structures
+        if (typeof result.sessionConfig.table === 'object') {
+            example += `// Note: Nested table structure is used to apply filters before aggregation.\n`;
+            example += `// This ensures WHERE clauses work correctly with GROUP BY operations.\n\n`;
+        }
         
         if (result.warnings.length > 0) {
             example += `// Warnings:\n`;

@@ -1,6 +1,7 @@
 // Core type definitions for Tesseract
 
 import { Tesseract } from "./export";
+import { ExpressionTree } from "./lib/expressionEngine";
 
 export interface DataRow {
   [key: string]: any;
@@ -25,6 +26,7 @@ export interface ColumnDef {
     title?: string;
     aggregator?: 'sum' | 'avg' | 'max' | 'min' | 'count' | 'first' | 'last' | 'expression' | 'none' | Function;
     expression?: string;
+    expressionTree?: ExpressionTree;
     // semantic column classification used in some places
     columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric';
     // additional fields used by utils/session building

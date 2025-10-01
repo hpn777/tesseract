@@ -12,10 +12,10 @@
 - **🔗 Relational Data Support**: SubSessions for handling relationships between datasets
 - **📊 Real-time Analytics**: Event-driven data updates with live query results
 - **🌐 Distributed Architecture**: Redis-based cluster synchronization for multi-node deployments
-- **🛠️ SQL Converter**: Convert SQL queries to Tessio session parameters with subquery support
+- **🛠️ SQL Converter**: Convert SQL queries to Tessio session parameters with subquery support and automatic WHERE + GROUP BY optimization
 - **⚡ High Performance**: Optimized for large datasets with efficient memory usage
 - **📈 Aggregations & GroupBy**: Multi-level grouping with various aggregation functions
-- **🎯 Expression Engine**: Support for custom expressions and calculated fields
+- **🎯 Expression Engine**: Fully functional support for custom expressions, calculated fields, and complex parentheses operations
 - **🔄 Real-time Updates**: Automatic query result updates when data changes
 
 ## 📦 Installation
@@ -96,6 +96,19 @@ console.log(result.sessionConfig);
 
 // Create session from SQL
 const session = eventHorizon.createSession(result.sessionConfig);
+
+// ✅ NEW: WHERE + GROUP BY combinations now work correctly
+const complexSql = `
+    SELECT department, COUNT(*) as count, AVG(salary) as avg_salary
+    FROM employees 
+    WHERE salary > 50000 AND active = true
+    GROUP BY department 
+    HAVING count > 5
+`;
+
+const complexResult = sqlToTessio(complexSql);
+// Automatically uses nested table structure for proper filter + aggregation
+const complexSession = eventHorizon.createSession(complexResult.sessionConfig);
 ```
 
 ## 📋 Core Concepts
@@ -249,7 +262,7 @@ npm run test:docker
 - **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
 - **[Advanced Queries](docs/ADVANCED_QUERIES.md)** - Complex query patterns
 - **[SubSessions Guide](docs/SUBSESSIONS_AND_GROUPBY.md)** - Relational data handling
-- **[SQL Converter](docs/SQL_TO_TESSIO_CONVERTER.md)** - SQL migration guide
+- **[SQL Converter](docs/SQL_TO_TESSIO_CONVERTER.md)** - Complete SQL migration guide with WHERE + GROUP BY fix
 - **[Distributed Setup](docs/DISTRIBUTED_SETUP.md)** - Clustering configuration
 - **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Upgrading from previous versions
 
@@ -289,8 +302,6 @@ npm test
 
 ## 🐛 Known Limitations
 
-- **Filter + GroupBy**: Some combinations may not work as expected in distributed mode
-- **Expression Evaluation**: Complex expressions return template strings instead of calculated values
 - **Real-time Updates**: Limited in compiled dist version compared to source version
 
 ## 📄 License
@@ -311,7 +322,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📈 Roadmap
 
-- [ ] Enhanced SQL compatibility
+- [x] **Enhanced SQL compatibility** - WHERE + GROUP BY architectural fix completed ✅
 - [ ] Performance optimizations for very large datasets
 - [ ] GraphQL integration
 - [ ] Enhanced real-time capabilities

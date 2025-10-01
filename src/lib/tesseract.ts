@@ -22,12 +22,7 @@ import { Session } from './session';
 import { 
   ColumnDef
 } from '../types';
-
-// Minimal expressionEngine facade to support expressions
-const expressionEngine = {
-  generateExpressionTree: (expression: string) => expression,
-  executeExpressionTree: (_tree: any, data: any) => data
-};
+import { ExpressionEngine } from "./expressionEngine";
 
 export interface TesseractConfig {
   data?: any[];
@@ -42,6 +37,7 @@ export interface TesseractConfig {
 
 const UPDATE_REASON_DATA = 'dataUpdate';
 const UPDATE_REASON_DATA_RESET = 'dataReset';
+const expressionEngine = new ExpressionEngine()
 
 export class Tesseract extends Model {
   public id: string;
@@ -588,21 +584,23 @@ export class Tesseract extends Model {
       }
 
       if (column.expression !== undefined) {
-        if ((column as any).customExpression === undefined && expressionEngine) {
-          (column as any).customExpression = expressionEngine.generateExpressionTree(column.expression as any);
+        if (column.expressionTree === undefined) {
+          column.expressionTree = expressionEngine.generateExpressionTree(column.expression);
+          console.log('Generated expression tree for', column.name, column.expressionTree);
         }
-        if ((column as any).customExpression && expressionEngine) {
-          (dataHolder as any)[propertyName] = expressionEngine.executeExpressionTree((column as any).customExpression, dataHolder);
+        if (column.expressionTree) {
+          dataHolder[propertyName] = expressionEngine.executeExpressionTree(column.expressionTree, dataHolder);
+          console.log('Executed expression for', column.name, 'result:', dataHolder[propertyName]);
         }
       }
 
       if (column.resolve !== undefined && this.resolverFn) {
-        (dataHolder as any)[propertyName] = this.resolverFn(column.resolve, dataHolder);
+        dataHolder[propertyName] = this.resolverFn(column.resolve, dataHolder);
       }
     }
 
     if (updateDataMap) {
-      this.dataMap[(dataHolder as any)[this.idProperty]] = dataHolder;
+      this.dataMap[dataHolder[this.idProperty]] = dataHolder;
     }
 
     return dataHolder;

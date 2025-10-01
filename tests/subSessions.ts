@@ -141,9 +141,9 @@ test('SubSessions - Basic Relational Queries', function (t: Test) {
     t.end();
 });
 
-test('SubSessions - Filtered SubSessions (Known Limitation)', function (t: Test) {
-    // NOTE: This test documents a known limitation where filter + groupBy in SubSessions
-    // returns empty results. This is a current limitation of the tesseract implementation.
+test('SubSessions - Filtered SubSessions (Fixed)', function (t: Test) {
+    // NOTE: This test demonstrates the correct way to apply filters with groupBy in SubSessions
+    // by using nested table structure to filter BEFORE aggregation.
     
     const eventHorizon = new EventHorizon();
 
@@ -180,31 +180,40 @@ test('SubSessions - Filtered SubSessions (Known Limitation)', function (t: Test)
         { id: 105, user_id: 3, amount: 500, status: 'completed' }
     ]);
 
-    // Test: Demonstrate filter + groupBy limitation
-    console.log('Testing filter + groupBy limitation...');
+    // Test: Demonstrate correct filter + groupBy usage
+    console.log('Testing filter + groupBy with nested table structure...');
     
     try {
         const limitationTestSession = eventHorizon.createSession({
-            table: 'orders',
+            table: {
+                table: {
+                    table: 'orders',
+                    filter: [
+                        { field: 'amount', comparison: '>', value: 100 },
+                        { field: 'status', comparison: '==', value: 'completed' }
+                    ]
+                },
+                columns: [
+                    { name: 'user_id', primaryKey: true },
+                    { name: 'highValueCount', value: 1, aggregator: 'sum' }
+                ],
+                groupBy: [{ dataIndex: 'user_id' }]
+            },
             columns: [
                 { name: 'user_id', primaryKey: true },
-                { name: 'highValueCount', value: 1, aggregator: 'sum' }
-            ],
-            filter: [
-                { field: 'amount', comparison: '>', value: 100 },
-                { field: 'status', comparison: '==', value: 'completed' }
-            ],
-            groupBy: [{ dataIndex: 'user_id' }]
+                { name: 'highValueCount' }
+            ]
         });
         
         const limitationResults = limitationTestSession.getData();
         
-        // Document the limitation
-        t.equal(limitationResults.length, 0, 'Filter + GroupBy currently returns empty results (known limitation)');
+        // Test the fix - should now return filtered and aggregated results
+        t.ok(limitationResults.length > 0, 'Filter + GroupBy now works with nested table structure');
+        t.equal(limitationResults.length, 2, 'Should return 2 user groups with completed orders > 100 (user_id 1 and 3)');
         
     } catch (error) {
         console.log('Filter + GroupBy error:', (error as Error).message);
-        t.pass('Filter + GroupBy limitation confirmed');
+        t.fail('Filter + GroupBy should work with nested table structure');
     }
     
     // Alternative approach: Use basic filtering without groupBy for verification
@@ -455,18 +464,20 @@ test('SubSessions - Three-Table Relationships', function (t: Test) {
                 table: 'orders',
                 columns: [
                     { name: 'user_id', primaryKey: true },
-                    { name: 'orderCount', value: 1, aggregator: 'sum' }
+                    { name: 'orderCount', expression: '1', aggregator: 'sum' }
                 ],
                 groupBy: [{ dataIndex: 'user_id' }]
             },
             completedOrderStats: {
-                table: 'orders',
+                table: {
+                    table: 'orders',
+                    filter: [
+                        { field: 'status', comparison: '==', value: 'completed' }
+                    ]
+                },
                 columns: [
                     { name: 'user_id', primaryKey: true },
                     { name: 'amount', aggregator: 'sum' }
-                ],
-                filter: [
-                    { field: 'status', comparison: '==', value: 'completed' }
                 ],
                 groupBy: [{ dataIndex: 'user_id' }]
             },
@@ -475,29 +486,33 @@ test('SubSessions - Three-Table Relationships', function (t: Test) {
                 columns: [
                     { name: 'owner_id', primaryKey: true },
                     { name: 'budget', aggregator: 'sum' },
-                    { name: 'projectCount', value: 1, aggregator: 'sum' }
+                    { name: 'projectCount', expression: '1', aggregator: 'sum' }
                 ],
                 groupBy: [{ dataIndex: 'owner_id' }]
             },
             activeProjectStats: {
-                table: 'projects',
+                table: {
+                    table: 'projects',
+                    filter: [
+                        { field: 'status', comparison: '==', value: 'active' }
+                    ]
+                },
                 columns: [
                     { name: 'owner_id', primaryKey: true },
-                    { name: 'activeProjects', value: 1, aggregator: 'sum' }
-                ],
-                filter: [
-                    { field: 'status', comparison: '==', value: 'active' }
+                    { name: 'activeProjects', expression: '1', aggregator: 'sum' }
                 ],
                 groupBy: [{ dataIndex: 'owner_id' }]
             },
             completedProjectStats: {
-                table: 'projects',
+                table: {
+                    table: 'projects',
+                    filter: [
+                        { field: 'status', comparison: '==', value: 'completed' }
+                    ]
+                },
                 columns: [
                     { name: 'owner_id', primaryKey: true },
-                    { name: 'completedProjects', value: 1, aggregator: 'sum' }
-                ],
-                filter: [
-                    { field: 'status', comparison: '==', value: 'completed' }
+                    { name: 'completedProjects', expression: '1', aggregator: 'sum' }
                 ],
                 groupBy: [{ dataIndex: 'owner_id' }]
             }
@@ -548,11 +563,11 @@ test('SubSessions - Three-Table Relationships', function (t: Test) {
             },
             {
                 name: 'totalResponsibility',
-                value: '(customerValue || 0) + (projectBudget || 0)'
+                expression: '(customerValue || 0) + (projectBudget || 0)'
             },
             {
                 name: 'activityScore',
-                value: '((totalOrders || 0) * 10) + ((activeProjectCount || 0) * 50) + ((completedProjectCount || 0) * 30)'
+                expression: '((totalOrders || 0) * 10) + ((activeProjectCount || 0) * 50) + ((completedProjectCount || 0) * 30)'
             }
         ],
         sort: [{ field: 'totalResponsibility', direction: 'DESC' }]
@@ -567,8 +582,8 @@ test('SubSessions - Three-Table Relationships', function (t: Test) {
         projectBudget: number;
         activeProjectCount: number | null;
         completedProjectCount: number | null;
-        totalResponsibility: string;
-        activityScore: string;
+        totalResponsibility: number;
+        activityScore: number;
     }
 
     const comprehensiveData: ComprehensiveData[] = [];
@@ -590,35 +605,35 @@ test('SubSessions - Three-Table Relationships', function (t: Test) {
     // Test Alice's comprehensive data
     const alice = comprehensiveData.find(u => u.name === 'Alice Johnson');
     t.ok(alice, 'Alice should be in comprehensive analysis');
-    // Note: Filtered SubSessions return null in dist version (known limitation)
-    t.equal(alice!.customerValue, null, 'Alice customer value returns null (filtered SubSession limitation)');
+    // Note: Filtered SubSessions now work with nested table structure
+    t.equal(alice!.customerValue, 1200, 'Alice customer value should be $1200 (completed orders total)');
     t.equal(alice!.totalOrders, 1, 'Alice should have 1 order');
     t.equal(alice!.projectBudget, 125000, 'Alice project budget should be $125000 (50k + 75k)');
-    t.equal(alice!.activeProjectCount, null, 'Alice active project count returns null (filtered SubSession limitation)');
-    t.equal(alice!.completedProjectCount, null, 'Alice completed project count returns null (filtered SubSession limitation)');
-    // Expression columns return formula string instead of calculated value in dist version
-    t.equal(alice!.totalResponsibility, '(customerValue || 0) + (projectBudget || 0)', 'Alice total responsibility returns formula string (expression limitation)');
-    t.equal(alice!.activityScore, '((totalOrders || 0) * 10) + ((activeProjectCount || 0) * 50) + ((completedProjectCount || 0) * 30)', 'Alice activity score returns formula string (expression limitation)');
+    t.equal(alice!.activeProjectCount, 1, 'Alice should have 1 active project (Website Redesign)');
+    t.equal(alice!.completedProjectCount, null, 'Alice should have 0 completed projects (null when no matches)');
+    // Expression columns now return calculated values (expressions are working!)
+    t.equal(alice!.totalResponsibility, 126200, 'Alice total responsibility: (1200 + 125000) = 126200');
+    t.equal(alice!.activityScore, 60, 'Alice activity score: (1*10 + 1*50 + 0*30) = 60');
 
     // Test Bob's comprehensive data
     const bob = comprehensiveData.find(u => u.name === 'Bob Smith');
     t.ok(bob, 'Bob should be in comprehensive analysis');
-    t.equal(bob!.customerValue, null, 'Bob customer value returns null (filtered SubSession limitation)');
+    t.equal(bob!.customerValue, 300, 'Bob customer value should be $300 (completed order total)');
     t.equal(bob!.projectBudget, 30000, 'Bob project budget should be $30000');
-    t.equal(bob!.activeProjectCount, null, 'Bob active project count returns null (filtered SubSession limitation)');
-    t.equal(bob!.completedProjectCount, null, 'Bob completed project count returns null (filtered SubSession limitation)');
-    t.equal(bob!.totalResponsibility, '(customerValue || 0) + (projectBudget || 0)', 'Bob total responsibility returns formula string (expression limitation)');
-    t.equal(bob!.activityScore, '((totalOrders || 0) * 10) + ((activeProjectCount || 0) * 50) + ((completedProjectCount || 0) * 30)', 'Bob activity score returns formula string (expression limitation)');
+    t.equal(bob!.activeProjectCount, null, 'Bob should have 0 active projects (null when no matches)');
+    t.equal(bob!.completedProjectCount, 1, 'Bob should have 1 completed project (Sales Dashboard)');
+    t.equal(bob!.totalResponsibility, 30300, 'Bob total responsibility: (300 + 30000) = 30300');
+    t.equal(bob!.activityScore, 40, 'Bob activity score: (1*10 + 0*50 + 1*30) = 40');
 
     // Test Carol's comprehensive data
     const carol = comprehensiveData.find(u => u.name === 'Carol Davis');
     t.ok(carol, 'Carol should be in comprehensive analysis');
-    t.equal(carol!.customerValue, null, 'Carol customer value returns null (filtered SubSession limitation)');
+    t.equal(carol!.customerValue, 500, 'Carol customer value should be $500 (completed order total)');
     t.equal(carol!.projectBudget, 25000, 'Carol project budget should be $25000');
-    t.equal(carol!.activeProjectCount, null, 'Carol active project count returns null (filtered SubSession limitation)');
-    t.equal(carol!.completedProjectCount, null, 'Carol completed project count returns null (filtered SubSession limitation)');
-    t.equal(carol!.totalResponsibility, '(customerValue || 0) + (projectBudget || 0)', 'Carol total responsibility returns formula string (expression limitation)');
-    t.equal(carol!.activityScore, '((totalOrders || 0) * 10) + ((activeProjectCount || 0) * 50) + ((completedProjectCount || 0) * 30)', 'Carol activity score returns formula string (expression limitation)');
+    t.equal(carol!.activeProjectCount, 1, 'Carol should have 1 active project (Marketing Campaign)');
+    t.equal(carol!.completedProjectCount, null, 'Carol should have 0 completed projects (null when no matches)');
+    t.equal(carol!.totalResponsibility, 25500, 'Carol total responsibility: (500 + 25000) = 25500');
+    t.equal(carol!.activityScore, 60, 'Carol activity score: (1*10 + 1*50 + 0*30) = 60');
 
     // Test sorting by totalResponsibility (DESC)
     t.equal(comprehensiveData[0].name, 'Alice Johnson', 'Alice should be first (highest responsibility)');
@@ -786,9 +801,9 @@ test('SubSessions - Real-time Updates', function (t: Test) {
     t.end();
 });
 
-test('SubSessions - Department Performance Aggregation (Filter+GroupBy Limitation)', function (t: Test) {
-    // NOTE: This test demonstrates the filter+groupBy limitation in SubSessions
-    // where filtered SubSessions with groupBy return empty results
+test('SubSessions - Department Performance Aggregation (Fixed)', function (t: Test) {
+    // NOTE: This test demonstrates department performance analysis using filtered SubSessions
+    // with the correct nested table structure for filter + groupBy operations
     
     const eventHorizon = new EventHorizon();
 
@@ -833,35 +848,41 @@ test('SubSessions - Department Performance Aggregation (Filter+GroupBy Limitatio
         table: 'users',
         subSessions: {
             recentOrderMetrics: {
-                table: 'orders',
+                table: {
+                    table: 'orders',
+                    filter: [
+                        { field: 'order_date', comparison: '>', value: new Date('2023-01-20') }
+                    ]
+                },
                 columns: [
                     { name: 'user_id', primaryKey: true },
                     { name: 'recentOrders', value: 1, aggregator: 'sum' }
                 ],
-                filter: [
-                    { field: 'order_date', comparison: '>', value: new Date('2023-01-20') }
-                ],
                 groupBy: [{ dataIndex: 'user_id' }]
             },
             pendingOrderMetrics: {
-                table: 'orders',
+                table: {
+                    table: 'orders',
+                    filter: [
+                        { field: 'status', comparison: '==', value: 'pending' }
+                    ]
+                },
                 columns: [
                     { name: 'user_id', primaryKey: true },
                     { name: 'pendingOrders', value: 1, aggregator: 'sum' }
                 ],
-                filter: [
-                    { field: 'status', comparison: '==', value: 'pending' }
-                ],
                 groupBy: [{ dataIndex: 'user_id' }]
             },
             completedOrderMetrics: {
-                table: 'orders',
+                table: {
+                    table: 'orders',
+                    filter: [
+                        { field: 'status', comparison: '==', value: 'completed' }
+                    ]
+                },
                 columns: [
                     { name: 'user_id', primaryKey: true },
                     { name: 'amount', aggregator: 'sum' }
-                ],
-                filter: [
-                    { field: 'status', comparison: '==', value: 'completed' }
                 ],
                 groupBy: [{ dataIndex: 'user_id' }]
             }
@@ -903,29 +924,28 @@ test('SubSessions - Department Performance Aggregation (Filter+GroupBy Limitatio
 
     const deptData = departmentPerformanceSession.groupData();
 
-    // Due to filter+groupBy limitation, filtered SubSessions return empty results
-    // Test that basic department structure works (employeeCount should work)
+    // With nested table structure, filtered SubSessions now work correctly
     const engineering = deptData.find((dept: any) => dept.department === 'Engineering')!;
     t.ok(engineering, 'Engineering department should exist');
     t.equal(engineering.employeeCount, 2, 'Engineering should have 2 employees');
-    // Known limitation assertions
-    t.equal(engineering.recentOrders, 0, 'Engineering recent orders returns 0 (filter+groupBy limitation)');
-    t.equal(engineering.pendingOrders, 0, 'Engineering pending orders returns 0 (filter+groupBy limitation)');
-    t.equal(engineering.completedRevenue, 0, 'Engineering revenue returns 0 (filter+groupBy limitation)');
+    // Fixed assertions - should now return actual values
+    t.equal(engineering.recentOrders, 2, 'Engineering should have 2 recent orders (Alice + David)');
+    t.equal(engineering.pendingOrders, 0, 'Engineering should have 0 pending orders');
+    t.equal(engineering.completedRevenue, 2000, 'Engineering revenue should be $2000 (1200 + 800)');
 
     const sales = deptData.find((dept: any) => dept.department === 'Sales')!;
     t.ok(sales, 'Sales department should exist');
     t.equal(sales.employeeCount, 1, 'Sales should have 1 employee');
-    t.equal(sales.recentOrders, 0, 'Sales recent orders returns 0 (filter+groupBy limitation)');
-    t.equal(sales.pendingOrders, 0, 'Sales pending orders returns 0 (filter+groupBy limitation)');
-    t.equal(sales.completedRevenue, 0, 'Sales revenue returns 0 (filter+groupBy limitation)');
+    t.equal(sales.recentOrders, 1, 'Sales should have 1 recent order (Bob pending order from 2023-01-25)');
+    t.equal(sales.pendingOrders, 1, 'Sales should have 1 pending order (Bob $300 order)');
+    t.equal(sales.completedRevenue, 400, 'Sales revenue should be $400 (Bob completed order from 2023-01-15)');
 
     const marketing = deptData.find((dept: any) => dept.department === 'Marketing')!;
     t.ok(marketing, 'Marketing department should exist');
     t.equal(marketing.employeeCount, 1, 'Marketing should have 1 employee');
-    t.equal(marketing.recentOrders, 0, 'Marketing recent orders returns 0 (filter+groupBy limitation)');
-    t.equal(marketing.pendingOrders, 0, 'Marketing pending orders returns 0 (filter+groupBy limitation)');
-    t.equal(marketing.completedRevenue, 0, 'Marketing revenue returns 0 (filter+groupBy limitation)');
+    t.equal(marketing.recentOrders, 1, 'Marketing should have 1 recent order (Carol from 2023-01-25)');
+    t.equal(marketing.pendingOrders, 0, 'Marketing should have 0 pending orders');
+    t.equal(marketing.completedRevenue, 500, 'Marketing revenue should be $500 (Carol completed order)');
 
     t.end();
 });

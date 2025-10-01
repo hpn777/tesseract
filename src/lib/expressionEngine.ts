@@ -104,7 +104,9 @@ export class ExpressionEngine extends Model {
         }
       }
     }
-
+    
+    entryString = entryString.replace(/\s+/g, '');
+    
     const parseExpression = (entryString: string): ExpressionNode => {
       const bracketsRegex = /([\(\)])/;
       const logicalOperatorsRegex = /(\|\||\&\&)/;
@@ -264,8 +266,8 @@ export class ExpressionEngine extends Model {
           node.Type = 'string';
         }
         // Handle bracket tokens
-        else if (bracketTokens[processedEntry]) {
-          return bracketTokens[processedEntry];
+        else if (bracketTokens[processedEntry.trim()]) {
+          return bracketTokens[processedEntry.trim()];
         }
         // Handle property access
         else if (processedEntry.indexOf('.') !== -1) {
@@ -300,53 +302,91 @@ export class ExpressionEngine extends Model {
     return parseExpression(processedString);
   }
 
-  public executeExpressionTree(tree: ExpressionTree, context: any): any {
-    if (!tree) return null;
-
-    switch (tree.Type) {
-      case 'number':
-      case 'boolean':
-      case 'string':
-        return tree.Value;
-
-      case 'property':
-        return this.getPropertyValue(tree.Value, context);
-
-      case 'operator':
-        const func = Functions[tree.Operand!];
-        if (func && tree.children.length >= 2) {
-          const left = this.executeExpressionTree(tree.children[0], context);
-          const right = this.executeExpressionTree(tree.children[1], context);
-          return func(left, right);
-        }
-        break;
-
-      case 'condition':
-        if (tree.Operand === '?:' && tree.children.length === 3) {
-          const condition = this.executeExpressionTree(tree.children[0], context);
-          return condition 
-            ? this.executeExpressionTree(tree.children[1], context)
-            : this.executeExpressionTree(tree.children[2], context);
-        }
-        break;
-
+  public executeExpressionTree(node: ExpressionTree, args: any): any {
+    if (!node) return null;
+    let attributes = [];
+    switch (node.Type) {
       case 'function':
-        return this.executeFunction(tree, context);
-
-      case 'lambda':
-        return this.executeLambda(tree, context);
-
-      case 'value':
-        return context[tree.Value] !== undefined ? context[tree.Value] : tree.Value;
-
-      default:
-        if (tree.children.length > 0) {
-          return tree.children.map(child => this.executeExpressionTree(child, context));
+      case 'contextFunction':
+        // @ts-expect-error - Dynamic property access with potentially undefined scope
+        var scope = { value: args[node.scope], scope: this, args: args };
+        switch (node.children[0].Type) {
+          case 'attributes':
+            for (var i = 0; i < node.children.length; i++)
+              attributes.push(this.executeExpressionTree(node.children[i], args));
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            return this[node.Operand].apply(scope, attributes);
+            break;
+          case 'lambda':
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            return this[node.Operand].call(scope, node.children[0]);
+            break;
+          case 'string':
+          case 'number':
+          case 'undefined':
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            return this[node.Operand].call(scope, node.children[0].Value);
+            break;
+          case 'variable':
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            return this[node.Operand].call(scope, args[node.children[0].Value]);
+            break;
         }
-        return tree.Value;
+        break;
+      case 'attributes':
+        for (var i = 0; i < node.children.length; i++)
+          attributes.push(this.executeExpressionTree(node.children[i], args));
+        return attributes;
+        break;
+      case 'operator':
+        // @ts-expect-error - Dynamic property access with potentially undefined scope
+        return Functions[node.Operand](
+          this.executeExpressionTree(node.children[0], args),
+          this.executeExpressionTree(node.children[1], args)
+        );
+        break;
+      case 'condition':
+        // @ts-expect-error - Dynamic property access with potentially undefined scope
+        return Functions[node.Operand](
+          this.executeExpressionTree(node.children[0], args),
+          this.executeExpressionTree(node.children[1], args),
+          this.executeExpressionTree(node.children[2], args)
+        );
+        break;
+      case 'stdout'://TODO need to optimize for performance, probably add dinamically change type of parent node
+        if (node.children[0].Type === 'variable') {
+          // @ts-expect-error - Dynamic property access with potentially undefined scope
+          if (args[node.scope])
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            args = args[node.scope];
+          node.children[1].scope = node.children[0].Value;
+          if (node.children[1].Type === 'variable')
+            // @ts-expect-error - Dynamic property access with potentially undefined scope
+            return args[node.children[1].scope][node.children[1].Value];
+          else
+            return this.executeExpressionTree(node.children[1], args);
+        }
+        else {
+          node.children[0].scope = node.scope;
+          node.children[1].scope = node.subExpression;
+          // @ts-expect-error - Dynamic property access with potentially undefined subExpression
+          args[node.subExpression] = this.executeExpressionTree(node.children[0], args);
+          return this.executeExpressionTree(node.children[1], args);
+        }
+        break;
+      case 'string':
+      case 'number':
+      case 'undefined':
+        return node.Value;
+        break;
+      case 'variable':
+        return args[node.Value];
+        break;
+      case 'value':
+        // Handle identifiers parsed as 'value' type (should be treated as variables)
+        return args[node.Value?.toString().trim()];
+        break;
     }
-
-    return null;
   }
 
   private getPropertyValue(propertyPath: string, context: any): any {
@@ -364,21 +404,6 @@ export class ExpressionEngine extends Model {
     }
     
     return current;
-  }
-
-  private executeFunction(tree: ExpressionTree, _context: any): any {
-    // Placeholder for function execution
-    // This would need to be implemented based on the specific functions supported
-    return tree.Value;
-  }
-
-  private executeLambda(tree: ExpressionTree, context: any): any {
-    // Placeholder for lambda execution
-    // This would need to be implemented based on lambda requirements
-    if (tree.children.length > 0) {
-      return this.executeExpressionTree(tree.children[0], context);
-    }
-    return null;
   }
 
   public toString(): string {
