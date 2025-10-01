@@ -95,7 +95,9 @@ test('SQL to Tessio Converter - Aggregation queries', function (t: Test) {
 
     const result = converter.convertSql(sql);
     
-    t.equal(result.sessionConfig.table, 'employees', 'Table name correct');
+    // With WHERE + GROUP BY, expect nested table structure
+    t.ok(typeof result.sessionConfig.table === 'object', 'Table is nested structure for WHERE + GROUP BY');
+    t.equal((result.sessionConfig.table as any).table, 'employees', 'Base table name correct in nested structure');
     t.ok(result.sessionConfig.groupBy, 'GroupBy array exists');
     t.equal(result.sessionConfig.groupBy!.length, 1, 'Group by count correct');
     t.equal(result.sessionConfig.groupBy![0].dataIndex, 'department', 'Group by field correct');
@@ -220,11 +222,12 @@ test('SQL to Tessio Converter - Complex scenarios', function (t: Test) {
 
     const result = converter.convertSql(complexSql);
     
-    // Should extract main table
-    t.equal(result.sessionConfig.table, 'employees', 'Main table extracted from complex query');
+    // With WHERE + GROUP BY, expect nested table structure
+    t.ok(typeof result.sessionConfig.table === 'object', 'Table is nested structure for WHERE + GROUP BY');
+    t.equal((result.sessionConfig.table as any).table, 'employees', 'Main table extracted from complex query');
     
-    // Should have filters
-    t.ok(result.sessionConfig.filter && result.sessionConfig.filter.length > 0, 'Filters extracted');
+    // Should have filters in nested table structure
+    t.ok((result.sessionConfig.table as any).filter && (result.sessionConfig.table as any).filter.length > 0, 'Filters extracted in nested structure');
     
     // Should have sorting
     t.ok(result.sessionConfig.sort && result.sessionConfig.sort.length > 0, 'Sorting extracted');
