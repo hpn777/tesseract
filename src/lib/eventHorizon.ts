@@ -85,7 +85,7 @@ export class EventHorizon {
     const childrenTableRef = this.tesseracts.get(resolve.childrenTable) as Tesseract;
     
     if (childrenTableRef) {
-      const underlyingData = childrenTableRef.getById(data[resolve.underlyingField]);
+      const underlyingData = childrenTableRef.getById(String(data[resolve.underlyingField]));
       
       if (underlyingData) {
         if (underlyingData.removed === true) {
@@ -201,7 +201,7 @@ export class EventHorizon {
           
           newSession.updateData(
             newSession.tesseract.getLinq().where((x: DataRow) => 
-              updatedIds[x[resolveConfig.underlyingField]]
+              updatedIds[String(x[resolveConfig.underlyingField])]
             ), 
             false, 
             UPDATE_REASON_DATA
@@ -211,12 +211,12 @@ export class EventHorizon {
         (childrenTable as any).on('dataUpdate', (data: DataRow[], _dissableClusterUpdate?: boolean, updateReason?: string) => {
           const idProperty = childrenTable.idProperty;
           const updatedIds = data.reduce((acc: { [key: string]: boolean }, x: DataRow) => {
-            acc[x[idProperty]] = true;
+            acc[String(x[idProperty])] = true;
             return acc;
           }, {} as { [key: string]: boolean });
           
           const arr = newSession.getLinq()
-            .where((x: DataRow) => updatedIds[x[resolveConfig.underlyingField]])
+            .where((x: DataRow) => updatedIds[String(x[resolveConfig.underlyingField])])
             .select((x: any) => x.object)
             .toArray();
           

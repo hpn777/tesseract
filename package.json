@@ -1,8 +1,9 @@
 {
   "name": "tessio",
-  "version": "3.2.13",
+  "version": "4.0.0",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "build:browser": "browserify -r ./dist/export.js:tessio  --exclude \"./commandPort\" > ./tessio.js",

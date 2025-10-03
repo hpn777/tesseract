@@ -85,8 +85,8 @@ let generateSummaryRow = (
       case 'sum':
         for (let k = 0; k < data.length; k++) {
           const ttValue = objWrapper.setData(data[k])[name];
-          if (ttValue != null) {
-            tempValue += ttValue ? ttValue : 0;
+          if (ttValue != null && typeof ttValue !== 'object') {
+            tempValue += Number(ttValue) || 0;
           }
         }
         response[name] = tempValue;
@@ -94,28 +94,28 @@ let generateSummaryRow = (
       case 'avg':
         for (let k = 0; k < data.length; k++) {
           const ttValue = objWrapper.setData(data[k])[name];
-          if (ttValue != null) {
-            tempValue += ttValue ? ttValue : 0;
+          if (ttValue != null && typeof ttValue !== 'object') {
+            tempValue += Number(ttValue) || 0;
           }
         }
         tempValue = tempValue / data.length;
         response[name] = tempValue;
         break;
       case 'max':
-        let max = objWrapper.setData(data[0])[name];
+        let max = objWrapper.setData(data[0])[name] ?? undefined;
         for (let k = 0; k < data.length; k++) {
           const ttValue = objWrapper.setData(data[k])[name];
-          if (ttValue != null) {
+          if (ttValue != null && max !== undefined) {
             max = ttValue > max ? ttValue : max;
           }
         }
         response[name] = max;
         break;
       case 'min':
-        let min = objWrapper.setData(data[0])[name];
+        let min = objWrapper.setData(data[0])[name] ?? undefined;
         for (let k = 0; k < data.length; k++) {
           const ttValue = objWrapper.setData(data[k])[name];
-          if (ttValue != null) {
+          if (ttValue != null && min !== undefined) {
             min = ttValue < min ? ttValue : min;
           }
         }
@@ -236,7 +236,7 @@ let groupData = (
             objWrapper,
             newGroupBy,
             includeLeafs,
-            tempAggregatedRow[idProperty || 'id'],
+            String(tempAggregatedRow[idProperty || 'id']),
             branchPath!.slice(0, branchPath!.length),
             tempAggregatedRow,
             idProperty
@@ -296,7 +296,7 @@ let groupSelectedData = (
   if (!currentGroup) {
     if (includeLeafs) {
       for (let i = 0; i < data.length; i++) {
-        if (selectedRowsIds[data[i][idProperty || 'id']]) {
+        if (selectedRowsIds[String(data[i][idProperty || 'id'])]) {
           const tempObj = objWrapper.setData(data[i]).object as GroupDataResult;
           tempObj.leaf = true;
           tempObj.children = [];
@@ -356,7 +356,7 @@ let groupSelectedData = (
                   newGroupBy,
                   selectedRowsIds,
                   includeLeafs,
-                  tempAggregatedRow[idProperty || 'id'],
+                  String(tempAggregatedRow[idProperty || 'id']),
                   branchPath!.slice(0, branchPath!.length),
                   tempAggregatedRow,
                   idProperty,

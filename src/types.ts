@@ -3,8 +3,20 @@
 import { Tesseract } from "./export";
 import { ExpressionTree } from "./lib/expressionEngine";
 
+// Type aliases for better type safety
+// RowValue: Flexible type for row data values
+export type RowValue = string | number | boolean | Date | null | undefined | object;
+// PrimitiveValue: Values that can be used as dictionary keys and in comparisons
+export type PrimitiveValue = string | number | boolean | null | undefined;
+// AggregateValue: Values returned by aggregation functions
+export type AggregateValue = number | string | null | undefined;
+// EnumValue: Values that can appear in enum lists
+export type EnumValue = string | number | boolean;
+// IdValue: Values used for row identification
+export type IdValue = string | number;
+
 export interface DataRow {
-  [key: string]: any;
+  [key: string]: RowValue;
 }
 
 // Resolve configuration used by Tesseract/EventHorizon and proxy getters
@@ -33,7 +45,7 @@ export interface ColumnDef {
     defaultValue?: string | number | Function;
     value?: string | number | Function;
     hidden?: boolean;
-    enum?: any[];
+    enum?: EnumValue[];
     resolve?: ResolveConfig;
 }
 
@@ -41,13 +53,13 @@ export interface FilterDef {
   field: string;
   // core code checks `comparison`, legacy places used `type`
   comparison?: '==' | '>' | '<' | '>=' | '<=' | '!=' | 'in' | 'notin' | 'like' | 'notlike' | '~' | '!~' | 'custom';
-  value: any;
+  value: string | number | boolean | Date | null | Array<string | number>;
 }
 
 export interface SortDef {
   field: string;
   direction?: 'asc' | 'desc' | 'ASC' | 'DESC';
-  comparer?: (a: any, b: any) => number;
+  comparer?: (a: PrimitiveValue, b: PrimitiveValue) => number;
 }
 
 // Nested SubSession map (subSessions: { name: CreateSessionParameters })
@@ -79,10 +91,10 @@ export type SessionConfig = CreateSessionParameters;
 
 export interface GroupNode<T = DataRow> {
   key: string;
-  value: any;
+  value: PrimitiveValue;
   children: GroupNode<T>[];
   data: T[];
-  aggregates: { [key: string]: any };
+  aggregates: { [key: string]: AggregateValue };
   level: number;
 }
 
@@ -101,8 +113,13 @@ export interface TesseractOptions {
   defferedDataUpdateTime?: number;
   clusterSync?: boolean;
   id?: string;
-  resolve?: (resolve: any, data: any) => any;
+  resolve?: (resolve: ResolveConfig, data: DataRow) => RowValue;
   persistent?: boolean;
+}
+
+export interface CommandPort {
+  listen: (callback: () => void) => void;
+  close: () => void;
 }
 
 export interface EventHorizonOptions {
@@ -115,16 +132,16 @@ export interface EventHorizonOptions {
   cluster?: boolean;
   clusterName?: string;
   namespace?: string;
-  commandPort?: any;
+  commandPort?: CommandPort;
 }
 
-export type EventCallback = (...args: any[]) => void;
+export type EventCallback = (...args: PrimitiveValue[]) => void;
 export type UnsubscribeFunction = () => void;
 
-// Utility types
-export type Comparer<T = any> = (a: T, b: T) => number;
-export type Predicate<T = any> = (item: T) => boolean;
-export type Aggregator<T = any> = (items: T[], column?: string) => any;
+// Utility types with default type parameter for flexibility
+export type Comparer<T = PrimitiveValue> = (a: T, b: T) => number;
+export type Predicate<T = DataRow> = (item: T) => boolean;
+export type Aggregator<T = DataRow> = (items: T[], column?: string) => AggregateValue;
 
 export interface ExtendedColumnDef extends ColumnDef {
   name: string;
@@ -134,28 +151,28 @@ export interface ExtendedColumnDef extends ColumnDef {
 
 export interface GroupDataResult {
   key: string;
-  value: any;
+  value: PrimitiveValue;
   children?: GroupDataResult[];
   data?: DataRow[];
-  aggregates?: { [key: string]: any };
+  aggregates?: { [key: string]: AggregateValue };
   level?: number;
 }
 
 export interface UpdateResult {
-  addedIds: any[];
-  addedData: any;
-  updatedIds: any[];
-  updatedData: any;
+  addedIds: IdValue[];
+  addedData: DataRow[];
+  updatedIds: IdValue[];
+  updatedData: DataRow[];
   updateReason: string;
-  removedIds: any[];
-  removedData: any;
+  removedIds: IdValue[];
+  removedData: DataRow[];
   toJSON(): {
-    addedIds: any[];
+    addedIds: IdValue[];
     addedData: DataRow[];
-    updatedIds: any[];
+    updatedIds: IdValue[];
     updatedData: DataRow[];
     updateReason: string;
-    removedIds: any[];
+    removedIds: IdValue[];
     removedData: DataRow[];
   };
 }

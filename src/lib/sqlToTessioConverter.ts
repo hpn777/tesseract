@@ -4,10 +4,18 @@
  */
 
 // Type definitions based on the main types
+
+// Type aliases for better type safety
+export type ComparisonOperator = 'lt' | '<' | 'eq' | '==' | '=' | 'gt' | '>' | 'gte' | '>=' | 'lte' | '<=' | 'ne' | '!=' | 'in' | 'notin' | 'like' | '~' | '!~' | 'between';
+export type AggregatorType = 'sum' | 'avg' | 'max' | 'min' | 'count' | 'expression';
+export type ColumnType = 'string' | 'text' | 'number' | 'date' | 'boolean' | 'object';
+export type FilterValue = string | number | boolean | Date | null | Array<string | number>;
+export type ColumnValue = string | number | boolean | Function | null;
+
 export interface FilterDef {
     field: string;
-    comparison: 'lt' | '<' | 'eq' | '==' | '=' | 'gt' | '>' | 'gte' | '>=' | 'lte' | '<=' | 'ne' | '!=' | 'in' | 'notin' | 'like' | '~' | '!~' | 'between' | string;
-    value: any;
+    comparison: ComparisonOperator | string;
+    value: FilterValue;
 }
 
 export interface SortDef {
@@ -19,11 +27,11 @@ export interface ColumnDef {
     name: string;
     primaryKey?: boolean;
     secondaryKey?: boolean;
-    columnType?: 'string' | 'text' | 'number' | 'date' | 'boolean' | 'object';
-    value?: any;
-    defaultValue?: any;
+    columnType?: ColumnType;
+    value?: ColumnValue;
+    defaultValue?: ColumnValue;
     expression?: string;
-    aggregator?: 'sum' | 'avg' | 'max' | 'min' | 'count' | 'expression';
+    aggregator?: AggregatorType;
     resolve?: ResolveConfig;
 }
 
@@ -68,6 +76,19 @@ export interface JoinInfo {
     table: string;
     alias?: string;
     on: string;
+}
+
+interface ParsedSql {
+    select: string;
+    from: string;
+    alias?: string;
+    where: string | null;
+    groupBy: string | null;
+    having: string | null;
+    orderBy: string | null;
+    limit: number | null;
+    offset: number | null;
+    joins: string[];
 }
 
 export class SqlToTessioConverter {
@@ -255,7 +276,7 @@ export class SqlToTessioConverter {
     /**
      * Parse SQL into components
      */
-    private parseSql(sql: string) {
+    private parseSql(sql: string): ParsedSql {
         const selectMatch = sql.match(/SELECT\s+(.*?)\s+FROM\s+(\w+)(?:\s+AS\s+(\w+))?/i);
         if (!selectMatch) {
             throw new Error('Invalid SQL: SELECT FROM clause not found');
@@ -290,7 +311,7 @@ export class SqlToTessioConverter {
     /**
      * Build session configuration from parsed SQL
      */
-    private buildSessionConfig(parsed: any, subQueries?: Map<string, string>): CreateSessionParameters {
+    private buildSessionConfig(parsed: ParsedSql, subQueries?: Map<string, string>): CreateSessionParameters {
         const config: CreateSessionParameters = {
             table: parsed.from
         };
@@ -410,7 +431,7 @@ export class SqlToTessioConverter {
                 columns.push({
                     name: alias || `${func.toLowerCase()}_${field.replace(/[^\w]/g, '_')}`,
                     value: field === '*' ? 1 : field,
-                    aggregator: func.toLowerCase() as any
+                    aggregator: func.toLowerCase() as AggregatorType
                 });
                 continue;
             }
@@ -553,11 +574,11 @@ export class SqlToTessioConverter {
                     return null;
                 }
                 
-                let value = this.parseValue(valueStr, op.tessio);
+                const value = this.parseValue(valueStr, op.tessio);
                 
                 return {
                     field: field,
-                    comparison: op.tessio as any,
+                    comparison: op.tessio as ComparisonOperator,
                     value: value
                 };
             }
@@ -620,7 +641,7 @@ export class SqlToTessioConverter {
     /**
      * Parse value from SQL to appropriate JavaScript type
      */
-    private parseValue(valueStr: string, operator: string): any {
+    private parseValue(valueStr: string, operator: string): FilterValue {
         valueStr = valueStr.trim();
 
         // Handle NULL
@@ -639,7 +660,7 @@ export class SqlToTessioConverter {
             valueStr.startsWith('(') && valueStr.endsWith(')')) {
             const items = valueStr.slice(1, -1).split(',').map(item => 
                 this.parseValue(item.trim(), '==')
-            );
+            ) as Array<string | number>;
             return items;
         }
 
