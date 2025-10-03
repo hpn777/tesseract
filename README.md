@@ -6,25 +6,25 @@
 
 **Tesseract** is a powerful in-memory analytics engine for Node.js that provides flexible data processing, querying, and real-time analytics capabilities with optional distributed synchronization via Redis. It features advanced querying, aggregations, SubSessions for relational data, and includes a comprehensive SQL-to-Tessio converter.
 
-## 🚀 Features
+## Features
 
-- **🔍 Advanced Analytics Engine**: In-memory data processing with complex querying capabilities
-- **🔗 Relational Data Support**: SubSessions for handling relationships between datasets
-- **📊 Real-time Analytics**: Event-driven data updates with live query results
-- **🌐 Distributed Architecture**: Redis-based cluster synchronization for multi-node deployments
-- **🛠️ SQL Converter**: Convert SQL queries to Tessio session parameters with subquery support and automatic WHERE + GROUP BY optimization
-- **⚡ High Performance**: Optimized for large datasets with efficient memory usage
-- **📈 Aggregations & GroupBy**: Multi-level grouping with various aggregation functions
-- **🎯 Expression Engine**: Fully functional support for custom expressions, calculated fields, and complex parentheses operations
-- **🔄 Real-time Updates**: Automatic query result updates when data changes
+- **Advanced Analytics Engine**: In-memory data processing with complex querying capabilities
+- **Relational Data Support**: SubSessions for handling relationships between datasets
+- **Real-time Analytics**: Event-driven data updates with live query results
+- **Distributed Architecture**: Redis-based cluster synchronization for multi-node deployments
+- **SQL Converter**: Convert SQL queries to Tessio session parameters with subquery support and automatic WHERE + GROUP BY optimization
+- **High Performance**: Optimized for large datasets with efficient memory usage
+- **Aggregations & GroupBy**: Multi-level grouping with various aggregation functions
+- **Expression Engine**: Fully functional support for custom expressions, calculated fields, and complex parentheses operations
+- **Real-time Updates**: Automatic query result updates when data changes
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install tessio
 ```
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Basic Usage
 
@@ -111,7 +111,7 @@ const complexResult = sqlToTessio(complexSql);
 const complexSession = eventHorizon.createSession(complexResult.sessionConfig);
 ```
 
-## 📋 Core Concepts
+## Core Concepts
 
 ### 1. EventHorizon
 The main data management hub that creates and manages Tesseracts (tables) and Sessions (queries).
@@ -125,7 +125,7 @@ A query configuration that defines what data to retrieve, how to filter it, sort
 ### 4. SubSessions
 Enable relational data queries by joining multiple Tesseracts, similar to SQL JOINs but with real-time capabilities.
 
-## 🔧 Advanced Features
+## Advanced Features
 
 ### Aggregations and GroupBy
 
@@ -193,7 +193,7 @@ const converted = sqlToTessio(complexSQL);
 const session = eventHorizon.createSession(converted.sessionConfig);
 ```
 
-## 🌐 Distributed Setup
+## Distributed Setup
 
 Enable Redis-based clustering for multi-node deployments:
 
@@ -211,7 +211,7 @@ const cluster = new ClusterRedis({
 const eventHorizon = new EventHorizon({ cluster });
 ```
 
-## 🛠️ CLI Tools
+## CLI Tools
 
 ### SQL to Tessio Converter CLI
 
@@ -226,7 +226,7 @@ npx sql-to-tessio --file queries.sql
 npx sql-to-tessio --batch --input queries/ --output converted/
 ```
 
-## 📊 Performance
+## Performance
 
 Tesseract is optimized for high-performance analytics:
 
@@ -240,7 +240,7 @@ Performance benchmarks show handling of:
 - Complex aggregations across multiple dimensions
 - Real-time updates at 90,000+ operations/second
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -256,17 +256,7 @@ npm run test:perf
 npm run test:docker
 ```
 
-## 📚 Documentation
-
-- **[Getting Started](docs/GETTING_STARTED.md)** - Basic setup and usage
-- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
-- **[Advanced Queries](docs/ADVANCED_QUERIES.md)** - Complex query patterns
-- **[SubSessions Guide](docs/SUBSESSIONS_AND_GROUPBY.md)** - Relational data handling
-- **[SQL Converter](docs/SQL_TO_TESSIO_CONVERTER.md)** - Complete SQL migration guide with WHERE + GROUP BY fix
-- **[Distributed Setup](docs/DISTRIBUTED_SETUP.md)** - Clustering configuration
-- **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Upgrading from previous versions
-
-## 🤝 Examples
+## Examples
 
 Check out the `/examples` directory for comprehensive usage examples:
 
@@ -276,7 +266,7 @@ Check out the `/examples` directory for comprehensive usage examples:
 - Real-time data processing
 - Distributed setups
 
-## 🔧 Development
+## Development
 
 ```bash
 # Install dependencies
@@ -295,46 +285,21 @@ npm run build:browser
 npm test
 ```
 
-## 📋 Requirements
+## Requirements
 
 - Node.js 14+ (TypeScript 4.9+)
 - Optional: Redis for distributed features
 
-## 🐛 Known Limitations
+## Known Limitations
 
 - **Real-time Updates**: Limited in compiled dist version compared to source version
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2019 Rafal Okninski
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📈 Roadmap
-
-- [x] **Enhanced SQL compatibility** - WHERE + GROUP BY architectural fix completed ✅
-- [ ] Performance optimizations for very large datasets
-- [ ] GraphQL integration
-- [ ] Enhanced real-time capabilities
-- [ ] More aggregation functions
-- [ ] Improved distributed synchronization
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/hpn777/tesseract/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/hpn777/tesseract/discussions)
-- **Email**: hpn777@gmail.com
-
 ---
 
-**Made with by [Rafal Okninski](https://github.com/hpn777)**
+**Made by [Rafal Okninski](https://github.com/hpn777)**
