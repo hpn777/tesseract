@@ -69,13 +69,25 @@ export interface ExpressionTree extends ExpressionNode {}
 
 export class ExpressionEngine extends Model {
   public expressions: any[];
+  private expressionCache: Map<string, ExpressionTree>;
 
   constructor(...args: any[]) {
     super(...args);
     this.expressions = [];
+    this.expressionCache = new Map<string, ExpressionTree>();
+  }
+
+  public clearCache(): void {
+    this.expressionCache.clear();
   }
 
   public generateExpressionTree(entryString: string): ExpressionTree {
+    // Check cache first
+    const cached = this.expressionCache.get(entryString);
+    if (cached) {
+      return cached;
+    }
+    
     const me = this;
     const bracketsRegex = /([\"\"])/;
     const stringTokens: { [key: string]: string } = {};
@@ -299,7 +311,12 @@ export class ExpressionEngine extends Model {
       return node;
     };
 
-    return parseExpression(processedString);
+    const tree = parseExpression(processedString);
+    
+    // Cache the compiled tree
+    this.expressionCache.set(entryString, tree);
+    
+    return tree;
   }
 
   public executeExpressionTree(node: ExpressionTree, args: any): any {

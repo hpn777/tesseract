@@ -210,11 +210,23 @@ let groupData = (
     branchPath.push(currentGroup.dataIndex);
     
     if (currentGroup.dataIndex !== 'All') {
-      linq.from(data)
-        .groupBy(x => objWrapper.setData(x)[currentGroup.dataIndex])
-        .forEach((item: any) => {
-          const childRows = item.getSource();
-          const groupKey = item.key();
+      // OPTIMIZATION: Use Map for O(1) lookups instead of linq groupBy
+      const groups = new Map<string, DataRow[]>();
+      
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const key = String(objWrapper.setData(row)[currentGroup.dataIndex]);
+        
+        let group = groups.get(key);
+        if (!group) {
+          group = [];
+          groups.set(key, group);
+        }
+        group.push(row);
+      }
+      
+      // Process each group
+      groups.forEach((childRows, groupKey) => {
           const tempAggregatedRow = generateSummaryRow(
             childRows,
             objWrapper,
@@ -312,61 +324,74 @@ let groupSelectedData = (
     branchPath.push(currentGroup.dataIndex);
     
     if (currentGroup.dataIndex !== 'All') {
-      linq.from(data)
-        .groupBy(x => objWrapper.setData(x)[currentGroup.dataIndex])
-        .forEach((item: any) => {
-          const childRows = item.getSource();
-          const groupKey = item.key();
-          processChildren = false;
-          
-          if (childRows.length >= 1) {
-            for (let i = 0; i < childRows.length; i++) {
-              if (selectedRowsIds[childRows[i][idProperty || 'id']]) {
-                processChildren = true;
-                break;
-              }
-            }
-
-            if (processChildren) {
-              const subData = linq.from(childRows)
-                .select(x => objWrapper.setData(x))
-                .select((x: any) => x.raw)
-                .toArray();
-                
-              if (subData.length) {
-                const tempAggregatedRow = generateSummaryRow(
-                  subData,
-                  objWrapper,
-                  columns,
-                  currentGroup.dataIndex,
-                  groupKey,
-                  branchPathCopy,
-                  parent
-                ) as GroupDataResult;
-                
-                if (idProperty) {
-                  tempAggregatedRow[idProperty] = groupIdPrefix + '/' + groupKey;
-                }
-                
-                const newGroupBy = groupBy.slice(1, groupBy.length);
-                tempAggregatedRow.children = groupSelectedData(
-                  columns,
-                  subData,
-                  objWrapper,
-                  newGroupBy,
-                  selectedRowsIds,
-                  includeLeafs,
-                  String(tempAggregatedRow[idProperty || 'id']),
-                  branchPath!.slice(0, branchPath!.length),
-                  tempAggregatedRow,
-                  idProperty,
-                  filters
-                );
-                response.push(tempAggregatedRow);
-              }
+      // OPTIMIZATION: Use Map for O(1) lookups instead of linq groupBy
+      const groups = new Map<string, DataRow[]>();
+      
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const key = String(objWrapper.setData(row)[currentGroup.dataIndex]);
+        
+        let group = groups.get(key);
+        if (!group) {
+          group = [];
+          groups.set(key, group);
+        }
+        group.push(row);
+      }
+      
+      // Process each group
+      groups.forEach((childRows, groupKey) => {
+        processChildren = false;
+        
+        if (childRows.length >= 1) {
+          for (let i = 0; i < childRows.length; i++) {
+            if (selectedRowsIds[String(childRows[i][idProperty || 'id'])]) {
+              processChildren = true;
+              break;
             }
           }
-        });
+
+          if (processChildren) {
+            // Map over childRows to get raw data
+            const subData: DataRow[] = [];
+            for (let i = 0; i < childRows.length; i++) {
+              subData.push(objWrapper.setData(childRows[i]).raw);
+            }
+              
+            if (subData.length) {
+              const tempAggregatedRow = generateSummaryRow(
+                subData,
+                objWrapper,
+                columns,
+                currentGroup.dataIndex,
+                groupKey,
+                branchPathCopy,
+                parent
+              ) as GroupDataResult;
+              
+              if (idProperty) {
+                tempAggregatedRow[idProperty] = groupIdPrefix + '/' + groupKey;
+              }
+              
+              const newGroupBy = groupBy.slice(1, groupBy.length);
+              tempAggregatedRow.children = groupSelectedData(
+                columns,
+                subData,
+                objWrapper,
+                newGroupBy,
+                selectedRowsIds,
+                includeLeafs,
+                String(tempAggregatedRow[idProperty || 'id']),
+                branchPath!.slice(0, branchPath!.length),
+                tempAggregatedRow,
+                idProperty,
+                filters
+              );
+              response.push(tempAggregatedRow);
+            }
+          }
+        }
+      });
     } else {
       const tempAggregatedRow = generateSummaryRow(
         data,

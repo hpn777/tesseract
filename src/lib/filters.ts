@@ -20,6 +20,7 @@ import { DataRow } from '../types';
 export class Filters {
   public items: Filter[];
   public length: number;
+  private compiledFilter: ((row: DataRow) => boolean) | null = null;
 
   constructor() {
     this.items = [];
@@ -29,11 +30,32 @@ export class Filters {
   reset(items: Filter[]): void {
     this.items = items;
     this.length = items.length;
+    this.compiledFilter = null; // Invalidate cache
+  }
+
+  private compileFilters(): void {
+    if (this.items.length === 0) {
+      this.compiledFilter = () => true;
+      return;
+    }
+    
+    const filters = this.items;
+    const len = filters.length;
+    
+    this.compiledFilter = (row: DataRow) => {
+      for (let i = 0; i < len; i++) {
+        if (!filters[i].applyFilter(row)) {
+          return false;
+        }
+      }
+      return true;
+    };
   }
 
   applyFilters(row: DataRow): boolean {
-    return this.items.reduce((valid: boolean, filter: Filter) => {
-      return valid && filter.applyFilter(row);
-    }, true);
+    if (!this.compiledFilter) {
+      this.compileFilters();
+    }
+    return this.compiledFilter!(row);
   }
 }
