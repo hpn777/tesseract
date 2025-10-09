@@ -290,10 +290,6 @@ npm test
 - Node.js 14+ (TypeScript 4.9+)
 - Optional: Redis for distributed features
 
-## Known Limitations
-
-- **Real-time Updates**: Limited in compiled dist version compared to source version
-
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
