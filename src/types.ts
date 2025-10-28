@@ -12,6 +12,8 @@ export type PrimitiveValue = string | number | boolean | null | undefined;
 export type AggregateValue = number | string | null | undefined;
 // EnumValue: Values that can appear in enum lists
 export type EnumValue = string | number | boolean;
+// EnumDefinition: Object holding the mapping of enum keys to values
+export type EnumDefinition = Record<string, EnumValue>;
 // IdValue: Values used for row identification
 export type IdValue = string | number;
 
@@ -40,12 +42,12 @@ export interface ColumnDef {
     expression?: string;
     expressionTree?: ExpressionTree;
     // semantic column classification used in some places
-    columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric';
+    columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric' | 'enum';
     // additional fields used by utils/session building
     defaultValue?: string | number | Function;
     value?: string | number | Function;
     hidden?: boolean;
-    enum?: EnumValue[];
+  enum?: EnumDefinition;
     resolve?: ResolveConfig;
 }
 

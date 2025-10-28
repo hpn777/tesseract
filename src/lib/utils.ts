@@ -17,7 +17,7 @@ copies or substantial portions of the Software.
 import * as _ from 'lodash';
 import * as linq from 'linq';
 import { ExpressionEngine } from './expressionEngine';
-import { DataRow, ColumnDef, SortDef, Comparer } from '../types';
+import { DataRow, ColumnDef, SortDef, Comparer, EnumDefinition } from '../types';
 
 const expressionEngine = new ExpressionEngine();
 
@@ -54,7 +54,7 @@ interface ResolveConfig {
 interface ExtendedColumnDef extends Omit<ColumnDef, 'aggregator'> {
   name: string;
   hidden?: boolean;
-  enum?: any[];
+  enum?: EnumDefinition;
   primaryKey?: boolean;
   resolve?: ResolveConfig;
   value?: string | number | Function;

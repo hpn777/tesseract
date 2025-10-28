@@ -82,6 +82,7 @@ export class Tesseract extends Model {
         aggregator: raw?.aggregator,
         expression: raw?.expression,
         resolve: raw?.resolve,
+        enum: raw?.enum,
       };
       return col;
     });
