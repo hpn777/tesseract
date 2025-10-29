@@ -17,7 +17,7 @@ copies or substantial portions of the Software.
 import * as _ from 'lodash';
 import * as linq from 'linq';
 import { ExpressionEngine } from './expressionEngine';
-import { DataRow, ColumnDef, SortDef, Comparer, EnumDefinition } from '../types';
+import { DataRow, ColumnDef, SortDef, Comparer, ResolveConfig, EnumDefinition } from '../types';
 
 const expressionEngine = new ExpressionEngine();
 
@@ -44,30 +44,17 @@ interface ObjWrapper {
 
 type GetTesseractFunction = (tableName: string) => any;
 
-interface ResolveConfig {
-  childrenTable: string;
-  displayField: string;
-  underlyingField: string;
-  template?: string;
-}
-
-interface ExtendedColumnDef extends Omit<ColumnDef, 'aggregator'> {
-  name: string;
-  hidden?: boolean;
-  enum?: EnumDefinition;
-  primaryKey?: boolean;
-  resolve?: ResolveConfig;
-  value?: string | number | Function;
-  dataIndex?: string;
-  aggregator?: 'sum' | 'avg' | 'max' | 'min' | 'count' | 'first' | 'last' | 'expression' | 'none' | Function;
-  type?: string;
+// Local extension for internal grouping logic
+interface GroupDataResultInternal extends DataRow {
+  children: GroupDataResultInternal[];
+  leaf?: boolean;
 }
 
 // Tesseract utils
 let generateSummaryRow = (
   data: DataRow[],
   objWrapper: ObjWrapper,
-  columns: ExtendedColumnDef[],
+  columns: ColumnDef[],
   groupedColumn: string,
   _branchValue: any,
   branchPath: string[],
@@ -144,7 +131,7 @@ let generateSummaryRow = (
   return response;
 };
 
-let getSimpleHeader = (allColumns: ExtendedColumnDef[], excludeHiddenColumns?: boolean): any[] => {
+let getSimpleHeader = (allColumns: ColumnDef[], excludeHiddenColumns?: boolean): any[] => {
   return allColumns
     .filter(x => (!excludeHiddenColumns || (excludeHiddenColumns && !x.hidden)))
     .map(x => ({
@@ -157,7 +144,7 @@ let getSimpleHeader = (allColumns: ExtendedColumnDef[], excludeHiddenColumns?: b
     }));
 };
 
-let getHeader = (allColumns: ExtendedColumnDef[], excludeHiddenColumns?: boolean): ExtendedColumnDef[] => {
+let getHeader = (allColumns: ColumnDef[], excludeHiddenColumns?: boolean): ColumnDef[] => {
   return allColumns
     .filter(x => (!excludeHiddenColumns || (excludeHiddenColumns && !x.hidden)))
     .map(x => {
@@ -168,20 +155,15 @@ let getHeader = (allColumns: ExtendedColumnDef[], excludeHiddenColumns?: boolean
           type: (x as any).type || 'auto',
           hidden: x.hidden,
           primaryKey: x.primaryKey
-        } as ExtendedColumnDef;
+        } as ColumnDef;
       } else {
         return x;
       }
     });
 };
 
-interface GroupDataResult extends DataRow {
-  children: GroupDataResult[];
-  leaf?: boolean;
-}
-
 let groupData = (
-  columns: ExtendedColumnDef[],
+  columns: ColumnDef[],
   data: DataRow[],
   objWrapper: ObjWrapper,
   groupBy: GroupByItem[],
@@ -190,14 +172,14 @@ let groupData = (
   branchPath?: string[],
   parent?: any,
   idProperty?: string
-): GroupDataResult[] => {
-  const response: GroupDataResult[] = [];
+): GroupDataResultInternal[] => {
+  const response: GroupDataResultInternal[] = [];
   const currentGroup = groupBy[0];
   
   if (!currentGroup) {
     if (includeLeafs) {
       return data.map(x => {
-        const obj = objWrapper.setData(x).object as GroupDataResult;
+        const obj = objWrapper.setData(x).object as GroupDataResultInternal;
         obj.leaf = true;
         obj.children = [];
         return obj;
@@ -235,7 +217,7 @@ let groupData = (
             groupKey,
             branchPathCopy,
             parent
-          ) as GroupDataResult;
+          ) as GroupDataResultInternal;
           
           if (idProperty) {
             tempAggregatedRow[idProperty] = groupIdPrefix + '/' + groupKey;
@@ -264,7 +246,7 @@ let groupData = (
         currentGroup.dataIndex,
         branchPathCopy,
         parent
-      ) as GroupDataResult;
+      ) as GroupDataResultInternal;
       
       if (idProperty) {
         tempAggregatedRow[idProperty] = currentGroup.dataIndex;
@@ -289,7 +271,7 @@ let groupData = (
 };
 
 let groupSelectedData = (
-  columns: ExtendedColumnDef[],
+  columns: ColumnDef[],
   data: DataRow[],
   objWrapper: ObjWrapper,
   groupBy: GroupByItem[],
@@ -300,8 +282,8 @@ let groupSelectedData = (
   parent?: any,
   idProperty?: string,
   filters?: any[]
-): GroupDataResult[] => {
-  const response: GroupDataResult[] = [];
+): GroupDataResultInternal[] => {
+  const response: GroupDataResultInternal[] = [];
   let processChildren = false;
   const currentGroup = groupBy[0];
   
@@ -309,7 +291,7 @@ let groupSelectedData = (
     if (includeLeafs) {
       for (let i = 0; i < data.length; i++) {
         if (selectedRowsIds[String(data[i][idProperty || 'id'])]) {
-          const tempObj = objWrapper.setData(data[i]).object as GroupDataResult;
+          const tempObj = objWrapper.setData(data[i]).object as GroupDataResultInternal;
           tempObj.leaf = true;
           tempObj.children = [];
           response.push(tempObj);
@@ -367,7 +349,7 @@ let groupSelectedData = (
                 groupKey,
                 branchPathCopy,
                 parent
-              ) as GroupDataResult;
+              ) as GroupDataResultInternal;
               
               if (idProperty) {
                 tempAggregatedRow[idProperty] = groupIdPrefix + '/' + groupKey;
@@ -401,7 +383,7 @@ let groupSelectedData = (
         currentGroup.dataIndex,
         branchPathCopy,
         parent
-      ) as GroupDataResult;
+      ) as GroupDataResultInternal;
       
       if (idProperty) {
         tempAggregatedRow[idProperty] = currentGroup.dataIndex;
@@ -429,8 +411,8 @@ let groupSelectedData = (
 
 let createSessionProxyConfig = (
   getTesseract: GetTesseractFunction,
-  allColumns: ExtendedColumnDef[],
-  selectedColumns?: ExtendedColumnDef[]
+  allColumns: ColumnDef[],
+  selectedColumns?: ColumnDef[]
 ): any => {
   selectedColumns = selectedColumns || allColumns;
   const selectedPropertyMap: { [key: string]: number } = {};
@@ -451,11 +433,11 @@ let createSessionProxyConfig = (
 
   selectedColumns.forEach((item) => {
     if (item.resolve !== undefined) {
-      const childrenTable = getTesseract(item.resolve.childrenTable);
+      const childrenTable = getTesseract(item.resolve.childrenTable!);
 
-      if (childrenTable !== undefined && !childrenTablesMap[item.resolve.childrenTable]) {
-        childrenTablesMap[item.resolve.childrenTable] = {};
-        childrenTablesMap[item.resolve.childrenTable][item.resolve.displayField] = 
+      if (childrenTable !== undefined && !childrenTablesMap[item.resolve.childrenTable!]) {
+        childrenTablesMap[item.resolve.childrenTable!] = {};
+        childrenTablesMap[item.resolve.childrenTable!][item.resolve.displayField] = 
           childrenTable.columns.findIndex((x: any) => x.name === item.resolve!.displayField);
       }
       
@@ -522,12 +504,12 @@ let createSessionProxyConfig = (
   return new Function('getTesseract', '_', 'expressionEngine', classMeat)(getTesseract, _, expressionEngine);
 };
 
-let mergeColumns = (baseColumns: ExtendedColumnDef[], optionalColumns?: ExtendedColumnDef[]): ExtendedColumnDef[] => {
+let mergeColumns = (baseColumns: ColumnDef[], optionalColumns?: ColumnDef[]): ColumnDef[] => {
   if (!optionalColumns) {
     return baseColumns;
   }
 
-  const updatedColumns: ExtendedColumnDef[] = [];
+  const updatedColumns: ColumnDef[] = [];
   
   baseColumns.forEach((item) => {
     const selectedColumns = optionalColumns.filter(c => c.name === item.name);
@@ -671,7 +653,5 @@ export {
   createSessionProxyConfig,
   mergeColumns,
   smartDebounce,
-  guid,
-  GroupDataResult,
-  ExtendedColumnDef
+  guid
 };

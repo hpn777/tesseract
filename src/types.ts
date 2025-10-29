@@ -44,10 +44,10 @@ export interface ColumnDef {
     // semantic column classification used in some places
     columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric' | 'enum';
     // additional fields used by utils/session building
-    defaultValue?: string | number | Function;
-    value?: string | number | Function;
+    defaultValue?: string | number | Function | null;
+    value?: string | number | null | Function;
     hidden?: boolean;
-  enum?: EnumDefinition;
+    enum?: EnumDefinition;
     resolve?: ResolveConfig;
 }
 
@@ -144,12 +144,6 @@ export type UnsubscribeFunction = () => void;
 export type Comparer<T = PrimitiveValue> = (a: T, b: T) => number;
 export type Predicate<T = DataRow> = (item: T) => boolean;
 export type Aggregator<T = DataRow> = (items: T[], column?: string) => AggregateValue;
-
-export interface ExtendedColumnDef extends ColumnDef {
-  name: string;
-  primaryKey?: boolean;
-  hidden?: boolean;
-}
 
 export interface GroupDataResult {
   key: string;

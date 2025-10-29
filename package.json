@@ -1,6 +1,6 @@
 {
   "name": "tessio",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "author": "Rafal Okninski <hpn777@gmail.com>",
   "scripts": {
     "prepare": "npm run build",

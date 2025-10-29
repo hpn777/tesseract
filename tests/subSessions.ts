@@ -1,7 +1,7 @@
 const test = require('tape');
 import { Test } from 'tape';
 // Import TypeScript types for better type checking
-import type { DataRow, ExtendedColumnDef } from '../src/types';
+import type { DataRow, ColumnDef } from '../src/types';
 // Use TypeScript source for functionality
 import { EventHorizon } from '../src/lib/eventHorizon';
 
