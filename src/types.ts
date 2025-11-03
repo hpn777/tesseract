@@ -44,8 +44,8 @@ export interface ColumnDef {
     // semantic column classification used in some places
     columnType?: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'text' | 'dimension' | 'metric' | 'enum';
     // additional fields used by utils/session building
-    defaultValue?: string | number | Function | null;
-    value?: string | number | null | Function;
+    defaultValue?: string | number | Function | boolean | null;
+    value?: string | number | Function | boolean | null;
     hidden?: boolean;
     enum?: EnumDefinition;
     resolve?: ResolveConfig;
